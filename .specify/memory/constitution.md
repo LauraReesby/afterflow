@@ -30,7 +30,7 @@ Every public interface must be test-first and measurable.
 
 ### Platform Requirements
 
-- **Minimum iOS Version**: ≥ 17.0 (tested on 17.6+)
+- **Minimum iOS Version**: ≥ 17.6 (tested on 17.6+)
 
 - **Target Devices**: iPhone and iPad with adaptive UI
 
