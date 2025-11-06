@@ -8,7 +8,14 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Tests are MANDATORY for all features with 80% minimum coverage requirement. 100% test coverage required for all public functions and methods.
+
+**Task Completion Protocol**: Tasks can only be marked as complete (✅) after:
+1. Implementation is finished
+2. All tests pass (including new tests for any public functions)
+3. Code coverage meets 80% minimum requirement (100% for public APIs)
+4. Feature functionality is verified
+5. NEVER implement public functions without corresponding tests
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -79,12 +86,14 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (MANDATORY - 80% Coverage + 100% Public API Coverage Required) ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **CRITICAL: NEVER implement public functions without corresponding tests**
 
 - [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T012 [P] [US1] Unit tests for ALL public functions in [component] with 100% coverage
 
 ### Implementation for User Story 1
 
@@ -249,3 +258,7 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+- **CRITICAL**: Mark tasks complete (✅) ONLY after implementation + testing + coverage verification
+- Use task completion checklist: Code Complete → Tests Pass → Coverage ≥80% (100% for public APIs) → Mark Complete ✅
+- **NEVER implement public functions without tests** - this violates constitutional principles
+- Test-first development is mandatory for all public APIs and critical functionality

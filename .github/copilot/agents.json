@@ -1,0 +1,28 @@
+{
+  "agents": [
+    {
+      "name": "set-and-setting-agent",
+      "description": "Specialized agent for the Set & Setting psychedelic therapy session logging iOS app",
+      "prompt_file": "set-and-setting-agent.md",
+      "tools": [
+        "file_search",
+        "grep_search", 
+        "read_file",
+        "replace_string_in_file",
+        "create_file",
+        "run_in_terminal",
+        "get_errors"
+      ],
+      "model": "gpt-4o",
+      "context": {
+        "constitution": ".specify/memory/constitution.md",
+        "project_structure": "specs/",
+        "current_specs": [
+          "specs/001-core-session-logging/",
+          "specs/002-spotify-integration/", 
+          "specs/003-data-export/"
+        ]
+      }
+    }
+  ]
+}

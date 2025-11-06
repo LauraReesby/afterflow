@@ -103,37 +103,61 @@ A user wants periodic reminders to review and potentially export their session d
 
 ### Functional Requirements
 
-- **FR-001**: System MUST generate CSV files containing all session data fields
+- **FR-001**: System MUST generate CSV files containing all session data fields with user field selection control
 - **FR-002**: System MUST create formatted PDF reports with session summaries and mood trends
 - **FR-003**: System MUST allow users to select date ranges for export (all time, last month, custom dates)
-- **FR-004**: System MUST provide field customization to control what data is included in exports
-- **FR-005**: System MUST integrate with iOS share sheet for file distribution
-- **FR-006**: System MUST handle large datasets without app crashes or performance issues
-- **FR-007**: System MUST properly format and escape special characters in CSV output
+- **FR-004**: System MUST provide granular field customization to control what therapeutic data is included in exports
+- **FR-005**: System MUST integrate with iOS share sheet for file distribution while maintaining privacy
+- **FR-006**: System MUST handle large datasets (100+ sessions) without app crashes or performance degradation
+- **FR-007**: System MUST properly format and escape special characters in CSV output for spreadsheet compatibility
 - **FR-008**: System MUST generate PDF reports that render correctly across devices and when printed
-- **FR-009**: System MUST provide email composition with pre-filled therapeutic context
-- **FR-010**: System MUST remember user export preferences and field customizations
-- **FR-011**: System MUST show progress indicators for long-running export operations
-- **FR-012**: System MUST handle export failures gracefully with retry options
-- **FR-013**: System MUST include export date and app version metadata in generated files
-- **FR-014**: System MUST provide preview functionality before finalizing exports
+- **FR-009**: System MUST provide email composition with pre-filled therapeutic context but no automatic sending
+- **FR-010**: System MUST remember user export preferences and field customizations securely
+- **FR-011**: System MUST show progress indicators for long-running export operations (>2 seconds)
+- **FR-012**: System MUST handle export failures gracefully with retry options and error explanation
+- **FR-013**: System MUST include export date and app version metadata in generated files for accountability
+- **FR-014**: System MUST provide preview functionality before finalizing exports for user verification
+- **FR-015**: System MUST ensure all export operations work entirely offline without internet dependency
+- **FR-016**: System MUST provide clear warnings when exporting sensitive therapeutic data
+- **FR-017**: System MUST allow complete export cancellation with secure cleanup of temporary files
 
-### Testing Requirements (MANDATORY)
+### Testing Requirements (MANDATORY - NON-NEGOTIABLE)
 
-- **TR-001**: MUST achieve minimum 80% code coverage across all export functionality
-- **TR-002**: MUST include unit tests for ExportConfiguration model and preferences persistence
-- **TR-003**: MUST include unit tests for CSV generation with various data types and edge cases
-- **TR-004**: MUST include unit tests for PDF generation and formatting logic
-- **TR-005**: MUST include unit tests for field customization and data filtering
-- **TR-006**: MUST include UI tests for complete export workflow (CSV and PDF)
-- **TR-007**: MUST include UI tests for field customization and preview functionality
-- **TR-008**: MUST include UI tests for email composition and sharing workflows
-- **TR-009**: MUST include integration tests for file generation and iOS share sheet
-- **TR-010**: MUST include performance tests for large dataset exports (100+ sessions)
-- **TR-011**: MUST include tests for special character handling and data encoding
-- **TR-012**: MUST include tests for export failure scenarios and error recovery
-- **TR-013**: MUST include tests for generated file integrity and format compliance
-- **TR-014**: MUST include accessibility tests for all export interface components
+**Test-Driven Development (TDD) Protocol - Constitutional Requirement**:
+- **TR-001**: MUST follow Red-Green-Refactor sequence for all implementations
+- **TR-002**: MUST write tests before implementation; ensure minimum 80% coverage
+- **TR-003**: MUST achieve 100% test coverage for all public functions and methods
+- **TR-004**: NEVER implement public functions without corresponding tests (Test-First enforcement)
+- **TR-005**: MUST verify all tests pass before marking any task complete
+
+**Unit Testing Requirements**:
+- **TR-006**: MUST include unit tests for ExportConfiguration model and preferences persistence
+- **TR-007**: MUST include unit tests for CSV generation with various data types and edge cases
+- **TR-008**: MUST include unit tests for PDF generation and formatting logic
+- **TR-009**: MUST include unit tests for field customization and data filtering with privacy controls
+- **TR-010**: MUST include unit tests for all public APIs with 100% coverage requirement
+
+**UI Testing Requirements**:
+- **TR-011**: MUST include UI tests for complete export workflow (CSV and PDF)
+- **TR-012**: MUST include UI tests for field customization and privacy controls
+- **TR-013**: MUST include UI tests for preview functionality before export
+- **TR-014**: MUST include UI tests for email composition and sharing workflows
+- **TR-015**: MUST include UI tests for error states, export failures, and cancellation
+
+**Performance & Integration Testing**:
+- **TR-016**: MUST include performance tests for large dataset exports (100+ sessions, <10s requirement)
+- **TR-017**: MUST include performance tests for app responsiveness during export operations
+- **TR-018**: MUST include integration tests for file generation and iOS share sheet
+- **TR-019**: MUST include tests for export operation memory usage and cleanup
+- **TR-020**: MUST include tests for special character handling and data encoding
+
+**Privacy & Security Testing**:
+- **TR-021**: MUST include tests for export failure scenarios and error recovery with secure cleanup
+- **TR-022**: MUST include tests for generated file integrity and format compliance
+- **TR-023**: MUST include tests for therapeutic context and user safety scenarios
+- **TR-024**: MUST include tests for privacy controls and sensitive data selection
+- **TR-025**: MUST include tests for secure temporary file handling and cleanup
+- **TR-026**: MUST include accessibility tests for all export interface components
 
 ### Key Entities
 
@@ -145,20 +169,68 @@ A user wants periodic reminders to review and potentially export their session d
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can generate CSV export of 50 sessions in under 10 seconds
-- **SC-002**: PDF reports render correctly and remain readable when printed or viewed on different devices
-- **SC-003**: 100% of generated CSV files open correctly in common spreadsheet applications (Excel, Numbers, Google Sheets)
-- **SC-004**: Email composition completes successfully with report attachment under 10MB
-- **SC-005**: Export operations complete successfully 99% of the time without data corruption
-- **SC-006**: Generated files contain accurate data with no field truncation or encoding issues
+- **SC-001**: Users can generate CSV export of 50 sessions in under 10 seconds on target devices
+- **SC-002**: Users can generate CSV export of 100+ sessions in under 15 seconds (constitutional performance requirement)
+- **SC-003**: PDF reports render correctly and remain readable when printed or viewed on different devices
+- **SC-004**: 100% of generated CSV files open correctly in common spreadsheet applications (Excel, Numbers, Google Sheets)
+- **SC-005**: Email composition completes successfully with report attachment under 10MB
+- **SC-006**: Export operations complete successfully 99% of the time without data corruption
+- **SC-007**: Generated files contain accurate data with no field truncation or encoding issues
+- **SC-008**: All export operations maintain app responsiveness with progress indicators
+- **SC-009**: Privacy controls allow users to exclude sensitive fields from exports with 100% accuracy
 
 ### Testing Success Criteria (MANDATORY)
 
 - **TSC-001**: Achieve and maintain minimum 80% code coverage across all export functionality
-- **TSC-002**: 100% of export workflows (CSV, PDF, email) covered by UI tests
-- **TSC-003**: All file generation logic thoroughly tested with various dataset sizes
-- **TSC-004**: Performance tests validate export speed requirements across target devices
-- **TSC-005**: Integration tests verify file format compliance and third-party app compatibility
-- **TSC-006**: Error handling tests cover all failure scenarios with appropriate user feedback
-- **TSC-007**: Data integrity tests confirm 100% accuracy in exported content
-- **TSC-008**: Accessibility tests ensure all export interfaces work with assistive technologies
+- **TSC-002**: 100% of public functions and methods covered by unit tests
+- **TSC-003**: 100% of export workflows (CSV, PDF, email) covered by UI tests
+- **TSC-004**: All file generation logic thoroughly tested with various dataset sizes
+- **TSC-005**: Performance tests validate export speed requirements across target devices
+- **TSC-006**: Integration tests verify file format compliance and third-party app compatibility
+- **TSC-007**: Error handling tests cover all failure scenarios with appropriate user feedback
+- **TSC-008**: Data integrity tests confirm 100% accuracy in exported content
+- **TSC-009**: Accessibility tests ensure all export interfaces work with assistive technologies
+- **TSC-010**: Privacy tests verify user control over exported data and field selection
+- **TSC-011**: Therapeutic context tests ensure export features support healing workflows
+- **TSC-012**: Test-first enforcement - no public API implementation without tests
+
+### Key Entities
+
+- **ExportConfiguration**: User preferences for field selection, date ranges, and format options with privacy controls
+- **ExportJob**: Individual export operations with progress tracking, error handling, and secure cleanup  
+- **ReportTemplate**: PDF formatting templates for different report types (summary, detailed, custom)
+
+### Privacy-First Export Features (Constitutional Requirements)
+
+**User Data Control**:
+- Granular field selection with clear privacy impact disclosure
+- Preview functionality before any data export to external systems
+- Explicit consent required for including sensitive therapeutic details
+- Export logs for user awareness of what data was shared and when
+- Secure cleanup of temporary files and export artifacts
+
+**Therapeutic Context Preservation**:
+- Export formats preserve therapeutic value and context
+- Reports maintain reflective and neutral tone consistent with app principles
+- No clinical or diagnostic language in exported documents
+- Clear disclaimers about therapeutic nature of exported data
+
+**Security & Privacy Compliance**:
+- All export operations work entirely offline (constitutional offline-first requirement)
+- No external service dependencies for export generation
+- Temporary files use iOS secure storage and automatic cleanup
+- Export metadata includes privacy notices and data handling guidance
+
+### Governance & Compliance
+
+**Constitutional Compliance**: This specification must adhere to all six constitutional principles:
+1. **Privacy-First**: User controls all exported data, explicit consent for sensitive information sharing
+2. **SwiftUI + SwiftData Native**: Modern Apple frameworks for export UI and data access
+3. **Therapeutic Value-First**: Export features support therapeutic collaboration and self-reflection
+4. **Offline-First Design**: All export functionality works without internet connection
+5. **Simplicity and Focus**: Essential export formats only (CSV, PDF), avoid feature complexity
+6. **Test-Driven Quality**: Mandatory TDD with Red-Green-Refactor sequence
+
+**Amendment Protocol**: Any changes to this specification require constitutional compliance review and documentation with clear rationale and impact assessment.
+
+**Version**: 1.1.0 | **Last Updated**: 2025-11-05 | **Constitutional Compliance**: Required

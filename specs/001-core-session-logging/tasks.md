@@ -3,7 +3,14 @@
 **Input**: Design documents from `/specs/001-core-session-logging/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories)
 
-**Testing**: Tests are MANDATORY for all features with 80% minimum coverage requirement
+**Testing**: Tests are MANDATORY for all features with 80% minimum coverage requirement. 100% test coverage required for all public functions and methods.
+
+**Task Completion Protocol**: Tasks can only be marked as complete (✅) after:
+1. Implementation is finished
+2. All tests pass (including new tests for any public functions)
+3. Code coverage meets 80% minimum requirement (100% for public APIs)
+4. Feature functionality is verified
+5. NEVER implement public functions without corresponding tests
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -48,28 +55,33 @@
 
 **Independent Test**: User can open app, tap "New Session", fill basic fields (date, treatment type, intentions), and save successfully
 
-### Tests for User Story 1 (MANDATORY - 80% Coverage Required) ⚠️
+### Tests for User Story 1 (MANDATORY - 80% Coverage + 100% Public API Coverage Required) ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **CRITICAL: NEVER implement public functions without corresponding tests**
 
 - [ ] T012 [P] [US1] Unit tests for TherapySession model in SetAndSettingTests/ModelTests/TherapySessionTests.swift
 - [ ] T013 [P] [US1] Unit tests for TreatmentType model in SetAndSettingTests/ModelTests/TreatmentTypeTests.swift
 - [ ] T014 [P] [US1] Unit tests for SessionFormViewModel in SetAndSettingTests/ViewModelTests/SessionFormViewModelTests.swift
 - [ ] T015 [P] [US1] Unit tests for SessionDataService in SetAndSettingTests/ServiceTests/SessionDataServiceTests.swift
-- [ ] T016 [P] [US1] UI tests for session creation workflow in SetAndSettingUITests/SessionCreationUITests.swift
-- [ ] T017 [P] [US1] Integration tests for session persistence in SetAndSettingTests/IntegrationTests/SessionPersistenceTests.swift
+- [ ] T016 [P] [US1] Unit tests for ALL public functions with 100% coverage requirement
+- [ ] T017 [P] [US1] UI tests for session creation workflow in SetAndSettingUITests/SessionCreationUITests.swift
+- [ ] T018 [P] [US1] Integration tests for session persistence in SetAndSettingTests/IntegrationTests/SessionPersistenceTests.swift
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Create TherapySession model in Models/TherapySession.swift with core properties
-- [ ] T019 [P] [US1] Create TreatmentTypePicker component in Views/Components/TreatmentTypePicker.swift
-- [ ] T020 [US1] Create SessionFormView in Views/SessionFormView.swift for session creation
-- [ ] T021 [US1] Create SessionFormViewModel in ViewModels/SessionFormViewModel.swift for form state management
-- [ ] T022 [US1] Update main ContentView.swift to show "Add Session" button and navigation
-- [ ] T023 [US1] Implement save functionality in SessionDataService with SwiftData persistence
-- [ ] T024 [US1] Add form validation and error handling in SessionFormViewModel
-- [ ] T025 [P] [US1] Create SwiftUI previews for SessionFormView with sample data
-- [ ] T026 [US1] Verify 80% code coverage achieved for User Story 1 components
+> **CRITICAL: All public functions MUST have corresponding tests before implementation**
+
+- [ ] T019 [P] [US1] Create TherapySession model in Models/TherapySession.swift with core properties
+- [ ] T020 [P] [US1] Create TreatmentTypePicker component in Views/Components/TreatmentTypePicker.swift
+- [ ] T021 [US1] Create SessionFormView in Views/SessionFormView.swift for session creation
+- [ ] T022 [US1] Create SessionFormViewModel in ViewModels/SessionFormViewModel.swift for form state management
+- [ ] T023 [US1] Update main ContentView.swift to show "Add Session" button and navigation
+- [ ] T024 [US1] Implement save functionality in SessionDataService with SwiftData persistence
+- [ ] T025 [US1] Add form validation and error handling in SessionFormViewModel
+- [ ] T026 [P] [US1] Create SwiftUI previews for SessionFormView with sample data
+- [ ] T027 [US1] Verify 80% code coverage achieved for User Story 1 components (100% for public APIs)
+- [ ] T028 [US1] Mark User Story 1 tasks complete only after full testing and coverage verification
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -97,6 +109,7 @@
 - [ ] T035 [US2] Add music input text field with placeholder guidance
 - [ ] T036 [P] [US2] Update SwiftUI previews to include environment and music data
 - [ ] T037 [US2] Verify 80% code coverage maintained for User Story 2 components
+- [ ] T038 [US2] Mark User Story 2 tasks complete only after full testing and coverage verification
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -124,6 +137,7 @@
 - [ ] T046 [US3] Add mood emoji display based on numeric rating (1-10 to emoji mapping)
 - [ ] T047 [P] [US3] Create mood rating SwiftUI previews with different rating values
 - [ ] T048 [US3] Verify 80% code coverage maintained for User Story 3 components
+- [ ] T049 [US3] Mark User Story 3 tasks complete only after full testing and coverage verification
 
 **Checkpoint**: User Stories 1, 2, AND 3 should all work independently
 
@@ -151,6 +165,7 @@
 - [ ] T057 [US4] Add auto-save or explicit save for reflection edits
 - [ ] T058 [P] [US4] Create SwiftUI previews for SessionDetailView with sample reflections
 - [ ] T059 [US4] Verify 80% code coverage maintained for User Story 4 components
+- [ ] T060 [US4] Mark User Story 4 tasks complete only after full testing and coverage verification
 
 **Checkpoint**: User Stories 1-4 should all be independently functional
 
@@ -180,6 +195,7 @@
 - [ ] T070 [P] [US5] Add pull-to-refresh and basic list animations
 - [ ] T071 [P] [US5] Create SwiftUI previews for SessionListView with various data states
 - [ ] T072 [US5] Verify 80% code coverage maintained for User Story 5 components
+- [ ] T073 [US5] Mark User Story 5 tasks complete only after full testing and coverage verification
 
 **Checkpoint**: All core user stories should now be independently functional
 
@@ -199,6 +215,7 @@
 - [ ] T080 [P] [Polish] Add performance tests in SetAndSettingTests/PerformanceTests/
 - [ ] T081 [Polish] Final code coverage validation - ensure 80% minimum across all components
 - [ ] T082 [Polish] Code coverage reporting and documentation
+- [ ] T083 [Polish] Mark all Polish tasks complete only after final testing and coverage verification
 
 **Coverage Gate**: Verify final 80% code coverage requirement met before release
 
@@ -274,3 +291,4 @@ Continue with User Stories 3 and 4 to add mood ratings and reflection editing, t
 - Write tests FIRST for each user story before implementation (TDD approach)
 - All tests must pass before moving to next phase
 - Code coverage reports should be generated and reviewed regularly
+- **Task Completion Protocol**: Mark tasks complete (✅) ONLY after: Code Complete → Tests Pass → Coverage ≥80% → Functionality Verified

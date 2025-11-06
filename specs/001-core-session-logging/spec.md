@@ -119,26 +119,62 @@ A user wants to see a chronological list of their past sessions with key details
 - **FR-014**: System MUST work entirely offline without internet connection
 - **FR-015**: System MUST auto-save session progress to prevent data loss
 
-### Testing Requirements (MANDATORY)
+### Testing Requirements (MANDATORY - NON-NEGOTIABLE)
 
-- **TR-001**: MUST achieve minimum 80% code coverage across all feature components
-- **TR-002**: MUST include unit tests for all SwiftData models (TherapySession, TreatmentType, MoodRating)
-- **TR-003**: MUST include unit tests for all ViewModels and business logic
-- **TR-004**: MUST include unit tests for SessionDataService and data persistence
-- **TR-005**: MUST include UI tests for complete session creation workflow
-- **TR-006**: MUST include UI tests for session viewing and editing workflows
-- **TR-007**: MUST include UI tests for session list navigation and interaction
-- **TR-008**: MUST include integration tests for SwiftData persistence and retrieval
-- **TR-009**: MUST include accessibility tests for VoiceOver and Dynamic Type
-- **TR-010**: MUST include performance tests for app launch and large dataset handling
-- **TR-011**: MUST include tests for data validation and error handling scenarios
-- **TR-012**: MUST include tests for auto-save functionality and data recovery
+**Test-Driven Development (TDD) Protocol - Constitutional Requirement**:
+- **TR-001**: MUST follow Red-Green-Refactor sequence for all implementations
+- **TR-002**: MUST write tests before implementation; ensure minimum 80% coverage
+- **TR-003**: MUST achieve 100% test coverage for all public functions and methods  
+- **TR-004**: NEVER implement public functions without corresponding tests (Test-First enforcement)
+- **TR-005**: MUST verify all tests pass before marking any task complete
 
-### Key Entities
+**Unit Testing Requirements**:
+- **TR-006**: MUST include unit tests for all SwiftData models (TherapySession, TreatmentType, MoodRating) with comprehensive edge cases
+- **TR-007**: MUST include unit tests for all ViewModels and business logic components
+- **TR-008**: MUST include unit tests for SessionDataService and data persistence layer
+- **TR-009**: MUST include unit tests for all public APIs with 100% coverage requirement
 
-- **TherapySession**: Core entity representing a single therapy session with all associated data (date, treatment type, dose, intentions, environment, music, ratings, reflections)
-- **TreatmentType**: Enumeration of treatment modalities (IV, IM, oral, lozenge, at-home, clinic)
-- **MoodRating**: Rating scale from 1-10 or emoji representation for before/after session mood
+**UI Testing Requirements**:
+- **TR-010**: MUST include UI tests for complete session creation workflow and acceptance scenarios
+- **TR-011**: MUST include UI tests for session viewing and editing workflows
+- **TR-012**: MUST include UI tests for session list navigation and interaction
+- **TR-013**: MUST include UI tests for error states and edge cases
+
+**Integration & Performance Testing**:
+- **TR-014**: MUST include integration tests for SwiftData persistence and retrieval
+- **TR-015**: MUST include performance tests for app launch (<2s requirement) and large dataset handling
+- **TR-016**: MUST include performance tests for main-thread I/O operations (<16ms requirement)
+- **TR-017**: MUST include memory usage profiling and battery impact assessment
+
+**Accessibility & Quality Testing**:
+- **TR-018**: MUST include accessibility tests for VoiceOver and Dynamic Type compliance
+- **TR-019**: MUST include tests for data validation and error handling scenarios
+- **TR-020**: MUST include tests for auto-save functionality and data recovery
+- **TR-021**: MUST include tests for therapeutic context and user safety scenarios
+- **TR-022**: MUST include tests for local data encryption verification and privacy compliance
+
+### Technical Requirements
+
+**Platform & Performance Requirements (Constitutional)**:
+- **TR-023**: MUST support iOS 17.6+ as minimum platform requirement
+- **TR-024**: MUST achieve app launch time under 2 seconds on target devices
+- **TR-025**: MUST maintain main-thread I/O operations under 16ms
+- **TR-026**: MUST provide adaptive UI for iPhone and iPad with proper scaling
+- **TR-027**: MUST leverage iOS built-in encryption for therapeutic data security
+
+**Data & Architecture Requirements**:
+- **TR-028**: MUST use SwiftData with local SQLite backing for persistence
+- **TR-029**: MUST design models for future CloudKit sync compatibility (user-controlled)
+- **TR-030**: MUST implement proper SwiftUI state management with @Observable pattern
+- **TR-031**: MUST ensure all CRUD operations work entirely offline
+- **TR-032**: MUST provide audit trail logging for session access awareness
+
+**Quality Gates (Constitutional)**:
+- **TR-033**: MUST pass VoiceOver compliance testing for all views
+- **TR-034**: MUST support Dynamic Type across all text elements
+- **TR-035**: MUST maintain therapeutic tone - reflective and neutral, avoid clinical language
+- **TR-036**: MUST ensure calming and supportive user interface design
+- **TR-037**: MUST verify no external data collection or tracking capabilities
 
 ## Success Criteria *(mandatory)*
 
@@ -146,18 +182,43 @@ A user wants to see a chronological list of their past sessions with key details
 
 - **SC-001**: Users can create and save a basic session entry in under 60 seconds
 - **SC-002**: Users can access and view any past session in under 3 taps
-- **SC-003**: App launches and displays session list in under 2 seconds on target devices
-- **SC-004**: Zero data loss during session entry, even with app interruption
-- **SC-005**: Interface remains usable and accessible during altered states (large touch targets, clear text, simple navigation)
-- **SC-006**: All session data persists locally without requiring internet connection
+- **SC-003**: App launches and displays session list in under 2 seconds on target devices (constitutional requirement)
+- **SC-004**: All main-thread I/O operations complete in under 16ms (constitutional requirement)
+- **SC-005**: Zero data loss during session entry, even with app interruption
+- **SC-006**: Interface remains usable and accessible during altered states (large touch targets, clear text, simple navigation)
+- **SC-007**: All session data persists locally without requiring internet connection
 
 ### Testing Success Criteria (MANDATORY)
 
 - **TSC-001**: Achieve and maintain minimum 80% code coverage across all feature code
-- **TSC-002**: 100% of critical user workflows covered by UI tests (session creation, viewing, editing)
-- **TSC-003**: All SwiftData models pass comprehensive unit testing including edge cases
-- **TSC-004**: All ViewModels and services achieve 90%+ test coverage for business logic
-- **TSC-005**: Integration tests verify 100% data persistence and retrieval accuracy
-- **TSC-006**: Accessibility tests pass for all views with VoiceOver and Dynamic Type
-- **TSC-007**: Performance tests confirm <2s app launch and <1s session list loading
-- **TSC-008**: Error handling tests cover all failure scenarios with appropriate user feedback
+- **TSC-002**: 100% of public functions and methods covered by unit tests
+- **TSC-003**: 100% of critical user workflows covered by UI tests (session creation, viewing, editing)
+- **TSC-004**: All SwiftData models pass comprehensive unit testing including edge cases
+- **TSC-005**: All ViewModels and services achieve 90%+ test coverage for business logic
+- **TSC-006**: Integration tests verify 100% data persistence and retrieval accuracy
+- **TSC-007**: Accessibility tests pass for all views with VoiceOver and Dynamic Type
+- **TSC-008**: Performance tests confirm <2s app launch and <1s session list loading
+- **TSC-009**: Error handling tests cover all failure scenarios with appropriate user feedback
+- **TSC-010**: Security and privacy tests verify no unauthorized data access or leakage
+- **TSC-011**: Therapeutic context tests ensure usability during altered states
+- **TSC-012**: Test-first enforcement - no public API implementation without tests
+
+### Key Entities
+
+- **TherapySession**: Core entity representing a single therapy session with all associated data (date, treatment type, dose, intentions, environment, music, ratings, reflections)
+- **TreatmentType**: Enumeration of treatment modalities (IV, IM, oral, lozenge, at-home, clinic)
+- **MoodRating**: Rating scale from 1-10 or emoji representation for before/after session mood
+
+### Governance & Compliance
+
+**Constitutional Compliance**: This specification must adhere to all six constitutional principles:
+1. **Privacy-First**: All session data remains local by default, user controls all sharing
+2. **SwiftUI + SwiftData Native**: Modern Apple frameworks only, no UIKit unless required by system APIs  
+3. **Therapeutic Value-First**: Every feature must directly support reflection and healing insights
+4. **Offline-First Design**: Core functionality works without internet, optional cloud sync only
+5. **Simplicity and Focus**: Essential therapeutic features only, avoid feature creep
+6. **Test-Driven Quality**: Mandatory TDD with Red-Green-Refactor sequence
+
+**Amendment Protocol**: Any changes to this specification require constitutional compliance review and documentation with clear rationale and impact assessment.
+
+**Version**: 1.1.0 | **Last Updated**: 2025-11-05 | **Constitutional Compliance**: Required

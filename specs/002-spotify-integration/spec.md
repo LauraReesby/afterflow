@@ -101,37 +101,59 @@ A user wants control over their Spotify integration, including the ability to re
 
 ### Functional Requirements
 
-- **FR-001**: System MUST implement Spotify OAuth 2.0 authentication flow
-- **FR-002**: System MUST securely store and manage Spotify access tokens
-- **FR-003**: System MUST allow users to search their Spotify playlists by name
-- **FR-004**: System MUST save Spotify playlist URI references with session entries
-- **FR-005**: System MUST fetch and cache playlist metadata (name, cover image, track count, duration)
-- **FR-006**: System MUST provide direct link to open playlists in Spotify app
-- **FR-007**: System MUST gracefully handle offline scenarios with cached playlist data
-- **FR-008**: System MUST allow users to disconnect Spotify integration at any time
-- **FR-009**: System MUST handle expired tokens with automatic refresh or re-authentication prompt
-- **FR-010**: System MUST respect Spotify API rate limits and implement appropriate throttling
-- **FR-011**: System MUST work with free Spotify accounts (no premium features required)
-- **FR-012**: System MUST cache playlist information for offline viewing
-- **FR-013**: System MUST handle playlist privacy changes gracefully
-- **FR-014**: System MUST provide clear privacy disclosure for Spotify data usage
+- **FR-001**: System MUST implement Spotify OAuth 2.0 with PKCE (Proof Key for Code Exchange) flow - no client secrets
+- **FR-002**: System MUST securely store and manage Spotify access tokens using iOS Keychain
+- **FR-003**: System MUST use Spotify Web API for metadata only - no in-app audio playback capabilities
+- **FR-004**: System MUST allow users to search their Spotify playlists by name
+- **FR-005**: System MUST save Spotify playlist URI references with session entries
+- **FR-006**: System MUST fetch and cache playlist metadata (name, cover image, track count, duration)
+- **FR-007**: System MUST provide direct link to open playlists in Spotify app (no web player fallback)
+- **FR-008**: System MUST gracefully handle offline scenarios with cached playlist data
+- **FR-009**: System MUST allow users to disconnect Spotify integration at any time with clear data impact disclosure
+- **FR-010**: System MUST handle expired tokens with automatic refresh or re-authentication prompt
+- **FR-011**: System MUST respect Spotify API rate limits and implement appropriate throttling
+- **FR-012**: System MUST work with free Spotify accounts (no premium features required)
+- **FR-013**: System MUST cache playlist information for offline viewing - core offline-first constitutional requirement
+- **FR-014**: System MUST handle playlist privacy changes gracefully with user notification
+- **FR-015**: System MUST provide clear privacy disclosure for Spotify data usage and user consent flows
+- **FR-016**: System MUST ensure all core therapeutic functionality remains available without Spotify connection
 
-### Testing Requirements (MANDATORY)
+### Testing Requirements (MANDATORY - NON-NEGOTIABLE)
 
-- **TR-001**: MUST achieve minimum 80% code coverage across all Spotify integration components
-- **TR-002**: MUST include unit tests for SpotifyConnection model and authentication flow
-- **TR-003**: MUST include unit tests for PlaylistReference model and caching logic
-- **TR-004**: MUST include unit tests for Spotify API service layer with mock responses
-- **TR-005**: MUST include unit tests for token management (storage, refresh, expiration)
-- **TR-006**: MUST include UI tests for complete Spotify authentication workflow
-- **TR-007**: MUST include UI tests for playlist search and selection workflow
-- **TR-008**: MUST include UI tests for playlist viewing in session details
-- **TR-009**: MUST include integration tests for OAuth flow and token persistence
-- **TR-010**: MUST include integration tests for API rate limiting and error handling
-- **TR-011**: MUST include tests for offline playlist viewing with cached data
-- **TR-012**: MUST include tests for privacy controls and data disconnection
-- **TR-013**: MUST include performance tests for playlist search and metadata fetching
-- **TR-014**: MUST include security tests for token storage and API communication
+**Test-Driven Development (TDD) Protocol - Constitutional Requirement**:
+- **TR-001**: MUST follow Red-Green-Refactor sequence for all implementations
+- **TR-002**: MUST write tests before implementation; ensure minimum 80% coverage
+- **TR-003**: MUST achieve 100% test coverage for all public functions and methods
+- **TR-004**: NEVER implement public functions without corresponding tests (Test-First enforcement)
+- **TR-005**: MUST verify all tests pass before marking any task complete
+
+**Unit Testing Requirements**:
+- **TR-006**: MUST include unit tests for SpotifyConnection model and authentication flow
+- **TR-007**: MUST include unit tests for PlaylistReference model and caching logic
+- **TR-008**: MUST include unit tests for Spotify API service layer with mock responses
+- **TR-009**: MUST include unit tests for token management (storage, refresh, expiration, PKCE flow)
+- **TR-010**: MUST include unit tests for all public APIs with 100% coverage requirement
+
+**UI Testing Requirements**:
+- **TR-011**: MUST include UI tests for complete Spotify authentication workflow
+- **TR-012**: MUST include UI tests for playlist search and selection workflow
+- **TR-013**: MUST include UI tests for playlist viewing in session details
+- **TR-014**: MUST include UI tests for error states and API failures
+- **TR-015**: MUST include UI tests for Spotify disconnection and privacy controls
+
+**Integration & Performance Testing**:
+- **TR-016**: MUST include integration tests for OAuth PKCE flow and token persistence
+- **TR-017**: MUST include integration tests for API rate limiting and error handling
+- **TR-018**: MUST include performance tests for playlist search and metadata fetching (<3s requirement)
+- **TR-019**: MUST include performance tests for app launch with Spotify integration (<2s requirement)
+- **TR-020**: MUST include tests for offline playlist viewing with cached data
+
+**Security & Privacy Testing**:
+- **TR-021**: MUST include security tests for token storage and API communication (Keychain verification)
+- **TR-022**: MUST include tests for privacy controls and data disconnection scenarios
+- **TR-023**: MUST include tests for PKCE implementation security and no client secret exposure
+- **TR-024**: MUST include tests for therapeutic context and user safety scenarios
+- **TR-025**: MUST include tests for graceful degradation when Spotify is unavailable
 
 ### Key Entities
 
@@ -139,24 +161,71 @@ A user wants control over their Spotify integration, including the ability to re
 - **PlaylistReference**: Spotify playlist URI, cached metadata, association with therapy sessions
 - **SpotifyPlaylist**: Cached playlist data including name, cover image URL, track count, duration
 
-## Success Criteria *(mandatory)*
+### Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can complete Spotify authentication in under 30 seconds
-- **SC-002**: Playlist search returns results in under 3 seconds for connected users
+- **SC-001**: Users can complete Spotify PKCE authentication in under 30 seconds
+- **SC-002**: Playlist search returns results in under 3 seconds for connected users (constitutional performance requirement)
 - **SC-003**: Playlist selection and association with session takes under 10 seconds
 - **SC-004**: 95% of playlist opens successfully launch Spotify app
-- **SC-005**: Cached playlist information displays correctly when offline
-- **SC-006**: Zero unauthorized access to user's Spotify data beyond stated permissions
+- **SC-005**: Cached playlist information displays correctly when offline (constitutional offline-first requirement)
+- **SC-006**: Zero unauthorized access to user's Spotify data beyond explicitly consented permissions
+- **SC-007**: App launch time remains under 2 seconds even with Spotify integration enabled (constitutional requirement)
+- **SC-008**: All core therapeutic functionality remains 100% available without Spotify connection
 
 ### Testing Success Criteria (MANDATORY)
 
 - **TSC-001**: Achieve and maintain minimum 80% code coverage across all Spotify integration code
-- **TSC-002**: 100% of OAuth authentication flows covered by integration tests
-- **TSC-003**: All Spotify API interactions thoroughly tested with mock services
-- **TSC-004**: UI tests verify complete playlist search and selection workflows
-- **TSC-005**: Security tests confirm proper token storage and handling
-- **TSC-006**: Performance tests validate playlist search and metadata fetch speeds
-- **TSC-007**: Offline tests verify cached playlist data accessibility and accuracy
-- **TSC-008**: Error handling tests cover all API failure scenarios and rate limiting
+- **TSC-002**: 100% of public functions and methods covered by unit tests
+- **TSC-003**: 100% of OAuth authentication flows covered by integration tests
+- **TSC-004**: All Spotify API interactions thoroughly tested with mock services
+- **TSC-005**: UI tests verify complete playlist search and selection workflows
+- **TSC-006**: Security tests confirm proper token storage and handling
+- **TSC-007**: Performance tests validate playlist search and metadata fetch speeds
+- **TSC-008**: Offline tests verify cached playlist data accessibility and accuracy
+- **TSC-009**: Error handling tests cover all API failure scenarios and rate limiting
+- **TSC-010**: Privacy tests verify user control over data and disconnection
+- **TSC-011**: Therapeutic context tests ensure integration supports healing workflows
+- **TSC-012**: Test-first enforcement - no public API implementation without tests
+
+### Key Entities
+
+- **SpotifyConnection**: Authentication state, tokens, user preferences for Spotify integration
+- **PlaylistReference**: Spotify playlist URI, cached metadata, association with therapy sessions
+- **SpotifyPlaylist**: Cached playlist data including name, cover image URL, track count, duration
+
+### Technical Architecture (Constitutional Requirements)
+
+**PKCE OAuth Implementation**:
+- Use Spotify Web API with PKCE (Proof Key for Code Exchange) flow only
+- No client secrets stored in app or transmitted
+- Code verifier and challenge generated securely on device
+- Tokens stored exclusively in iOS Keychain for security
+
+**Offline-First Design (Constitutional)**:
+- All playlist metadata cached locally for offline viewing
+- Spotify connection enhances but never blocks core therapeutic functionality
+- Graceful degradation when API unavailable or user disconnected
+- Local cache persists independently of network connectivity
+
+**Privacy-First Integration (Constitutional)**:
+- Explicit user consent required for Spotify connection
+- Clear disclosure of data access permissions (playlist metadata only)
+- User can disconnect and revoke access at any time
+- No tracking or analytics of music listening behavior
+- Cached data remains available after disconnection for user's own reference
+
+### Governance & Compliance
+
+**Constitutional Compliance**: This specification must adhere to all six constitutional principles:
+1. **Privacy-First**: User controls all Spotify data sharing, no unauthorized access beyond playlists
+2. **SwiftUI + SwiftData Native**: Modern Apple frameworks, integrate with existing SwiftData session model
+3. **Therapeutic Value-First**: Music context supports session reflection and pattern recognition
+4. **Offline-First Design**: Core functionality works without Spotify, integration is enhancement only
+5. **Simplicity and Focus**: Essential playlist association only, avoid feature creep
+6. **Test-Driven Quality**: Mandatory TDD with Red-Green-Refactor sequence
+
+**Amendment Protocol**: Any changes to this specification require constitutional compliance review and documentation with clear rationale and impact assessment.
+
+**Version**: 1.1.0 | **Last Updated**: 2025-11-05 | **Constitutional Compliance**: Required

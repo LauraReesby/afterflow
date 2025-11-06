@@ -95,6 +95,24 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Testing Requirements (MANDATORY - NON-NEGOTIABLE)
+
+- **TR-001**: MUST achieve minimum 80% code coverage across all feature components
+- **TR-002**: MUST achieve 100% test coverage for all public functions and methods
+- **TR-003**: MUST include unit tests for all SwiftData models with comprehensive edge cases
+- **TR-004**: MUST include unit tests for all ViewModels and business logic components
+- **TR-005**: MUST include unit tests for all Services and data access layers
+- **TR-006**: MUST include UI tests for complete user workflows and acceptance scenarios
+- **TR-007**: MUST include UI tests for error states and edge cases
+- **TR-008**: MUST include integration tests for data persistence and retrieval
+- **TR-009**: MUST include accessibility tests for VoiceOver and Dynamic Type
+- **TR-010**: MUST include performance tests for critical paths and large datasets
+- **TR-011**: MUST include tests for data validation and error handling scenarios
+- **TR-012**: MUST include tests for privacy and security requirements
+- **TR-013**: NEVER implement public functions without corresponding tests (Test-First)
+- **TR-014**: MUST verify all tests pass before marking any task complete
+- **TR-015**: MUST include tests for therapeutic context and user safety scenarios
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
@@ -113,3 +131,16 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+### Testing Success Criteria (MANDATORY)
+
+- **TSC-001**: Achieve and maintain minimum 80% code coverage across all feature code
+- **TSC-002**: 100% of public functions and methods covered by unit tests
+- **TSC-003**: 100% of critical user workflows covered by UI tests
+- **TSC-004**: All SwiftData models pass comprehensive unit testing including edge cases
+- **TSC-005**: All ViewModels and services achieve 90%+ test coverage for business logic
+- **TSC-006**: Integration tests verify 100% data persistence and retrieval accuracy
+- **TSC-007**: Accessibility tests pass for all views with VoiceOver and Dynamic Type
+- **TSC-008**: Performance tests confirm requirements across target devices
+- **TSC-009**: Error handling tests cover all failure scenarios with appropriate user feedback
+- **TSC-010**: Security and privacy tests verify no data leakage or unauthorized access
