@@ -1,18 +1,12 @@
-//
-//  SetAndSettingApp.swift
-//  SetAndSetting
-//
-//  Created by Laura Reesby on 11/5/25.
-//
-
 import SwiftUI
 import SwiftData
+import UIKit
 
 @main
-struct SetAndSettingApp: App {
+struct AfterflowApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            TherapeuticSession.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -27,6 +21,8 @@ struct SetAndSettingApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: [
+            TherapeuticSession.self,
+        ])
     }
 }

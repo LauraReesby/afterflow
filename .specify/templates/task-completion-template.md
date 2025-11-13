@@ -83,15 +83,15 @@ Tasks can ONLY be marked as complete (✅) after ALL of the following criteria a
 
 ```bash
 # Generate coverage report
-xcodebuild test -scheme SetAndSetting \
+xcodebuild test -scheme Afterflow \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
   -enableCodeCoverage YES
 
 # View coverage details
-xcrun xccov view SetAndSetting.xcresult --report --json
+xcrun xccov view Afterflow.xcresult --report --json
 
 # Coverage threshold check
-xcrun xccov view SetAndSetting.xcresult --report | grep "Total coverage"
+xcrun xccov view Afterflow.xcresult --report | grep "Total coverage"
 ```
 
 ## Task Status Indicators

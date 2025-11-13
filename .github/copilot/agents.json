@@ -1,9 +1,9 @@
 {
   "agents": [
     {
-      "name": "set-and-setting-agent",
-      "description": "Specialized agent for the Set & Setting psychedelic therapy session logging iOS app",
-      "prompt_file": "set-and-setting-agent.md",
+      "name": "afterflow-agent",
+      "description": "Specialized agent for the Afterflow psychedelic therapy session logging iOS app",
+      "prompt_file": "afterflow-agent.md",
       "tools": [
         "file_search",
         "grep_search", 

@@ -1,4 +1,4 @@
-# Set and Setting Constitution
+# Afterflow Constitution
 
 ## Core Principles
 

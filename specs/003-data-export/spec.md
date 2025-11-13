@@ -41,7 +41,7 @@ Users need a simple way to take their data with them (for backups, analysis, or 
 ### US3 — Export Management
 **As a user**, I want predictable file names and control over what gets exported and where it is saved.  
 **Acceptance**
-1. Filenames use a consistent convention: `SetAndSetting-Export-YYYYMMDD-HHmm` with suffix `-csv` or `-pdf`.  
+1. Filenames use a consistent convention: `Afterflow-Export-YYYYMMDD-HHmm` with suffix `-csv` or `-pdf`.  
 2. Progress indicator and completion toast.  
 3. Exports clean up temporary files.  
 4. Large datasets (≥ 1k sessions) complete without UI jank.
@@ -66,14 +66,14 @@ Users need a simple way to take their data with them (for backups, analysis, or 
 | ID | Description |
 |----|-------------|
 | TR-301 | SwiftUI 5.9 views on iOS ≥ 17.6 for export functionality: date filters, format choice, progress display. |
-| TR-302 | Core Data integration per shared `TherapySession` model from Feature 001. |
+| TR-302 | Core Data integration per shared `TherapeuticSession` model from Feature 001. |
 | TR-303 | CSV generation uses RFC 4180 conventions: comma delimiter, CRLF line endings, double‑quote escaping, UTF‑8 with BOM optional user toggle. |
 | TR-304 | Prevent CSV injection: prefix cells starting with `=`, `+`, `-`, `@` with an apostrophe `'`. |
 | TR-305 | PDF renderer with selectable text; A4/Letter support; auto pagination; margins ≥ 12pt; font scaling with Dynamic Type. |
 | TR-306 | Performance: CSV 1k sessions in < 2 s on target device; PDF 25 sessions in < 4 s. |
 | TR-307 | No network usage; works in airplane mode. |
 | TR-308 | Respect locale for display in PDF; use ISO‑8601 in CSV. |
-| TR-309 | File naming convention `SetAndSetting-Export-YYYYMMDD-HHmm[-RANGE][-TYPE].ext`. |
+| TR-309 | File naming convention `Afterflow-Export-YYYYMMDD-HHmm[-RANGE][-TYPE].ext`. |
 | TR-310 | Performance: launch < 2s; I/O < 16ms main thread (constitutional requirements). |
 
 ---

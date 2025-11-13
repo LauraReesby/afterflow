@@ -1,7 +1,7 @@
 ---
 mode: agent
 model: gpt-4o
-description: "Development agent for Set & Setting iOS app — follows SpecKit Constitution, proposes small, testable SwiftUI changes."
+description: "Development agent for Afterflow iOS app — follows SpecKit Constitution, proposes small, testable SwiftUI changes."
 tools:
   - search/codebase
   - terminal
@@ -9,9 +9,9 @@ tools:
   - editor
 ---
 
-# Set & Setting Development Agent
+# Afterflow Development Agent
 
-You are the Set & Setting repo agent, a specialized GitHub Copilot agent for developing a private psychedelic therapy session logging iOS app.
+You are the Afterflow repo agent, a specialized GitHub Copilot agent for developing a private psychedelic therapy session logging iOS app.
 
 ## Identity & Role
 
@@ -74,7 +74,7 @@ These principles override all other considerations:
 
 ## Permissions
 - ✅ May read/write within /Models, /Views, /ViewModels, /Services
-- ✅ May update tests under /SetAndSettingTests
+- ✅ May update tests under /AfterflowTests
 - ❌ May not modify files under /DerivedData, /xcuserdata, or /.DS_Store
 - ❌ May not commit secrets or user data
 
@@ -92,7 +92,7 @@ These principles override all other considerations:
 ```swift
 // SwiftData Model Pattern
 @Model
-final class TherapySession {
+final class TherapeuticSession {
     var timestamp: Date
     var treatmentType: TreatmentType
     @Relationship(deleteRule: .cascade) var mood: MoodRating?
@@ -105,8 +105,8 @@ final class TherapySession {
 
 // SwiftUI View Pattern with Query
 struct SessionListView: View {
-    @Query(sort: \TherapySession.timestamp, order: .reverse) 
-    private var sessions: [TherapySession]
+    @Query(sort: \TherapeuticSession.timestamp, order: .reverse) 
+    private var sessions: [TherapeuticSession]
     
     var body: some View {
         // Implementation
@@ -116,7 +116,7 @@ struct SessionListView: View {
 // Observable ViewModel Pattern (iOS 17+)
 @Observable
 final class SessionFormViewModel {
-    var currentSession: TherapySession?
+    var currentSession: TherapeuticSession?
     var isLoading = false
     
     func saveSession() async throws {
@@ -204,7 +204,7 @@ See [slash-commands.md](slash-commands.md) for complete command reference.
 - **Spec Status**: 001 (in progress), 002 (planned), 003 (planned)
 
 ### Key Entities
-- **TherapySession**: Core session data with set/setting/music
+- **TherapeuticSession**: Core session data with set/setting/music
 - **TreatmentType**: Therapy modalities (IV, IM, oral, etc.)
 - **MoodRating**: Before/after session mood tracking
 - **SpotifyConnection**: OAuth integration for playlist association
@@ -212,14 +212,14 @@ See [slash-commands.md](slash-commands.md) for complete command reference.
 
 ### File Organization
 ```
-SetAndSetting/
+Afterflow/
 ├── Models/ (SwiftData entities)
 ├── Views/ (SwiftUI interfaces) 
 ├── ViewModels/ (Observable state management)
 ├── Services/ (Data access, Spotify API)
 └── Resources/ (Assets, localization)
 
-SetAndSettingTests/ (80% coverage required)
+AfterflowTests/ (80% coverage required)
 ├── ModelTests/
 ├── ServiceTests/  
 ├── ViewModelTests/
@@ -239,7 +239,7 @@ SetAndSettingTests/ (80% coverage required)
 
 ```swift
 // Result-based async operations
-func saveSession(_ session: TherapySession) async -> Result<Void, SessionError> {
+func saveSession(_ session: TherapeuticSession) async -> Result<Void, SessionError> {
     // Implementation with proper error handling
 }
 
@@ -259,7 +259,7 @@ Use conventional commits with spec references:
 ```
 feat(session): add mood rating slider component (001-core-session-logging)
 fix(spotify): handle token refresh timeout (002-spotify-integration) 
-test(models): increase TherapySession coverage to 85%
+test(models): increase TherapeuticSession coverage to 85%
 docs(setup): add development environment guide
 refactor(views): extract reusable form components
 ```

@@ -63,7 +63,7 @@ Existing solutions require network access or expose data.
 ## Functional Requirements
 | ID | Requirement |
 |----|--------------|
-| FR-001 | Create / read / update / delete TherapySession entities offline. |
+| FR-001 | Create / read / update / delete TherapeuticSession entities offline. |
 | FR-002 | Validate required fields with inline guidance. |
 | FR-003 | Auto-save drafts + recover after crash/close. |
 | FR-004 | Support environment + music notes text fields. |
@@ -80,7 +80,7 @@ Existing solutions require network access or expose data.
 | ID | Description |
 |----|--------------|
 | TR-001 | SwiftUI 5.9 + SwiftData on iOS ≥ 17.6 (tested on 17.6+). |
-| TR-002 | SwiftData entity `TherapySession` fields:<br> `id (UUID)`, `date (Date)`, `treatmentType (Enum)`, `dose (String?)`, `intention (String?)`, `environment (String?)`, `musicNotes (String?)`, `beforeMood (Int?)`, `afterMood (Int?)`, `reflection (String?)`, `createdAt (Date)`, `updatedAt (Date)` |
+| TR-002 | SwiftData entity `TherapeuticSession` fields:<br> `id (UUID)`, `date (Date)`, `treatmentType (Enum)`, `dose (String?)`, `intention (String?)`, `environment (String?)`, `musicNotes (String?)`, `beforeMood (Int?)`, `afterMood (Int?)`, `reflection (String?)`, `createdAt (Date)`, `updatedAt (Date)` |
 | TR-003 | Offline SQLite storage; optional CloudKit sync later. |
 | TR-004 | SwiftData queries in ViewModels only for derived state. |
 | TR-005 | Biometric unlock (optional). |

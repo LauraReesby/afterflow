@@ -12,7 +12,7 @@ Let users attach a Spotify playlist or track link to a session for context durin
 Music is central to therapeutic setting, yet users can’t easily log what they listened to without manual text entry.
 
 ## Success Criteria
-- Link Spotify playlists or tracks to any TherapySession.
+- Link Spotify playlists or tracks to any TherapeuticSession.
 - No in-app playback or analytics.
 - OAuth login fully transparent; tokens stored locally.
 - UI shows playlist name, cover art, duration.
@@ -56,7 +56,7 @@ Music is central to therapeutic setting, yet users can’t easily log what they 
 | FR-201 | Implement Spotify OAuth 2.0 (PKCE) flow. |
 | FR-202 | Store access/refresh tokens in Keychain. |
 | FR-203 | Fetch playlist metadata (name, image, duration). |
-| FR-204 | Allow user to link one playlist per TherapySession. |
+| FR-204 | Allow user to link one playlist per TherapeuticSession. |
 | FR-205 | Deep link to Spotify via `spotify://` or HTTPS. |
 | FR-206 | Provide disconnect & token wipe functionality. |
 | FR-207 | Respect offline mode (defer connection gracefully). |
@@ -69,7 +69,7 @@ Music is central to therapeutic setting, yet users can’t easily log what they 
 | TR-201 | SwiftUI 5.9 interface additions on iOS ≥ 17.6: Connect, Choose Playlist, Disconnect. |
 | TR-202 | Spotify Web API endpoints only; no SDK dependency for minimal attack surface. |
 | TR-203 | Token storage: iOS Keychain (secure). |
-| TR-204 | Added fields to `TherapySession`: `spotifyPlaylistURI`, `spotifyPlaylistName`, `spotifyPlaylistImageURL`. |
+| TR-204 | Added fields to `TherapeuticSession`: `spotifyPlaylistURI`, `spotifyPlaylistName`, `spotifyPlaylistImageURL`. |
 | TR-205 | ViewModel isolation: `SpotifyService` + `SpotifyAuthManager`. |
 | TR-206 | UI: reflective tone, avoid "music recommendation" language. |
 | TR-207 | Performance: launch < 2s; I/O < 16ms main thread (constitutional requirements). |

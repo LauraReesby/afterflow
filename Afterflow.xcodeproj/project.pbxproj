@@ -12,37 +12,37 @@
 			containerPortal = 82E012C22EBC3CE500A7B115 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 82E012C92EBC3CE500A7B115;
-			remoteInfo = SetAndSetting;
+			remoteInfo = Afterflow;
 		};
 		82E012E42EBC3CE600A7B115 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 82E012C22EBC3CE500A7B115 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 82E012C92EBC3CE500A7B115;
-			remoteInfo = SetAndSetting;
+			remoteInfo = Afterflow;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		82E012CA2EBC3CE500A7B115 /* SetAndSetting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SetAndSetting.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		82E012D92EBC3CE600A7B115 /* SetAndSettingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SetAndSettingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		82E012E32EBC3CE600A7B115 /* SetAndSettingUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SetAndSettingUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		82E012CA2EBC3CE500A7B115 /* Afterflow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Afterflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		82E012D92EBC3CE600A7B115 /* AfterflowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AfterflowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		82E012E32EBC3CE600A7B115 /* AfterflowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AfterflowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		82E012CC2EBC3CE500A7B115 /* SetAndSetting */ = {
+		82E012CC2EBC3CE500A7B115 /* Afterflow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = SetAndSetting;
+			path = Afterflow;
 			sourceTree = "<group>";
 		};
-		82E012DC2EBC3CE600A7B115 /* SetAndSettingTests */ = {
+		82E012DC2EBC3CE600A7B115 /* AfterflowTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = SetAndSettingTests;
+			path = AfterflowTests;
 			sourceTree = "<group>";
 		};
-		82E012E62EBC3CE600A7B115 /* SetAndSettingUITests */ = {
+		82E012E62EBC3CE600A7B115 /* AfterflowUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = SetAndSettingUITests;
+			path = AfterflowUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +75,9 @@
 		82E012C12EBC3CE500A7B115 = {
 			isa = PBXGroup;
 			children = (
-				82E012CC2EBC3CE500A7B115 /* SetAndSetting */,
-				82E012DC2EBC3CE600A7B115 /* SetAndSettingTests */,
-				82E012E62EBC3CE600A7B115 /* SetAndSettingUITests */,
+				82E012CC2EBC3CE500A7B115 /* Afterflow */,
+				82E012DC2EBC3CE600A7B115 /* AfterflowTests */,
+				82E012E62EBC3CE600A7B115 /* AfterflowUITests */,
 				82E012CB2EBC3CE500A7B115 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,9 +85,9 @@
 		82E012CB2EBC3CE500A7B115 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				82E012CA2EBC3CE500A7B115 /* SetAndSetting.app */,
-				82E012D92EBC3CE600A7B115 /* SetAndSettingTests.xctest */,
-				82E012E32EBC3CE600A7B115 /* SetAndSettingUITests.xctest */,
+				82E012CA2EBC3CE500A7B115 /* Afterflow.app */,
+				82E012D92EBC3CE600A7B115 /* AfterflowTests.xctest */,
+				82E012E32EBC3CE600A7B115 /* AfterflowUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		82E012C92EBC3CE500A7B115 /* SetAndSetting */ = {
+		82E012C92EBC3CE500A7B115 /* Afterflow */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 82E012ED2EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "SetAndSetting" */;
+			buildConfigurationList = 82E012ED2EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "Afterflow" */;
 			buildPhases = (
 				82E012C62EBC3CE500A7B115 /* Sources */,
 				82E012C72EBC3CE500A7B115 /* Frameworks */,
@@ -108,18 +108,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				82E012CC2EBC3CE500A7B115 /* SetAndSetting */,
+				82E012CC2EBC3CE500A7B115 /* Afterflow */,
 			);
-			name = SetAndSetting;
+			name = Afterflow;
 			packageProductDependencies = (
 			);
-			productName = SetAndSetting;
-			productReference = 82E012CA2EBC3CE500A7B115 /* SetAndSetting.app */;
+			productName = Afterflow;
+			productReference = 82E012CA2EBC3CE500A7B115 /* Afterflow.app */;
 			productType = "com.apple.product-type.application";
 		};
-		82E012D82EBC3CE600A7B115 /* SetAndSettingTests */ = {
+		82E012D82EBC3CE600A7B115 /* AfterflowTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 82E012F02EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "SetAndSettingTests" */;
+			buildConfigurationList = 82E012F02EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "AfterflowTests" */;
 			buildPhases = (
 				82E012D52EBC3CE600A7B115 /* Sources */,
 				82E012D62EBC3CE600A7B115 /* Frameworks */,
@@ -131,18 +131,18 @@
 				82E012DB2EBC3CE600A7B115 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				82E012DC2EBC3CE600A7B115 /* SetAndSettingTests */,
+				82E012DC2EBC3CE600A7B115 /* AfterflowTests */,
 			);
-			name = SetAndSettingTests;
+			name = AfterflowTests;
 			packageProductDependencies = (
 			);
-			productName = SetAndSettingTests;
-			productReference = 82E012D92EBC3CE600A7B115 /* SetAndSettingTests.xctest */;
+			productName = AfterflowTests;
+			productReference = 82E012D92EBC3CE600A7B115 /* AfterflowTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		82E012E22EBC3CE600A7B115 /* SetAndSettingUITests */ = {
+		82E012E22EBC3CE600A7B115 /* AfterflowUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 82E012F32EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "SetAndSettingUITests" */;
+			buildConfigurationList = 82E012F32EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "AfterflowUITests" */;
 			buildPhases = (
 				82E012DF2EBC3CE600A7B115 /* Sources */,
 				82E012E02EBC3CE600A7B115 /* Frameworks */,
@@ -154,13 +154,13 @@
 				82E012E52EBC3CE600A7B115 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				82E012E62EBC3CE600A7B115 /* SetAndSettingUITests */,
+				82E012E62EBC3CE600A7B115 /* AfterflowUITests */,
 			);
-			name = SetAndSettingUITests;
+			name = AfterflowUITests;
 			packageProductDependencies = (
 			);
-			productName = SetAndSettingUITests;
-			productReference = 82E012E32EBC3CE600A7B115 /* SetAndSettingUITests.xctest */;
+			productName = AfterflowUITests;
+			productReference = 82E012E32EBC3CE600A7B115 /* AfterflowUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 82E012C52EBC3CE500A7B115 /* Build configuration list for PBXProject "SetAndSetting" */;
+			buildConfigurationList = 82E012C52EBC3CE500A7B115 /* Build configuration list for PBXProject "Afterflow" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				82E012C92EBC3CE500A7B115 /* SetAndSetting */,
-				82E012D82EBC3CE600A7B115 /* SetAndSettingTests */,
-				82E012E22EBC3CE600A7B115 /* SetAndSettingUITests */,
+				82E012C92EBC3CE500A7B115 /* Afterflow */,
+				82E012D82EBC3CE600A7B115 /* AfterflowTests */,
+				82E012E22EBC3CE600A7B115 /* AfterflowUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		82E012DB2EBC3CE600A7B115 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 82E012C92EBC3CE500A7B115 /* SetAndSetting */;
+			target = 82E012C92EBC3CE500A7B115 /* Afterflow */;
 			targetProxy = 82E012DA2EBC3CE600A7B115 /* PBXContainerItemProxy */;
 		};
 		82E012E52EBC3CE600A7B115 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 82E012C92EBC3CE500A7B115 /* SetAndSetting */;
+			target = 82E012C92EBC3CE500A7B115 /* Afterflow */;
 			targetProxy = 82E012E42EBC3CE600A7B115 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -395,12 +395,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = E6HZKYX9G9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Set & Setting";
+				INFOPLIST_KEY_CFBundleDisplayName = Afterflow;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -412,8 +415,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.SetAndSetting;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.Afterflow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -433,12 +437,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = E6HZKYX9G9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Set & Setting";
+				INFOPLIST_KEY_CFBundleDisplayName = Afterflow;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -450,8 +457,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.SetAndSetting;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.Afterflow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -476,7 +484,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.SetAndSettingTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.AfterflowTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -488,7 +496,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SetAndSetting.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SetAndSetting";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Afterflow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Afterflow";
 			};
 			name = Debug;
 		};
@@ -502,7 +510,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.SetAndSettingTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.AfterflowTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -514,7 +522,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SetAndSetting.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SetAndSetting";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Afterflow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Afterflow";
 			};
 			name = Release;
 		};
@@ -526,7 +534,7 @@
 				DEVELOPMENT_TEAM = E6HZKYX9G9;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.SetAndSettingUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.AfterflowUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -538,7 +546,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = SetAndSetting;
+				TEST_TARGET_NAME = Afterflow;
 			};
 			name = Debug;
 		};
@@ -550,7 +558,7 @@
 				DEVELOPMENT_TEAM = E6HZKYX9G9;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.SetAndSettingUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lreesby.app.AfterflowUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -562,14 +570,14 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = SetAndSetting;
+				TEST_TARGET_NAME = Afterflow;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		82E012C52EBC3CE500A7B115 /* Build configuration list for PBXProject "SetAndSetting" */ = {
+		82E012C52EBC3CE500A7B115 /* Build configuration list for PBXProject "Afterflow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				82E012EB2EBC3CE600A7B115 /* Debug */,
@@ -578,7 +586,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		82E012ED2EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "SetAndSetting" */ = {
+		82E012ED2EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "Afterflow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				82E012EE2EBC3CE600A7B115 /* Debug */,
@@ -587,7 +595,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		82E012F02EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "SetAndSettingTests" */ = {
+		82E012F02EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "AfterflowTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				82E012F12EBC3CE600A7B115 /* Debug */,
@@ -596,7 +604,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		82E012F32EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "SetAndSettingUITests" */ = {
+		82E012F32EBC3CE600A7B115 /* Build configuration list for PBXNativeTarget "AfterflowUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				82E012F42EBC3CE600A7B115 /* Debug */,

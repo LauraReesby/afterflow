@@ -1,7 +1,7 @@
 # Implementation Plan — Spotify Integration (v2)
 
 ## Overview
-Integrate Spotify playlist linking into TherapySession entries using secure OAuth PKCE flow and local token storage.
+Integrate Spotify playlist linking into TherapeuticSession entries using secure OAuth PKCE flow and local token storage.
 
 ## Technical Context
 **Language/Version:** Swift 5.9+ / iOS ≥ 17.6 (tested on 17.6+)  
@@ -35,7 +35,7 @@ Tests/
 | 1 | OAuth PKCE Auth | SpotifyAuthManager + tests |
 | 2 | Playlist Metadata Fetch | SpotifyService + mock API tests |
 | 3 | UI Flow | ConnectView, PickerView, DisconnectView |
-| 4 | Integration with TherapySession | Add URI fields, update forms |
+| 4 | Integration with TherapeuticSession | Add URI fields, update forms |
 | 5 | QA & Governance | Privacy manifest, test validation |
 
 ## Metrics

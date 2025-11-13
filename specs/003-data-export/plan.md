@@ -1,7 +1,7 @@
 # Implementation Plan — Data Export (v2)
 
 ## Overview
-Deliver offline CSV and PDF export for TherapySession entries with filtering and secure local handling.
+Deliver offline CSV and PDF export for TherapeuticSession entries with filtering and secure local handling.
 
 ## Technical Context
 **Language/Version:** Swift 5.9+ / iOS ≥ 17.6 (tested on 17.6+)  
@@ -30,10 +30,10 @@ Tests/
 ```
 
 ## File Naming
-`SetAndSetting-Export-YYYYMMDD-HHmm[-RANGE][-TYPE].ext`  
+`Afterflow-Export-YYYYMMDD-HHmm[-RANGE][-TYPE].ext`  
 Examples:  
-- `SetAndSetting-Export-20251106-1921-ALL-csv.csv`  
-- `SetAndSetting-Export-20251106-1921-2025Q4-PDF.pdf`
+- `Afterflow-Export-20251106-1921-ALL-csv.csv`  
+- `Afterflow-Export-20251106-1921-2025Q4-PDF.pdf`
 
 ## Filters
 - Date range (start/end)  

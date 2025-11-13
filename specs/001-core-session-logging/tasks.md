@@ -1,10 +1,10 @@
 # Task List — Core Session Logging (v2)
 
 ## Phase 1 – Model & Persistence
-- [ ] T001 [US1] Define TherapySession entity fields per spec.  
-- [ ] T002 [US1] Implement SwiftData persistence and auto-save service.  
-- [ ] T003 [US1] Unit tests for TherapySession CRUD and auto-save recovery.  
-- [ ] T004 [US1] Verify constitutional quality gates: 80% coverage, 100% public API coverage, TDD compliance.  
+- [x] T001 [US1] Define TherapeuticSession entity fields per spec.  
+- [x] T002 [US1] Implement SwiftData persistence and auto-save service.  
+- [x] T003 [US1] Unit tests for TherapeuticSession CRUD and auto-save recovery.  
+- [x] T004 [US1] Verify constitutional quality gates: 80% coverage, 100% public API coverage, TDD compliance.  
 
 ## Phase 2 – Session Form
 - [ ] T005 [US1] Build SessionFormView with date, type, intentions.  
@@ -15,30 +15,30 @@
 - [ ] T010 [US1] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 
 ## Phase 3 – Environment & Music
-- [ ] T011 [US2] Add environment + music fields to model.  
+- [x] T011 [US2] Add environment + music fields to model.  
 - [ ] T012 [US2] EnvironmentInputView + Music Input subviews.  
 - [ ] T013 [US2] Tone-checked helper copy.  
-- [ ] T014 [US2] Persistence tests + UI tests (long text handling).  
+- [x] T014 [US2] Persistence tests + UI tests (long text handling).  
 - [ ] T015 [US2] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 
 ## Phase 4 – Mood Ratings
-- [ ] T016 [US3] Add before/after mood fields.  
+- [x] T016 [US3] Add before/after mood fields.  
 - [ ] T017 [US3] MoodRatingView (slider + emoji map).  
 - [ ] T018 [US3] VoiceOver focus + value announcement tests.  
 - [ ] T019 [US3] Dynamic Type XL+ snapshot tests.  
 - [ ] T020 [US3] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 
 ## Phase 5 – Reflections
-- [ ] T021 [US4] Add reflections field to model.  
+- [x] T021 [US4] Add reflections field to model.  
 - [ ] T022 [US4] SessionDetailView (editable reflection).  
 - [ ] T023 [US4] Empty-state helper copy.  
 - [ ] T024 [US4] Persistence error handling.  
 - [ ] T025 [US4] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 
 ## Phase 6 – History List
-- [ ] T026 [US5] SessionListView with SwiftData query.  
+- [x] T026 [US5] SessionListView with SwiftData query.  
 - [ ] T027 [US5] SessionListViewModel (filter/sort).  
-- [ ] T028 [US5] Delete + Undo flow.  
+- [x] T028 [US5] Delete + Undo flow.  
 - [ ] T029 [US5] Large dataset fixture + perf tests.  
 - [ ] T030 [US5] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24128" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="LaunchVC">
+    <device id="retina6_5" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="Scene-Launch">
+            <objects>
+                <viewController storyboardIdentifier="LaunchVC" id="LaunchVC" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="LaunchView" userLabel="Launch View">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <imageView contentMode="scaleAspectFit" image="AppLogo" translatesAutoresizingMaskIntoConstraints="NO" id="LogoImage" userLabel="AppLogo">
+                                <rect key="frame" x="124.33333333333333" y="365.33333333333331" width="165.33333333333337" height="165.33333333333331"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="LogoImage" secondAttribute="height" multiplier="1:1" id="AspectSquare"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="SafeArea"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="LogoImage" firstAttribute="centerX" secondItem="LaunchView" secondAttribute="centerX" id="CenterX"/>
+                            <constraint firstItem="LogoImage" firstAttribute="centerY" secondItem="LaunchView" secondAttribute="centerY" id="CenterY"/>
+                            <constraint firstItem="LogoImage" firstAttribute="width" relation="greaterThanOrEqual" constant="120" id="MinWidth120"/>
+                            <constraint firstItem="LogoImage" firstAttribute="width" relation="lessThanOrEqual" secondItem="LaunchView" secondAttribute="width" multiplier="0.4" id="Width40Percent"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="FirstResponder" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="139" y="107"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="AppLogo" width="1024" height="1024"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

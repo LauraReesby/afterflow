@@ -23,8 +23,8 @@
 - [ ] T216 [US2] Accessibility audit: reflective tone copy, labels, focus order.  
 - [ ] T217 [US2] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 
-## Phase 4 – Integration with TherapySession
-- [ ] T218 [US4] Extend TherapySession model with spotifyPlaylistURI/name/imageURL.  
+## Phase 4 – Integration with TherapeuticSession
+- [x] T218 [US4] Extend TherapeuticSession model with spotifyPlaylistURI/name/imageURL.  
 - [ ] T219 [US4] Update SessionFormViewModel + persistence tests.  
 - [ ] T220 [US4] Unit & UI tests for attach/detach playlist.  
 - [ ] T221 [US4] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  

@@ -1,4 +1,4 @@
-# Set & Setting Development Slash Commands
+# Afterflow Development Slash Commands
 
 Custom slash commands to streamline development of the therapeutic session logging app while maintaining constitutional compliance and quality standards.
 
@@ -29,7 +29,7 @@ Custom slash commands to streamline development of the therapeutic session loggi
 **Usage**:
 ```
 /coverage all
-/coverage TherapySession
+/coverage TherapeuticSession
 /coverage SessionFormViewModel
 ```
 
@@ -47,7 +47,7 @@ Custom slash commands to streamline development of the therapeutic session loggi
 
 **Usage**:
 ```
-/test TherapySession unit
+/test TherapeuticSession unit
 /test SessionFormView ui
 /test session-creation integration
 ```
@@ -280,7 +280,7 @@ Custom slash commands to streamline development of the therapeutic session loggi
 
 **Usage**:
 ```
-/docs TherapySession
+/docs TherapeuticSession
 /docs session-workflow
 /docs privacy-features
 ```

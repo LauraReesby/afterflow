@@ -1,7 +1,7 @@
 # Task List — Data Export (v2)
 
 ## Phase 1 – CSV Export
-- [ ] T301 [US1] Define CSV schema and mapping from TherapySession.  
+- [ ] T301 [US1] Define CSV schema and mapping from TherapeuticSession.  
 - [ ] T302 [US1] Implement CSVExportService with RFC‑4180 quoting + UTF‑8.  
 - [ ] T303 [US1] Inject CSV injection protection for leading formula chars.  
 - [ ] T304 [US1] Add date range + treatment type filters.  

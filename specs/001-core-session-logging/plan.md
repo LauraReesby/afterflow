@@ -14,7 +14,7 @@ Implements FR-001 → FR-010 using SwiftUI + SwiftData in modular structure.
 
 ## File Structure
 ```
-Models/        TherapySession.swift
+Models/        TherapeuticSession.swift
 ViewModels/    SessionFormViewModel.swift
 Views/
  ├── SessionFormView.swift

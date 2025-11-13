@@ -72,6 +72,8 @@ Icon?
 .env.*
 Secrets.plist
 Config.plist
+*.p12
+*.mobileprovision
 
 ### Logs / temp ###
 *.log
