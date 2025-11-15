@@ -1,5 +1,3 @@
-//  Constitutional Compliance: Test-Driven Quality, Privacy-First
-
 import Testing
 import Foundation
 @testable import Afterflow

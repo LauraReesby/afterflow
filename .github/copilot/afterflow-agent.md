@@ -68,6 +68,7 @@ These principles override all other considerations:
 
 ## Read First
 
+- ai/README.md (entry point linking Codex, Claude, and Copilot guidance)
 - spec/00-constitution/CONSTITUTION.md
 - spec/10-product/PRD.md
 - spec/30-tech/TECH-SPEC.md

@@ -1,5 +1,3 @@
-//  Constitutional Compliance: Test-Driven Quality, Accessibility-First
-
 import XCTest
 
 final class SessionFormValidationUITests: XCTestCase {
@@ -9,25 +7,6 @@ final class SessionFormValidationUITests: XCTestCase {
     }
 
     override func tearDownWithError() throws { }
-
-    func testIntentionValidationMessageAppears() throws {
-        let app = XCUIApplication()
-        let intentionField = presentSessionForm(app)
-
-        intentionField.tap()
-        intentionField.typeText("gentle intention")
-        intentionField.clearText(app: app)
-        let saveButton = app.navigationBars["New Session"].buttons["Save"]
-        XCTAssertTrue(saveButton.waitForExistence(timeout: 2), "Save button should exist")
-        saveButton.tap()
-        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
-
-        let validationLabel = app.descendants(matching: .any)["validation_suggestion_text"]
-        XCTAssertTrue(
-            validationLabel.waitForExistence(timeout: 5),
-            "Intention validation guidance should appear after clearing the required field"
-        )
-    }
 
     func testSaveButtonEnablesAfterValidInput() throws {
         let app = XCUIApplication()

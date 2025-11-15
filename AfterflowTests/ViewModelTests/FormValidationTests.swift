@@ -1,9 +1,8 @@
-//  Constitutional Compliance: Test-Driven Quality, Privacy-First
-
 import Testing
 import Foundation
 @testable import Afterflow
 
+@MainActor
 struct FormValidationTests {
     
     // MARK: - Basic Validation Tests

@@ -1,0 +1,46 @@
+# Shared Style Guide
+
+Applies to every agent touching Swift, Markdown, or automation scripts. Supplements the language-specific guides already embedded in `AGENTS.md` and `.github/copilot/afterflow-agent.md`.
+
+## Swift & SwiftUI
+- Use Swift API Design Guidelines: `PascalCase` types, `camelCase` members, descriptive argument labels.
+- Indent with **4 spaces**; avoid tabs.
+- Keep Swift files under ~300 lines—extract helpers or subviews when bodies exceed ~80 lines.
+- SwiftUI subviews live in `Afterflow/Views/Components` and adopt `PreviewProvider` stubs gated by `#if DEBUG` when useful.
+- View models must be `@Observable` or `ObservableObject` with clearly named `@Published` state.
+- Services throw strongly typed errors; prefer `Result` for async call sites.
+
+## Documentation & Comments
+- Prefer expressive naming over comments; add a short comment only before non-obvious logic (e.g., privacy-sensitive persistence, data migrations).
+- Update `specs/<id>/spec.md` when implementation deviates from the original assumption.
+
+## Testing Standards
+- Unit tests use the Swift Testing framework ( `import Testing`, `@Test` ) and should run headlessly via `xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16'`.
+- Mirror production folders: `Afterflow/Models/Foo.swift` ↔ `AfterflowTests/ModelTests/FooTests.swift`.
+- Tests follow `test<Scenario><Expectation>` naming (e.g., `testSavingDraftRestoresLastInput`) and always start with a failing case (Red-Green-Refactor).
+- Maintain ≥80% coverage overall and 100% for any new public API; capture coverage stats in the PR body.
+- Use the in-memory `ModelContainer` scaffold when testing SwiftData interactions:
+  ```swift
+  @MainActor
+  func makeTestEnvironment() -> (ModelContainer, SessionDataService) {
+      let config = ModelConfiguration(isStoredInMemoryOnly: true)
+      let container = try! ModelContainer(for: TherapeuticSession.self, configurations: config)
+      let service = SessionDataService(modelContext: container.mainContext)
+      return (container, service)
+  }
+  ```
+- UI and accessibility flows rely on XCUITest (`AfterflowUITests/`); snapshot VoiceOver + Dynamic Type tests mirror the acceptance criteria in `specs/<id>/tasks.md`.
+
+## Markdown & Docs
+- Headings use sentence case (`## Project structure`).
+- Keep instructions concise (200–400 words when possible) with actionable bullets and inline code fences for commands.
+- Link to files relative to repo root to keep references portable between tools.
+
+## Privacy Defaults
+- Never log therapeutic session contents or user-identifying data.
+- Do not introduce network calls without an approved spec; when unavoidable, document endpoints and data contracts in the spec plus PR checklist.
+
+## Performance & Accessibility Targets
+- Constitutional baseline: launch < 2 s, main-thread I/O < 16 ms, workflows usable offline.
+- Feature-specific goals from `specs/*/plan.md` must be honored (e.g., session creation ≤ 60 s, Spotify connect ≤ 15 s, CSV export 1k sessions ≤ 2 s, PDF export 25 sessions ≤ 4 s); include measurements or rationale in PRs.
+- Every major phase concludes with “Constitutional QA verification” (accessibility, performance profiling, privacy compliance) as listed in `specs/*/tasks.md`; ensure these checks are documented before marking tasks complete.

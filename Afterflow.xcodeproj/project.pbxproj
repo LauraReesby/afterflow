@@ -24,12 +24,30 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		82DA2AAC2EC7F89A00A0CAE9 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		82DA2AAD2EC7F89A00A0CAE9 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
+		82DA2AB92EC7F89A00A0CAE9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		82E012CA2EBC3CE500A7B115 /* Afterflow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Afterflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82E012D92EBC3CE600A7B115 /* AfterflowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AfterflowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		82E012E32EBC3CE600A7B115 /* AfterflowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AfterflowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		82DA2AAB2EC7F89A00A0CAE9 /* .github */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = .github;
+			sourceTree = "<group>";
+		};
+		82DA2AB82EC7F89A00A0CAE9 /* ai */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ai;
+			sourceTree = "<group>";
+		};
+		82DA2AC62EC7F89A00A0CAE9 /* specs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = specs;
+			sourceTree = "<group>";
+		};
 		82E012CC2EBC3CE500A7B115 /* Afterflow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Afterflow;
@@ -79,6 +97,12 @@
 				82E012DC2EBC3CE600A7B115 /* AfterflowTests */,
 				82E012E62EBC3CE600A7B115 /* AfterflowUITests */,
 				82E012CB2EBC3CE500A7B115 /* Products */,
+				82DA2AAB2EC7F89A00A0CAE9 /* .github */,
+				82DA2AAC2EC7F89A00A0CAE9 /* .gitignore */,
+				82DA2AAD2EC7F89A00A0CAE9 /* AGENTS.md */,
+				82DA2AB82EC7F89A00A0CAE9 /* ai */,
+				82DA2AB92EC7F89A00A0CAE9 /* README.md */,
+				82DA2AC62EC7F89A00A0CAE9 /* specs */,
 			);
 			sourceTree = "<group>";
 		};
