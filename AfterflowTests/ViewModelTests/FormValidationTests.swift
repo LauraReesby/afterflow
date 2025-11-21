@@ -3,7 +3,6 @@ import Foundation
 import Testing
 
 @MainActor
-@MainActor
 struct FormValidationTests {
     // MARK: - Basic Validation Tests
 

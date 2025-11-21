@@ -114,9 +114,10 @@ final class TherapeuticSession {
     var statusRawValue: String
 
     var status: SessionLifecycleStatus {
-        get { SessionLifecycleStatus(rawValue: statusRawValue) ?? .draft }
-        set { statusRawValue = newValue.rawValue }
+        get { SessionLifecycleStatus(rawValue: self.statusRawValue) ?? .draft }
+        set { self.statusRawValue = newValue.rawValue }
     }
+
     // MARK: - Spotify Integration (Optional)
 
     /// Spotify playlist URI (optional, from Feature 002)
@@ -209,6 +210,7 @@ extension TherapeuticSession {
         self.markAsUpdated()
     }
 }
+
 enum SessionLifecycleStatus: String, Codable, CaseIterable {
     case draft
     case needsReflection
@@ -216,9 +218,9 @@ enum SessionLifecycleStatus: String, Codable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .draft: return "Draft"
-        case .needsReflection: return "Needs Reflection"
-        case .complete: return "Complete"
+        case .draft: "Draft"
+        case .needsReflection: "Needs Reflection"
+        case .complete: "Complete"
         }
     }
 }

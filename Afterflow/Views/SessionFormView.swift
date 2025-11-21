@@ -45,6 +45,9 @@ struct SessionFormView: View {
     @State private var errorMessage = ""
     @State private var showDateNormalizationHint = false
     @State private var dateNormalizationMessage = ""
+    @State private var showReminderPrompt = false
+    @State private var pendingSessionForReminder: TherapeuticSession?
+    private let reminderScheduler = ReminderScheduler()
 
     // MARK: - Computed Properties
 
@@ -220,9 +223,11 @@ struct SessionFormView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Plan for reflections later")
                             .font(.headline)
-                        Text("Once you save this draft we’ll highlight it as “Needs Reflection” and you can capture environment notes, reflections, and reminders.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        Text(
+                            "Once you save this draft we’ll highlight it as “Needs Reflection” and you can capture environment notes, reflections, and reminders."
+                        )
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                     }
                     .padding(.vertical, 4)
                 } header: {
@@ -267,6 +272,16 @@ struct SessionFormView: View {
             Button("OK") {}
         } message: {
             Text(self.errorMessage)
+        }
+        .confirmationDialog(
+            "Would you like a reminder to add reflections later?",
+            isPresented: self.$showReminderPrompt,
+            titleVisibility: .visible
+        ) {
+            Button("In 1 hour") { self.handleReminderSelection(.oneHour) }
+            Button("Later today") { self.handleReminderSelection(.laterToday) }
+            Button("Tomorrow morning") { self.handleReminderSelection(.tomorrowMorning) }
+            Button("No thanks", role: .cancel) { self.handleReminderSelection(.none) }
         }
         .onAppear {
             self.setupInitialState()
@@ -397,15 +412,21 @@ struct SessionFormView: View {
             status: .needsReflection
         )
 
-        do {
-            let service = self.ensureDataService()
-            try service.createSession(newSession)
-            service.clearDraft()
-
-            // Success - dismiss the form
-            self.dismiss()
-        } catch {
-            self.showError(message: "Unable to save session: \(error.localizedDescription)")
+        Task {
+            do {
+                await self.reminderScheduler.requestPermissionIfNeeded()
+                let service = self.ensureDataService()
+                try service.createSession(newSession)
+                service.clearDraft()
+                await MainActor.run {
+                    self.pendingSessionForReminder = newSession
+                    self.showReminderPrompt = true
+                }
+            } catch {
+                await MainActor.run {
+                    self.showError(message: "Unable to save session: \(error.localizedDescription)")
+                }
+            }
         }
     }
 
@@ -457,6 +478,37 @@ struct SessionFormView: View {
             status: self.sessionPhase,
             reminderDate: nil
         )
+    }
+
+    private func handleReminderSelection(_ selection: ReminderOption) {
+        guard let session = self.pendingSessionForReminder else {
+            self.dismiss()
+            return
+        }
+
+        let service = self.ensureDataService()
+
+        session.reminderDate = selection.targetDate(from: Date())
+
+        Task {
+            do {
+                try service.updateSession(session)
+                if let reminderDate = session.reminderDate, reminderDate > Date() {
+                    try await self.reminderScheduler.scheduleReminder(for: session)
+                } else {
+                    self.reminderScheduler.cancelReminder(for: session)
+                }
+            } catch {
+                await MainActor.run {
+                    self.showError(message: "Reminder preference could not be saved: \(error.localizedDescription)")
+                }
+            }
+
+            await MainActor.run {
+                self.pendingSessionForReminder = nil
+                self.dismiss()
+            }
+        }
     }
 }
 

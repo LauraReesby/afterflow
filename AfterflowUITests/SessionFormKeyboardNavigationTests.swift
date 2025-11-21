@@ -63,11 +63,12 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
 
         // Tap outside the text field - try a different approach since navigation bar tap might not work
         // Tap on a section header or form area
-        let formTitle = app.staticTexts["Treatment"]
+        let formTitle = app.staticTexts["2 · Treatment details"]
         if formTitle.exists {
             formTitle.tap()
+        } else if app.staticTexts["Treatment"].exists {
+            app.staticTexts["Treatment"].tap()
         } else {
-            // Fallback: tap on the navigation bar
             app.navigationBars["New Session"].tap()
         }
 

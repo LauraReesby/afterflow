@@ -44,6 +44,8 @@ final class SessionDetailViewModel {
         self.session.reflections = trimmed
 
         do {
+            self.session.status = .complete
+            self.session.reminderDate = nil
             try self.persistence.updateSession(self.session)
             self.reflectionText = trimmed
             self.showSuccessMessage = true

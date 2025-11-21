@@ -18,9 +18,18 @@ struct ContentView: View {
                     NavigationLink {
                         SessionDetailView(session: session)
                     } label: {
-                        VStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(session.displayTitle)
                                 .font(.headline)
+                            if session.status == .needsReflection {
+                                Label("Needs Reflection", systemImage: "bell.badge")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            } else if session.status == .complete {
+                                Label("Complete", systemImage: "checkmark.circle")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
                             if !session.intention.isEmpty {
                                 Text(session.intention)
                                     .font(.caption)

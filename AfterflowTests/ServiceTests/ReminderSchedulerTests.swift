@@ -1,0 +1,51 @@
+@testable import Afterflow
+import Foundation
+import Testing
+import UserNotifications
+
+@MainActor
+struct ReminderSchedulerTests {
+    @Test("Scheduler adds request when reminder date in future") func schedulesRequestWhenAuthorized() async throws {
+        let mockCenter = MockNotificationCenter()
+        mockCenter.authorizationStatus = .authorized
+        let scheduler = ReminderScheduler(notificationCenter: mockCenter)
+
+        let session = TherapeuticSession(intention: "Test", moodBefore: 5)
+        session.reminderDate = Date().addingTimeInterval(3600)
+
+        try await scheduler.scheduleReminder(for: session)
+        #expect(mockCenter.addedRequests.count == 1)
+        #expect(mockCenter.addedRequests.first?.identifier == "reminder_\(session.id.uuidString)")
+    }
+
+    @Test("Scheduler cancels request when reminder removed") func cancelReminderRemovesRequest() {
+        let mockCenter = MockNotificationCenter()
+        let scheduler = ReminderScheduler(notificationCenter: mockCenter)
+        let session = TherapeuticSession(intention: "Test")
+
+        scheduler.cancelReminder(for: session)
+        #expect(mockCenter.canceledIdentifiers.contains("reminder_\(session.id.uuidString)"))
+    }
+
+    private final class MockNotificationCenter: NotificationCentering {
+        var addedRequests: [UNNotificationRequest] = []
+        var canceledIdentifiers: [String] = []
+        var authorizationStatus: UNAuthorizationStatus = .authorized
+
+        func authorizationStatus() async -> UNAuthorizationStatus {
+            self.authorizationStatus
+        }
+
+        func add(_ request: UNNotificationRequest) async throws {
+            self.addedRequests.append(request)
+        }
+
+        func removePendingNotificationRequests(withIdentifiers identifiers: [String]) {
+            self.canceledIdentifiers.append(contentsOf: identifiers)
+        }
+
+        func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+            true
+        }
+    }
+}

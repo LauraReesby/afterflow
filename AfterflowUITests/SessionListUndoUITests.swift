@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class SessionListUndoUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -14,6 +15,7 @@ final class SessionListUndoUITests: XCTestCase {
 
         let cell = app.cells.containing(.staticText, identifier: intention).firstMatch
         XCTAssertTrue(cell.waitForExistence(timeout: 3), "Session cell should exist")
+        cell.waitForHittable()
 
         cell.swipeLeft()
         if app.buttons["Delete"].waitForExistence(timeout: 2) {
@@ -45,9 +47,13 @@ final class SessionListUndoUITests: XCTestCase {
         let intentionField = app.textFields["intentionField"]
         XCTAssertTrue(intentionField.waitForExistence(timeout: 3))
         intentionField.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2))
         intentionField.typeText(intention)
 
         app.navigationBars["New Session"].buttons["Save"].tap()
-        XCTAssertFalse(app.navigationBars["New Session"].exists)
+        if app.buttons["No thanks"].waitForExistence(timeout: 1) {
+            app.buttons["No thanks"].tap()
+        }
+        XCTAssertFalse(app.navigationBars["New Session"].waitForExistence(timeout: 1))
     }
 }

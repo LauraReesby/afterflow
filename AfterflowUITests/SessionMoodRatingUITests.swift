@@ -64,11 +64,19 @@ final class SessionMoodRatingUITests: XCTestCase {
     }
 
     private func revealMoodSection(in app: XCUIApplication) {
-        let scrollable = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.scrollViews
-            .firstMatch
-        for _ in 0 ..< 12 where !(app.sliders["moodBeforeSlider"].exists && app.sliders["moodAfterSlider"].exists) {
-            scrollable.swipeUp()
-            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        let container: XCUIElement = if app.collectionViews.firstMatch.exists {
+            app.collectionViews.firstMatch
+        } else if app.tables.firstMatch.exists {
+            app.tables.firstMatch
+        } else {
+            app.scrollViews.firstMatch
+        }
+
+        var attempts = 0
+        while !(app.sliders["moodBeforeSlider"].exists && app.sliders["moodAfterSlider"].exists), attempts < 30 {
+            container.swipeUp()
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+            attempts += 1
         }
     }
 

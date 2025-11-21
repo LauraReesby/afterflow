@@ -2,18 +2,18 @@ import SwiftUI
 
 struct SessionStatusIndicatorView: View {
     let status: SessionLifecycleStatus
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: iconName)
-                .foregroundStyle(iconColor)
+            Image(systemName: self.iconName)
+                .foregroundStyle(self.iconColor)
                 .imageScale(.large)
                 .padding(.top, 4)
-            
+
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+                Text(self.title)
                     .font(.headline)
-                Text(detail)
+                Text(self.detail)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -22,56 +22,56 @@ struct SessionStatusIndicatorView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(backgroundTint)
+                .fill(self.backgroundTint)
         )
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(title)
-        .accessibilityHint(detail)
+        .accessibilityLabel(self.title)
+        .accessibilityHint(self.detail)
     }
 
     private var title: String {
-        switch status {
+        switch self.status {
         case .draft:
-            return "Draft • Capture your intention"
+            "Draft • Capture your intention"
         case .needsReflection:
-            return "Needs Reflection • Return later to reflect"
+            "Needs Reflection • Return later to reflect"
         case .complete:
-            return "Complete • Reflections saved"
+            "Complete • Reflections saved"
         }
     }
 
     private var detail: String {
-        switch status {
+        switch self.status {
         case .draft:
-            return "Complete the required fields below to save this entry and set an optional reminder."
+            "Complete the required fields below to save this entry and set an optional reminder."
         case .needsReflection:
-            return "This session is waiting for reflections. You'll see it highlighted in your history until you finish."
+            "This session is waiting for reflections. You'll see it highlighted in your history until you finish."
         case .complete:
-            return "This session is complete. You can still update reflections any time."
+            "This session is complete. You can still update reflections any time."
         }
     }
 
     private var iconName: String {
-        switch status {
-        case .draft: return "square.fill"
-        case .needsReflection: return "square.lefthalf.fill"
-        case .complete: return "checkmark.square.fill"
+        switch self.status {
+        case .draft: "square.fill"
+        case .needsReflection: "square.lefthalf.fill"
+        case .complete: "checkmark.square.fill"
         }
     }
 
     private var iconColor: Color {
-        switch status {
-        case .draft: return .blue
-        case .needsReflection: return .orange
-        case .complete: return .green
+        switch self.status {
+        case .draft: .blue
+        case .needsReflection: .orange
+        case .complete: .green
         }
     }
 
     private var backgroundTint: Color {
-        switch status {
-        case .draft: return Color.blue.opacity(0.15)
-        case .needsReflection: return Color.orange.opacity(0.15)
-        case .complete: return Color.green.opacity(0.15)
+        switch self.status {
+        case .draft: Color.blue.opacity(0.15)
+        case .needsReflection: Color.orange.opacity(0.15)
+        case .complete: Color.green.opacity(0.15)
         }
     }
 }

@@ -20,6 +20,8 @@ final class SessionFormValidationUITests: XCTestCase {
 
         let intentionField = app.textFields["intentionField"]
         XCTAssertTrue(intentionField.waitForExistence(timeout: 2))
+        intentionField.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2))
         intentionField.typeText("Grounding intention")
 
         let saveButton = app.navigationBars["New Session"].buttons["Save"]
@@ -32,6 +34,16 @@ final class SessionFormValidationUITests: XCTestCase {
             .completed,
             "Save button should enable once required fields are valid"
         )
+
+        saveButton.tap()
+        if app.buttons["In 1 hour"].waitForExistence(timeout: 1) {
+            app.buttons["In 1 hour"].tap()
+        }
+        XCTAssertFalse(app.navigationBars["New Session"].waitForExistence(timeout: 1))
+
+        let sessionCell = app.cells.containing(.staticText, identifier: "Grounding intention").firstMatch
+        XCTAssertTrue(sessionCell.waitForExistence(timeout: 3), "Session should appear in list")
+        sessionCell.waitForHittable()
     }
 
     // MARK: - Helpers

@@ -36,8 +36,8 @@
 - [x] T023 [US4] Empty-state helper copy.  
 - [x] T024 [US4] Persistence error handling.  
 - [x] T025 [US4] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
-- [ ] T025a [US4] Implement session status pipeline (Draft ➜ Needs Reflection ➜ Complete) with reminder scheduling.  
-- [ ] T025b [US4] Local notification handling + auto-save once Needs Reflection is active.  
+- [x] T025a [US4] Implement session status pipeline (Draft ➜ Needs Reflection ➜ Complete) with reminder scheduling.  
+- [x] T025b [US4] Local notification handling + auto-save once Needs Reflection is active.  
 
 ## Phase 6 – History List
 - [x] T026 [US5] SessionListView with SwiftData query.  

@@ -1,6 +1,7 @@
 @testable import Afterflow
 import Testing
 
+@MainActor
 struct SessionListViewModelTests {
     @Test("Applies treatment filter and sorts newest first") func treatmentFilterAndSort() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 5)
@@ -14,7 +15,7 @@ struct SessionListViewModelTests {
     }
 
     @Test("Sorts by mood change when requested") func sortByMoodChange() async throws {
-        var sessions = SessionFixtureFactory.makeSessions(count: 10)
+        let sessions = SessionFixtureFactory.makeSessions(count: 10)
         sessions[0].moodBefore = 2
         sessions[0].moodAfter = 9
         sessions[1].moodBefore = 7

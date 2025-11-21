@@ -1,6 +1,7 @@
 @testable import Afterflow
 import Testing
 
+@MainActor
 struct MoodRatingScaleTests {
     @Test("Descriptor mapping clamps low values") func descriptorClampsLow() async throws {
         #expect(MoodRatingScale.descriptor(for: 0) == "Tender")

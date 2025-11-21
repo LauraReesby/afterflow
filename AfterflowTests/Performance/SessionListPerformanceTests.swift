@@ -3,6 +3,7 @@ import Foundation
 import SwiftData
 import Testing
 
+@MainActor
 struct SessionListPerformanceTests {
     @Test("View model filters 1k sessions quickly") func listViewModelPerformance() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
