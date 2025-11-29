@@ -6,7 +6,7 @@ _Covers tasks T010, T020, T025, and T030 for Feature 001 – Core Session Loggin
   - `SessionFormValidationUITests` + `SessionFormKeyboardNavigationTests` confirm focus order, keyboard dismissal, and Save-button enablement.  
   - `SessionMoodRatingUITests` (VoiceOver + Dynamic Type XXXL cases) assert the new sliders expose descriptive labels and remain visible at large content sizes.  
 - **Manual audit (Nov 14, 2025)**  
-  - Ran Accessibility Inspector on `SessionFormView` inside the iPhone 16 simulator; verified each field exposes `accessibilityLabel`, hints, and identifiers (`dosageField`, `intentionField`, `moodBeforeSlider`, `moodAfterSlider`).  
+  - Ran Accessibility Inspector on `SessionFormView` inside the iPhone 16 simulator; verified each field exposes `accessibilityLabel`, hints, and identifiers (`intentionField`, `moodBeforeSlider`, `moodAfterSlider`).  
   - VoiceOver rotor announces “Before Session mood rating, adjustable, 5 of 10, Centered” and “After Session…” while swiping; inline validation banners are read as hints.  
 
 ## Performance Profiling
@@ -35,7 +35,7 @@ _Covers tasks T010, T020, T025, and T030 for Feature 001 – Core Session Loggin
   - Editing reflections adds no measurable layout cost (<4 ms frame time).  
   - Simulated persistence failures via the mock view model; non-blocking error banner appears and allows an immediate retry without leaving the screen.
 - **Status / reminders**  
-  - `SessionFormView` confirmation dialog (“In 3 hours / Tomorrow / No thanks”) tested manually + via UI helpers; “No thanks” path covered in UI tests.  
+  - `SessionFormView` confirmation dialog (“In 3 hours / Tomorrow / None”) tested manually + via UI helpers; “None” path covered in UI tests.  
   - Sessions flip to **Needs Reflection** once saved; reflections auto-save while in that state and completing reflections clears reminders + marks sessions **Complete**.
 
 ## Phase 6 – History List QA

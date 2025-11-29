@@ -10,14 +10,6 @@ final class SessionFormValidationUITests: XCTestCase {
         let app = self.makeApp()
         self.presentSessionForm(app)
 
-        let dosageField = app.textFields["dosageField"]
-        XCTAssertTrue(dosageField.waitForExistence(timeout: 2))
-        dosageField.tap()
-        dosageField.typeText("2g")
-        if app.keyboards.buttons["Next"].waitForExistence(timeout: 1) {
-            app.keyboards.buttons["Next"].tap()
-        }
-
         guard let intentionField = app.waitForTextInput("intentionField") else {
             XCTFail("Intention field should exist")
             return

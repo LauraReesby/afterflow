@@ -13,9 +13,8 @@ struct SessionFormView: View {
     // MARK: - Form State
 
     @State private var sessionDate = Date()
-    @State private var selectedTreatmentType = PsychedelicTreatmentType.psilocybin
-    @State private var dosage = ""
-    @State private var selectedAdministration = AdministrationMethod.oral
+    @State private var selectedTreatmentType = PsychedelicTreatmentType.ketamine
+    @State private var selectedAdministration = AdministrationMethod.intravenous
     @State private var intention = ""
     @State private var moodBefore = 5
     @State private var moodAfter = 5
@@ -25,7 +24,6 @@ struct SessionFormView: View {
     @FocusState private var focusedField: FormField?
 
     enum FormField: CaseIterable {
-        case dosage
         case intention
     }
 
@@ -34,7 +32,6 @@ struct SessionFormView: View {
     @State private var validator = FormValidation()
     @State private var intentionValidation: FieldValidationState?
     @State private var dateValidation: FieldValidationState?
-    @State private var dosageValidation: FieldValidationState?
     @State private var validationTask: Task<Void, Never>?
     @State private var draftSaveTask: Task<Void, Never>?
 
@@ -54,7 +51,6 @@ struct SessionFormView: View {
         let formData = SessionFormData(
             sessionDate: sessionDate,
             treatmentType: selectedTreatmentType,
-            dosage: dosage,
             administration: selectedAdministration,
             intention: intention
         )
@@ -114,7 +110,7 @@ struct SessionFormView: View {
                 }
 
                 Section {
-                    Picker("Treatment Type", selection: self.$selectedTreatmentType) {
+                    Picker("Type", selection: self.$selectedTreatmentType) {
                         ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
                             Text(type.displayName).tag(type)
                         }
@@ -123,23 +119,6 @@ struct SessionFormView: View {
                     .onChange(of: self.selectedTreatmentType) { _, _ in
                         self.scheduleDraftSave()
                     }
-
-                    TextField("Dosage (e.g., 3.5g, 100μg)", text: self.$dosage)
-                        .textContentType(.none)
-                        .autocorrectionDisabled()
-                        .focused(self.$focusedField, equals: .dosage)
-                        .submitLabel(.next)
-                        .onSubmit {
-                            self.focusedField = .intention
-                        }
-                        .onChange(of: self.dosage) { _, _ in
-                            self.debounceValidation()
-                            self.scheduleDraftSave()
-                        }
-                        .inlineValidation(self.dosageValidation)
-                        .accessibilityIdentifier("dosageField")
-                        .accessibilityLabel("Dosage")
-                        .accessibilityHint("Enter the amount taken, for example 3.5g or 100μg")
 
                     Picker("Administration", selection: self.$selectedAdministration) {
                         ForEach(AdministrationMethod.allCases, id: \.self) { method in
@@ -200,22 +179,6 @@ struct SessionFormView: View {
                         .foregroundColor(.primary)
                 }
 
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Plan for reflections later")
-                            .font(.headline)
-                        Text(
-                            "Once you save this draft we’ll highlight it as “Needs Reflection” and you can capture environment notes, reflections, and reminders."
-                        )
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    }
-                    .padding(.vertical, 4)
-                } header: {
-                    Text("Later · Needs Reflection")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                }
             }
             .navigationTitle("New Session")
             .navigationBarTitleDisplayMode(.inline)
@@ -223,6 +186,7 @@ struct SessionFormView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         self.dismissKeyboard()
+                        self.sessionStore.clearDraft()
                         self.dismiss()
                     }
                 }
@@ -254,22 +218,21 @@ struct SessionFormView: View {
         ) {
             Button("In 3 hours") { self.handleReminderSelection(.threeHours) }
             Button("Tomorrow") { self.handleReminderSelection(.tomorrow) }
-            Button("No thanks", role: .cancel) { self.handleReminderSelection(.none) }
+            Button("None") { self.handleReminderSelection(.none) }
         }
         .onAppear {
             self.setupInitialState()
-
-            // Auto-focus first text field for better UX
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if self.dosage.isEmpty {
-                    self.focusedField = .dosage
-                } else if self.intention.isEmpty {
+                if self.intention.isEmpty {
                     self.focusedField = .intention
                 }
             }
         }
         .onDisappear {
             self.draftSaveTask?.cancel()
+            if !self.isLoading, self.pendingSessionForReminder == nil {
+                self.sessionStore.clearDraft()
+            }
         }
     }
 
@@ -322,8 +285,6 @@ struct SessionFormView: View {
         // Use normalized date for validation
         let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
         self.dateValidation = self.validator.validateSessionDate(normalizedDate)
-
-        self.dosageValidation = self.validator.validateDosage(self.dosage)
     }
 
     // MARK: - Lifecycle
@@ -331,6 +292,15 @@ struct SessionFormView: View {
     private func setupInitialState() {
         if let draft = self.sessionStore.recoverDraft() {
             self.applyDraft(draft)
+            return
+        }
+
+        if let lastSession = self.sessionStore.sessions.first {
+            self.selectedTreatmentType = lastSession.treatmentType
+            self.selectedAdministration = lastSession.administration
+        } else {
+            self.selectedTreatmentType = .ketamine
+            self.selectedAdministration = .intravenous
         }
 
         // Perform initial validation
@@ -353,7 +323,6 @@ struct SessionFormView: View {
         let formData = SessionFormData(
             sessionDate: normalizedDate,
             treatmentType: selectedTreatmentType,
-            dosage: dosage,
             administration: selectedAdministration,
             intention: intention
         )
@@ -374,7 +343,6 @@ struct SessionFormView: View {
         let newSession = TherapeuticSession(
             sessionDate: normalizedDate,
             treatmentType: selectedTreatmentType,
-            dosage: dosage.trimmingCharacters(in: .whitespacesAndNewlines),
             administration: self.selectedAdministration,
             intention: self.intention.trimmingCharacters(in: .whitespacesAndNewlines),
             moodBefore: self.moodBefore,
@@ -405,7 +373,6 @@ struct SessionFormView: View {
     private func applyDraft(_ draft: TherapeuticSession) {
         self.sessionDate = draft.sessionDate
         self.selectedTreatmentType = draft.treatmentType
-        self.dosage = draft.dosage
         self.selectedAdministration = draft.administration
         self.intention = draft.intention
         self.moodBefore = draft.moodBefore
@@ -427,7 +394,6 @@ struct SessionFormView: View {
         return TherapeuticSession(
             sessionDate: normalizedDate,
             treatmentType: self.selectedTreatmentType,
-            dosage: self.dosage,
             administration: self.selectedAdministration,
             intention: self.intention,
             moodBefore: self.moodBefore,

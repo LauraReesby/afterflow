@@ -14,7 +14,6 @@ final class SessionDetailViewModel {
     private let persistence: SessionReflectionPersisting
 
     var reflectionText: String
-    var dosage: String
     var administration: AdministrationMethod
     var environmentNotes: String
     var musicNotes: String
@@ -28,7 +27,6 @@ final class SessionDetailViewModel {
         self.session = session
         self.persistence = persistence
         self.reflectionText = session.reflections
-        self.dosage = session.dosage
         self.administration = session.administration
         self.environmentNotes = session.environmentNotes
         self.musicNotes = session.musicNotes
@@ -39,7 +37,6 @@ final class SessionDetailViewModel {
     var hasChanges: Bool {
         let trimmedReflection = self.reflectionText.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedReflection != self.session.reflections ||
-            self.dosage != self.session.dosage ||
             self.administration != self.session.administration ||
             self.environmentNotes != self.session.environmentNotes ||
             self.musicNotes != self.session.musicNotes ||
@@ -55,7 +52,6 @@ final class SessionDetailViewModel {
 
         let trimmed = self.reflectionText.trimmingCharacters(in: .whitespacesAndNewlines)
         self.session.reflections = trimmed
-        self.session.dosage = self.dosage
         self.session.administration = self.administration
         self.session.environmentNotes = self.environmentNotes
         self.session.musicNotes = self.musicNotes

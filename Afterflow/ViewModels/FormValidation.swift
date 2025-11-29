@@ -1,7 +1,6 @@
 //  Constitutional Compliance: Privacy-First, SwiftUI Native, Therapeutic Value-First
 
 import Foundation
-import SwiftData
 
 /// Represents whether a particular form field passes validation.
 struct FieldValidationState {
@@ -15,7 +14,6 @@ struct FieldValidationState {
 struct SessionFormData {
     let sessionDate: Date
     let treatmentType: PsychedelicTreatmentType
-    let dosage: String
     let administration: AdministrationMethod
     let intention: String
 }
@@ -104,27 +102,9 @@ struct FormValidation {
         return "Time adjusted to \(normalizedTimeString) for easier session tracking"
     }
 
-    /// Validate dosage field (optional but with length limits)
-    func validateDosage(_ dosage: String) -> FieldValidationState {
-        let trimmed = dosage.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Empty is valid (optional field)
-        if trimmed.isEmpty {
-            return .valid
-        }
-
-        // Check for extremely long entries
-        if trimmed.count > 100 {
-            return .invalid
-        }
-
-        return .valid
-    }
-
     /// Validate complete form data
     func validateForm(_ formData: SessionFormData) -> Bool {
         self.validateIntention(formData.intention).isValid &&
-            self.validateSessionDate(formData.sessionDate).isValid &&
-            self.validateDosage(formData.dosage).isValid
+            self.validateSessionDate(formData.sessionDate).isValid
     }
 }

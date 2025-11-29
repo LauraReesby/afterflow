@@ -13,7 +13,6 @@ struct TherapeuticSessionTests {
         #expect(session.id != UUID()) // Should have a unique ID
         #expect(session.treatmentType == .psilocybin) // Default value
         #expect(session.administration == .oral) // Default value
-        #expect(session.dosage == "")
         #expect(session.intention == "")
         #expect(session.environmentNotes == "")
         #expect(session.musicNotes == "")
@@ -40,7 +39,6 @@ struct TherapeuticSessionTests {
         let session = TherapeuticSession(
             sessionDate: customDate,
             treatmentType: .psilocybin,
-            dosage: "3.5g dried",
             administration: .oral,
             intention: "Healing trauma",
             environmentNotes: "Peaceful garden",
@@ -54,7 +52,6 @@ struct TherapeuticSessionTests {
         #expect(session.sessionDate == customDate)
         #expect(session.treatmentType == .psilocybin)
         #expect(session.administration == .oral)
-        #expect(session.dosage == "3.5g dried")
         #expect(session.intention == "Healing trauma")
         #expect(session.environmentNotes == "Peaceful garden")
         #expect(session.musicNotes == "Nature sounds")
@@ -110,7 +107,6 @@ struct TherapeuticSessionTests {
     @Test("Valid session validation") func validSessionValidation() async throws {
         let validSession = TherapeuticSession(
             treatmentType: .psilocybin,
-            dosage: "3.5g",
             administration: .oral,
             intention: "Connect with inner wisdom",
             moodBefore: 5,
@@ -213,7 +209,6 @@ struct TherapeuticSessionTests {
         let longText = String(repeating: "A", count: 1000)
         let session = TherapeuticSession(
             treatmentType: .psilocybin, // Use valid psychedelic
-            dosage: "3.5g",
             administration: .oral,
             intention: longText,
             environmentNotes: longText,
@@ -233,7 +228,6 @@ struct TherapeuticSessionTests {
     @Test("Unicode and special characters") func unicodeSupport() async throws {
         let session = TherapeuticSession(
             treatmentType: .mdma,
-            dosage: "120mg",
             administration: .oral,
             intention: "Найти покой и мудрость 🕉️",
             environmentNotes: "Beautiful zen garden with 🌸 sakura trees",

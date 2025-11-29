@@ -76,7 +76,7 @@ extension View {
                     .inlineValidation(.valid)
 
                 // Direct error view
-                ValidationErrorView(message: "Please keep dosage brief for easier tracking")
+                ValidationErrorView(message: "Please provide more context before saving")
             }
             .padding()
             .preferredColorScheme(.light)

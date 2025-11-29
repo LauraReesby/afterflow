@@ -137,7 +137,6 @@ extension SessionStore: SessionReflectionPersisting {
 private struct SessionDraft: Codable {
     let sessionDate: Date
     let treatmentType: String
-    let dosage: String
     let administration: String
     let intention: String
     let environmentNotes: String
@@ -153,7 +152,6 @@ private struct SessionDraft: Codable {
     init(session: TherapeuticSession) {
         self.sessionDate = session.sessionDate
         self.treatmentType = session.treatmentTypeRawValue
-        self.dosage = session.dosage
         self.administration = session.administrationRawValue
         self.intention = session.intention
         self.environmentNotes = session.environmentNotes
@@ -171,7 +169,6 @@ private struct SessionDraft: Codable {
         let session = TherapeuticSession(
             sessionDate: sessionDate,
             treatmentType: PsychedelicTreatmentType(rawValue: treatmentType) ?? .psilocybin,
-            dosage: dosage,
             administration: AdministrationMethod(rawValue: administration) ?? .oral,
             intention: intention,
             environmentNotes: environmentNotes,

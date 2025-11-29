@@ -54,7 +54,7 @@ struct ContentView: View {
                     .accessibilityLabel("Add Session")
                 }
             }
-            .navigationTitle("Afterflow Sessions")
+            .navigationTitle("Sessions")
             .searchable(
                 text: self.$listViewModel.searchText,
                 placement: .toolbar,
@@ -98,7 +98,7 @@ struct ContentView: View {
                 }
             }
 
-            Menu("Treatment Type") {
+            Menu("Type") {
                 Button("All Treatments") {
                     self.listViewModel.treatmentFilter = nil
                 }

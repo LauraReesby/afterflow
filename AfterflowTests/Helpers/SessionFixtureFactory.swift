@@ -13,7 +13,6 @@ enum SessionFixtureFactory {
             let session = TherapeuticSession(
                 sessionDate: date,
                 treatmentType: treatment,
-                dosage: "\(index % 5 + 1)g",
                 administration: .oral,
                 intention: "Fixture Session \(index)",
                 environmentNotes: "Fixture environment \(index)",

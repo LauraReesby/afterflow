@@ -10,7 +10,11 @@ struct SessionDetailView: View {
     let session: TherapeuticSession
 
     @State private var viewModel: SessionDetailViewModel?
-    @FocusState private var editorFocused: Bool
+    @FocusState private var editorFocused: FormField?
+
+    enum FormField: Hashable {
+        case reflection
+    }
 
     init(session: TherapeuticSession) {
         self.session = session
@@ -18,12 +22,97 @@ struct SessionDetailView: View {
 
     var body: some View {
         Form {
-            self.overviewSection
+            Section {
+                HStack {
+                    Text("Time")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text(self.session.sessionDate.formatted(date: .omitted, time: .shortened))
+                        .foregroundColor(.secondary)
+                }
 
-            self.editableDetailsSection
-            self.reflectionSection
+                HStack {
+                    Text("Type")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text(self.session.treatmentType.displayName)
+                        .foregroundColor(.secondary)
+                }
+            } header: {
+                Text("Session context")
+            }
+
+            Section {
+                Picker("Administration", selection: Binding(
+                    get: { self.viewModel?.administration ?? .oral },
+                    set: { self.viewModel?.administration = $0 }
+                )) {
+                    ForEach(AdministrationMethod.allCases, id: \.self) { method in
+                        Text(method.displayName).tag(method)
+                    }
+                }
+
+                TextField("Environment", text: Binding(
+                    get: { self.viewModel?.environmentNotes ?? "" },
+                    set: { self.viewModel?.environmentNotes = $0 }
+                ), axis: .vertical)
+
+                TextField("Music", text: Binding(
+                    get: { self.viewModel?.musicNotes ?? "" },
+                    set: { self.viewModel?.musicNotes = $0 }
+                ), axis: .vertical)
+
+                MoodRatingView(
+                    value: Binding(
+                        get: { self.viewModel?.moodBefore ?? self.session.moodBefore },
+                        set: { self.viewModel?.moodBefore = $0 }
+                    ),
+                    title: "Before Session",
+                    accessibilityIdentifier: "detailMoodBefore"
+                )
+
+                MoodRatingView(
+                    value: Binding(
+                        get: { self.viewModel?.moodAfter ?? self.session.moodAfter },
+                        set: { self.viewModel?.moodAfter = $0 }
+                    ),
+                    title: "After Session",
+                    accessibilityIdentifier: "detailMoodAfter"
+                )
+            } header: {
+                Text("Session details")
+            }
+
+            Section("Intention") {
+                TextField(
+                    "Intention",
+                    text: .constant(self.session.intention),
+                    axis: .vertical
+                )
+                .disabled(true)
+            }
+
+            Section("Reflections") {
+                TextEditor(text: Binding(
+                    get: { self.viewModel?.reflectionText ?? "" },
+                    set: { self.viewModel?.reflectionText = $0 }
+                ))
+                .frame(minHeight: 160)
+                .focused(self.$editorFocused, equals: .reflection)
+                .accessibilityIdentifier("reflectionEditor")
+
+                if let errorMessage = self.viewModel?.errorMessage {
+                    ValidationErrorView(message: errorMessage)
+                        .padding(.top, 4)
+                        .accessibilityIdentifier("reflectionErrorBanner")
+                }
+            }
         }
-        .navigationTitle("Session Details")
+        .navigationTitle(
+            self.session.sessionDate.formatted(date: .abbreviated, time: .omitted)
+        )
         .navigationBarTitleDisplayMode(.inline)
         .scrollContentBackground(.visible)
         .scrollDismissesKeyboard(.immediately)
@@ -39,136 +128,11 @@ struct SessionDetailView: View {
         .onAppear {
             self.prepareViewModelIfNeeded()
         }
-        .onChange(of: self.session.reflections) { _, newValue in
-            self.viewModel?.reflectionText = newValue
-        }
-    }
-
-    private var overviewSection: some View {
-        Section("Session Overview") {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(self.session.displayTitle)
-                    .font(.headline)
-                Text(self.session.intention)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-
-            HStack {
-                Label("Treatment", systemImage: "leaf")
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(self.session.treatmentType.displayName)
-                    .bold()
-            }
-
-            HStack {
-                Label("Mood Shift", systemImage: "smiley")
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("\(self.session.moodBefore) → \(self.session.moodAfter)")
-                    .bold()
-            }
-        }
-    }
-
-    private var editableDetailsSection: some View {
-        Section("Details") {
-            TextField("Dosage", text: Binding(
-                get: { self.viewModel?.dosage ?? "" },
-                set: { self.viewModel?.dosage = $0 }
-            ))
-            .textContentType(.none)
-            .autocorrectionDisabled()
-
-            Picker("Administration", selection: Binding(
-                get: { self.viewModel?.administration ?? .oral },
-                set: { self.viewModel?.administration = $0 }
-            )) {
-                ForEach(AdministrationMethod.allCases, id: \.self) { method in
-                    Text(method.displayName).tag(method)
-                }
-            }
-
-            TextField("Environment notes", text: Binding(
-                get: { self.viewModel?.environmentNotes ?? "" },
-                set: { self.viewModel?.environmentNotes = $0 }
-            ), axis: .vertical)
-                .lineLimit(1 ... 3)
-
-            TextField("Music notes", text: Binding(
-                get: { self.viewModel?.musicNotes ?? "" },
-                set: { self.viewModel?.musicNotes = $0 }
-            ), axis: .vertical)
-                .lineLimit(1 ... 3)
-
-            MoodRatingView(value: Binding(
-                get: { self.viewModel?.moodBefore ?? 5 },
-                set: { self.viewModel?.moodBefore = $0 }
-            ), title: "Before Session", accessibilityIdentifier: "detailMoodBefore")
-
-            MoodRatingView(value: Binding(
-                get: { self.viewModel?.moodAfter ?? 5 },
-                set: { self.viewModel?.moodAfter = $0 }
-            ), title: "After Session", accessibilityIdentifier: "detailMoodAfter")
-        }
-    }
-
-    private var reflectionSection: some View {
-        Section("Reflections") {
-            ZStack(alignment: .topLeading) {
-                TextEditor(text: self.reflectionBinding)
-                    .frame(minHeight: 160)
-                    .padding(.top, 8)
-                    .accessibilityIdentifier("reflectionEditor")
-                    .focused(self.$editorFocused)
-
-                if self.reflectionBinding.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text("Share insights, integration notes, or anything your future self may need.")
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 14)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                }
-            }
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(Color.secondary.opacity(0.1))
-            )
-
-            if let errorMessage = self.viewModel?.errorMessage {
-                ValidationErrorView(message: errorMessage)
-                    .padding(.top, 4)
-                    .accessibilityIdentifier("reflectionErrorBanner")
-            }
-
-            if self.viewModel?.showSuccessMessage == true {
-                Label("Reflection saved", systemImage: "checkmark.circle.fill")
-                    .font(.caption)
-                    .foregroundColor(.green)
-                    .padding(.top, 4)
-                    .accessibilityIdentifier("reflectionSuccessBanner")
-            }
-        }
-    }
-
-    private var reflectionBinding: Binding<String> {
-        Binding<String>(
-            get: { self.viewModel?.reflectionText ?? "" },
-            set: { newValue in self.viewModel?.reflectionText = newValue }
-        )
     }
 
     private func saveReflection() {
         guard let viewModel = self.viewModel else { return }
         viewModel.saveReflection()
-
-        if viewModel.showSuccessMessage {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                viewModel.dismissSuccessMessage()
-            }
-        }
     }
 
     private func prepareViewModelIfNeeded() {

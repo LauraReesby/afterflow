@@ -110,31 +110,6 @@ struct FormValidationTests {
         #expect(message == nil)
     }
 
-    @Test("Empty dosage passes validation (optional field)") func emptyDosageValidation() async throws {
-        let validation = FormValidation()
-
-        let result = validation.validateDosage("")
-
-        #expect(result.isValid == true)
-    }
-
-    @Test("Valid dosage passes validation") func validDosageValidation() async throws {
-        let validation = FormValidation()
-
-        let result = validation.validateDosage("3.5g")
-
-        #expect(result.isValid == true)
-    }
-
-    @Test("Extremely long dosage shows gentle guidance") func longDosageValidation() async throws {
-        let validation = FormValidation()
-        let longDosage = String(repeating: "very long dosage description ", count: 10)
-
-        let result = validation.validateDosage(longDosage)
-
-        #expect(result.isValid == false)
-    }
-
     // MARK: - Form Data Tests
 
     @Test("Valid complete form passes validation") func completeFormValidation() async throws {
@@ -143,7 +118,6 @@ struct FormValidationTests {
         let formData = SessionFormData(
             sessionDate: Date(),
             treatmentType: .psilocybin,
-            dosage: "3.5g",
             administration: .oral,
             intention: "Connect with inner wisdom"
         )

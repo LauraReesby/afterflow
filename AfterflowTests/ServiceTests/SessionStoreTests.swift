@@ -24,7 +24,6 @@ struct SessionStoreTests {
         let draft = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
-            dosage: "2g",
             administration: .oral,
             intention: "Draft intention",
             moodBefore: 6,
@@ -34,7 +33,6 @@ struct SessionStoreTests {
         store.saveDraft(draft)
         let recovered = store.recoverDraft()
         #expect(recovered?.intention == "Draft intention")
-        #expect(recovered?.dosage == "2g")
 
         store.clearDraft()
         #expect(store.recoverDraft() == nil)

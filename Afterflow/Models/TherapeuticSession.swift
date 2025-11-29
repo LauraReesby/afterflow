@@ -61,9 +61,6 @@ final class TherapeuticSession {
         }
     }
 
-    /// Dosage information as a free-form string (e.g., "3.5g dried", "100μg", "50mg")
-    var dosage: String
-
     /// Administration method (stored as String)
     var administrationRawValue: String
 
@@ -126,7 +123,6 @@ final class TherapeuticSession {
     init(
         sessionDate: Date = Date(),
         treatmentType: PsychedelicTreatmentType = .psilocybin,
-        dosage: String = "",
         administration: AdministrationMethod = .oral,
         intention: String = "",
         environmentNotes: String = "",
@@ -139,7 +135,6 @@ final class TherapeuticSession {
         self.id = UUID()
         self.sessionDate = sessionDate
         self.treatmentTypeRawValue = treatmentType.rawValue
-        self.dosage = dosage
         self.administrationRawValue = administration.rawValue
         self.intention = intention
         self.environmentNotes = environmentNotes

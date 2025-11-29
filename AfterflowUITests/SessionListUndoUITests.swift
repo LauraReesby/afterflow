@@ -36,14 +36,6 @@ final class SessionListUndoUITests: XCTestCase {
         XCTAssertTrue(addSessionButton.waitForExistence(timeout: 5))
         addSessionButton.tap()
 
-        let dosageField = app.textFields["dosageField"]
-        XCTAssertTrue(dosageField.waitForExistence(timeout: 3))
-        dosageField.tap()
-        dosageField.typeText("1g")
-        if app.keyboards.buttons["Next"].waitForExistence(timeout: 1) {
-            app.keyboards.buttons["Next"].tap()
-        }
-
         guard let intentionField = app.waitForTextInput("intentionField") else {
             XCTFail("Intention field should exist")
             return
@@ -53,8 +45,8 @@ final class SessionListUndoUITests: XCTestCase {
         intentionField.typeText(intention)
 
         app.navigationBars["New Session"].buttons["Save"].tap()
-        if app.buttons["No thanks"].waitForExistence(timeout: 1) {
-            app.buttons["No thanks"].tap()
+        if app.buttons["None"].waitForExistence(timeout: 1) {
+            app.buttons["None"].tap()
         }
         XCTAssertFalse(app.navigationBars["New Session"].waitForExistence(timeout: 2))
         if app.buttons["Close"].waitForExistence(timeout: 1) {

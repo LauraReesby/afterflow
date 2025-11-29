@@ -13,7 +13,7 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 - **🌐 Offline-First**: Core functionality works without internet connection
 - **🎵 Spotify Integration**: Optional playlist linking (planned) for music context
 - **📊 Mood Tracking**: Before and after session mood ratings with visual feedback
-- **📝 Comprehensive Logging**: Capture treatment type, dosage, environment, intentions, and reflections (editable later in Session Detail)
+- **📝 Comprehensive Logging**: Capture treatment type, environment, intentions, and reflections (editable later in Session Detail)
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
 - **📚 History Filters + Undo**: Sort/search the session list, filter by treatment type, and undo deletes for up to 10 seconds
 - **⏰ Reflection Reminders**: Optional reminders to add post session mood and reflections
