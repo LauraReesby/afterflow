@@ -9,7 +9,7 @@ struct SpotifyTokens: Codable, Equatable {
     let expirationDate: Date
 
     var isExpired: Bool {
-        Date() >= expirationDate
+        Date() >= self.expirationDate
     }
 }
 
@@ -27,9 +27,9 @@ final class SpotifyAuthManager: NSObject {
     private let secureStore: SecureStore
     private let tokenKey = "spotify_tokens"
 
-    init(configuration: Configuration, secureStore: SecureStore = SecureStore()) {
+    init(configuration: Configuration, secureStore: SecureStore? = nil) {
         self.configuration = configuration
-        self.secureStore = secureStore
+        self.secureStore = secureStore ?? SecureStore()
     }
 
     // MARK: - PKCE
@@ -69,9 +69,9 @@ final class SpotifyAuthManager: NSObject {
         var components = URLComponents(url: configuration.authorizeURL, resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "client_id", value: configuration.clientID),
-            URLQueryItem(name: "scope", value: configuration.scopes.joined(separator: " ")),
-            URLQueryItem(name: "redirect_uri", value: configuration.redirectURI),
+            URLQueryItem(name: "client_id", value: self.configuration.clientID),
+            URLQueryItem(name: "scope", value: self.configuration.scopes.joined(separator: " ")),
+            URLQueryItem(name: "redirect_uri", value: self.configuration.redirectURI),
             URLQueryItem(name: "code_challenge_method", value: "S256"),
             URLQueryItem(name: "code_challenge", value: pkce.challenge),
             URLQueryItem(name: "state", value: state)
@@ -90,7 +90,7 @@ final class SpotifyAuthManager: NSObject {
             "grant_type=authorization_code",
             "code=\(code)",
             "redirect_uri=\(configuration.redirectURI)",
-            "client_id=\(configuration.clientID)",
+            "client_id=\(self.configuration.clientID)",
             "code_verifier=\(pkce.verifier)"
         ].joined(separator: "&")
         request.httpBody = body.data(using: .utf8)
@@ -106,7 +106,7 @@ final class SpotifyAuthManager: NSObject {
             refreshToken: tokenResponse.refreshToken,
             expirationDate: Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn))
         )
-        try saveTokens(tokens)
+        try self.saveTokens(tokens)
         return tokens
     }
 
@@ -114,7 +114,7 @@ final class SpotifyAuthManager: NSObject {
         if let tokens = try loadTokens(), !tokens.isExpired {
             return tokens
         }
-        return try await refreshTokens()
+        return try await self.refreshTokens()
     }
 
     private func refreshTokens() async throws -> SpotifyTokens {
@@ -127,7 +127,7 @@ final class SpotifyAuthManager: NSObject {
         let body = [
             "grant_type=refresh_token",
             "refresh_token=\(stored.refreshToken)",
-            "client_id=\(configuration.clientID)"
+            "client_id=\(self.configuration.clientID)"
         ].joined(separator: "&")
         request.httpBody = body.data(using: .utf8)
 
@@ -142,12 +142,12 @@ final class SpotifyAuthManager: NSObject {
             refreshToken: tokenResponse.refreshToken.isEmpty ? stored.refreshToken : tokenResponse.refreshToken,
             expirationDate: Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn))
         )
-        try saveTokens(tokens)
+        try self.saveTokens(tokens)
         return tokens
     }
 
     func disconnect() throws {
-        try secureStore.remove(key: tokenKey)
+        try self.secureStore.remove(key: self.tokenKey)
     }
 
     func loadTokens() throws -> SpotifyTokens? {
@@ -157,7 +157,7 @@ final class SpotifyAuthManager: NSObject {
 
     private func saveTokens(_ tokens: SpotifyTokens) throws {
         let data = try JSONEncoder().encode(tokens)
-        try secureStore.set(data, for: tokenKey)
+        try self.secureStore.set(data, for: self.tokenKey)
     }
 }
 
@@ -166,7 +166,8 @@ extension SpotifyAuthManager: ASWebAuthenticationPresentationContextProviding {
         guard let scene = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene })
             .first(where: { $0.activationState == .foregroundActive }),
-              let window = scene.windows.first(where: { $0.isKeyWindow }) else {
+            let window = scene.windows.first(where: { $0.isKeyWindow })
+        else {
             return ASPresentationAnchor()
         }
         return window

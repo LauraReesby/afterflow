@@ -9,10 +9,10 @@
 - [x] T206 [US1] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 
 ## Phase 2 – Playlist Metadata Fetch
-- [ ] T207 [US2] Create SpotifyService to call Web API (playlist-read-private).  
-- [ ] T208 [US2] Parse playlist metadata: name, image, duration.  
-- [ ] T209 [US2] Mock API + offline fallback.  
-- [ ] T210 [US2] Unit tests for SpotifyService + offline cases.  
+- [x] T207 [US2] Create SpotifyService to call Web API (playlist-read-private).  
+- [x] T208 [US2] Parse playlist metadata: name, image, duration/track count.  
+- [x] T209 [US2] Mock API + offline fallback.  
+- [x] T210 [US2] Unit tests for SpotifyService + offline cases.  
 - [ ] T211 [US2] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
 
 ## Phase 3 – UI Flow

@@ -158,7 +158,15 @@ struct ContentView: View {
 }
 
 #Preview {
-    let container = try! ModelContainer(for: TherapeuticSession.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+    let container: ModelContainer
+    do {
+        container = try ModelContainer(
+            for: TherapeuticSession.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    } catch {
+        fatalError("Failed to create preview container: \(error)")
+    }
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
     return ContentView()
         .modelContainer(container)

@@ -15,7 +15,7 @@ struct ReminderSchedulerTests {
         await scheduler.setReminder(for: session, option: .threeHours, now: now)
         #expect(mockCenter.addedRequests.count == 1)
         #expect(mockCenter.addedRequests.first?.identifier == "reminder_\(session.id.uuidString)")
-        #expect(session.reminderDate == now.addingTimeInterval(10_800))
+        #expect(session.reminderDate == now.addingTimeInterval(10800))
     }
 
     @Test("Scheduler cancels request when reminder removed") func cancelReminderRemovesRequest() {

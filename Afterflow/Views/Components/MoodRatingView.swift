@@ -43,7 +43,7 @@ struct MoodRatingView: View {
                 in: 1 ... 10,
                 step: 1
             )
-            .tint(.purple)
+            .tint(Color("AccentColor"))
             .accessibilityLabel("\(self.title) mood rating")
             .accessibilityValue("\(self.value) of 10, \(self.descriptor)")
             .accessibilityAdjustableAction { direction in

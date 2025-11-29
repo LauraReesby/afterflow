@@ -8,11 +8,11 @@ struct SecureStoreTests {
 
     @Test("SecureStore set/get/remove roundtrip") func roundTrip() async throws {
         let key = "token"
-        let payload = "hello".data(using: .utf8)!
-        try store.set(payload, for: key)
-        let stored = try #require(store.data(for: key))
+        let payload = Data("hello".utf8)
+        try self.store.set(payload, for: key)
+        let stored = try #require(try self.store.data(for: key))
         #expect(stored == payload)
-        try store.remove(key: key)
+        try self.store.remove(key: key)
         let missing = try store.data(for: key)
         #expect(missing == nil)
     }

@@ -38,27 +38,27 @@ final class SessionStore {
     }
 
     func create(_ session: TherapeuticSession) throws {
-        modelContext.insert(session)
-        try saveAndRefresh()
+        self.modelContext.insert(session)
+        try self.saveAndRefresh()
         Task { await self.scheduleReminderIfNeeded(for: session) }
     }
 
     func update(_ session: TherapeuticSession) throws {
         session.markAsUpdated()
-        try saveAndRefresh()
+        try self.saveAndRefresh()
         Task { await self.scheduleReminderIfNeeded(for: session) }
     }
 
     func delete(_ session: TherapeuticSession) throws {
-        reminderScheduler.cancelReminder(for: session)
-        modelContext.delete(session)
-        try saveAndRefresh()
+        self.reminderScheduler.cancelReminder(for: session)
+        self.modelContext.delete(session)
+        try self.saveAndRefresh()
     }
 
     func setReminder(for session: TherapeuticSession, option: ReminderOption) async throws {
-        await reminderScheduler.setReminder(for: session, option: option)
-        if modelContext.hasChanges {
-            try modelContext.save()
+        await self.reminderScheduler.setReminder(for: session, option: option)
+        if self.modelContext.hasChanges {
+            try self.modelContext.save()
         }
         self.reload()
     }
@@ -66,8 +66,8 @@ final class SessionStore {
     // MARK: - Helpers
 
     private func saveAndRefresh() throws {
-        if modelContext.hasChanges {
-            try modelContext.save()
+        if self.modelContext.hasChanges {
+            try self.modelContext.save()
         }
         self.reload()
     }
@@ -76,10 +76,10 @@ final class SessionStore {
         switch session.status {
         case .needsReflection:
             if session.reminderDate == nil {
-                reminderScheduler.cancelReminder(for: session)
+                self.reminderScheduler.cancelReminder(for: session)
             }
         case .draft, .complete:
-            reminderScheduler.cancelReminder(for: session)
+            self.reminderScheduler.cancelReminder(for: session)
         }
     }
 
@@ -89,8 +89,8 @@ final class SessionStore {
         do {
             let draft = SessionDraft(session: session)
             let data = try JSONEncoder().encode(draft)
-            draftDefaults.set(data, forKey: draftPayloadKey)
-            draftDefaults.set(Date(), forKey: draftTimestampKey)
+            self.draftDefaults.set(data, forKey: self.draftPayloadKey)
+            self.draftDefaults.set(Date(), forKey: self.draftTimestampKey)
         } catch {
             print("Failed to save draft: \(error.localizedDescription)")
         }
@@ -105,7 +105,7 @@ final class SessionStore {
         // Only keep drafts for 24 hours
         let hoursSinceSave = Date().timeIntervalSince(timestamp) / 3600
         guard hoursSinceSave < 24 else {
-            clearDraft()
+            self.clearDraft()
             return nil
         }
 
@@ -114,14 +114,14 @@ final class SessionStore {
             return draft.makeSession()
         } catch {
             print("Failed to recover draft: \(error.localizedDescription)")
-            clearDraft()
+            self.clearDraft()
             return nil
         }
     }
 
     func clearDraft() {
-        draftDefaults.removeObject(forKey: draftPayloadKey)
-        draftDefaults.removeObject(forKey: draftTimestampKey)
+        self.draftDefaults.removeObject(forKey: self.draftPayloadKey)
+        self.draftDefaults.removeObject(forKey: self.draftTimestampKey)
     }
 }
 
@@ -178,9 +178,9 @@ private struct SessionDraft: Codable {
             reflections: reflections,
             reminderDate: reminderDate
         )
-        session.spotifyPlaylistURI = spotifyPlaylistURI
-        session.spotifyPlaylistName = spotifyPlaylistName
-        session.spotifyPlaylistImageURL = spotifyPlaylistImageURL
+        session.spotifyPlaylistURI = self.spotifyPlaylistURI
+        session.spotifyPlaylistName = self.spotifyPlaylistName
+        session.spotifyPlaylistImageURL = self.spotifyPlaylistImageURL
         return session
     }
 }

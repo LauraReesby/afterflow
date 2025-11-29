@@ -142,7 +142,15 @@ struct SessionDetailView: View {
 }
 
 #Preview {
-    let container = try! ModelContainer(for: TherapeuticSession.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+    let container: ModelContainer
+    do {
+        container = try ModelContainer(
+            for: TherapeuticSession.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    } catch {
+        fatalError("Failed to create preview container: \(error)")
+    }
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
     let previewSession = TherapeuticSession(
         treatmentType: .psilocybin,
@@ -151,7 +159,11 @@ struct SessionDetailView: View {
         moodAfter: 8,
         reflections: "Felt a deeper sense of clarity around recurring patterns."
     )
-    try! store.create(previewSession)
+    do {
+        try store.create(previewSession)
+    } catch {
+        fatalError("Failed to insert preview session: \(error)")
+    }
     return SessionDetailView(session: previewSession)
         .modelContainer(container)
         .environment(store)

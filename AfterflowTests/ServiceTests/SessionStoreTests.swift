@@ -6,8 +6,7 @@ import UserNotifications
 
 @MainActor
 struct SessionStoreTests {
-    @Test("Create and delete go through store and refresh list")
-    func createAndDelete() async throws {
+    @Test("Create and delete go through store and refresh list") func createAndDelete() async throws {
         let (store, _) = try makeStore()
         let session = TherapeuticSession(intention: "Test", moodBefore: 5)
 
@@ -18,8 +17,7 @@ struct SessionStoreTests {
         #expect(store.sessions.isEmpty)
     }
 
-    @Test("Draft save, recover, and clear")
-    func draftLifecycle() async throws {
+    @Test("Draft save, recover, and clear") func draftLifecycle() async throws {
         let (store, _) = try makeStore()
         let draft = TherapeuticSession(
             sessionDate: Date(),
@@ -73,7 +71,7 @@ private final class MockNotificationCenter: NotificationCentering {
     var canceledIdentifiers: [String] = []
     var authorizationStatus: UNAuthorizationStatus = .authorized
 
-    func authorizationStatus() async -> UNAuthorizationStatus { authorizationStatus }
+    func authorizationStatus() async -> UNAuthorizationStatus { self.authorizationStatus }
 
     func add(_ request: UNNotificationRequest) async throws {
         self.addedRequests.append(request)

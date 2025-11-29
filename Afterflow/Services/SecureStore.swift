@@ -16,7 +16,7 @@ struct SecureStore {
     func set(_ data: Data, for key: String) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
+            kSecAttrService as String: self.service,
             kSecAttrAccount as String: key,
             kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
@@ -42,7 +42,7 @@ struct SecureStore {
     func data(for key: String) throws -> Data? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
+            kSecAttrService as String: self.service,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
@@ -63,7 +63,7 @@ struct SecureStore {
     func remove(key: String) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
+            kSecAttrService as String: self.service,
             kSecAttrAccount as String: key
         ]
 

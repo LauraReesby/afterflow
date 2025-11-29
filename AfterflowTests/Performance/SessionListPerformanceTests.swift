@@ -31,7 +31,10 @@ struct SessionListPerformanceTests {
 
         var fetched: [TherapeuticSession] = []
         let duration = measureTime {
-            let descriptor = FetchDescriptor<TherapeuticSession>(sortBy: [SortDescriptor(\.sessionDate, order: .reverse)])
+            let descriptor = FetchDescriptor<TherapeuticSession>(sortBy: [SortDescriptor(
+                \.sessionDate,
+                order: .reverse
+            )])
             fetched = (try? context.fetch(descriptor)) ?? []
         }
 

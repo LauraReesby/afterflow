@@ -181,7 +181,7 @@ extension TherapeuticSession {
     /// Derived lifecycle status based on required fields and reflections
     var status: SessionLifecycleStatus {
         let hasCoreFields = !self.intention.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-            (1...10).contains(self.moodBefore)
+            (1 ... 10).contains(self.moodBefore)
         guard hasCoreFields else { return .draft }
 
         let hasReflections = !self.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

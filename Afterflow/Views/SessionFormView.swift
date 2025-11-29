@@ -178,7 +178,6 @@ struct SessionFormView: View {
                         .font(.headline)
                         .foregroundColor(.primary)
                 }
-
             }
             .navigationTitle("New Session")
             .navigationBarTitleDisplayMode(.inline)
@@ -421,7 +420,15 @@ struct SessionFormView: View {
 }
 
 #Preview {
-    let container = try! ModelContainer(for: TherapeuticSession.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+    let container: ModelContainer
+    do {
+        container = try ModelContainer(
+            for: TherapeuticSession.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    } catch {
+        fatalError("Failed to create preview container: \(error)")
+    }
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
     return SessionFormView()
         .modelContainer(container)
