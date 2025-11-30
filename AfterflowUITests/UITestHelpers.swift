@@ -8,40 +8,42 @@ extension XCTestCase {
         app.launchArguments = launchArguments
         return app
     }
-
-    func waitForKeyboardDismissal(in app: XCUIApplication) {
-        let keyboard = app.keyboards.firstMatch
-        guard keyboard.exists else { return }
-        _ = keyboard.waitForExistence(timeout: 1)
-        keyboard.swipeDown()
-    }
 }
 
 extension XCUIApplication {
     func waitForTextInput(_ identifier: String, timeout: TimeInterval = 5) -> XCUIElement? {
         let deadline = Date().addingTimeInterval(timeout)
-        let field = self.textFields[identifier]
-        let textView = self.textViews[identifier]
-        let container = self.primaryScrollableContainer
+
+        func locateElement() -> XCUIElement? {
+            let match = self.descendants(matching: .any).matching(identifier: identifier).firstMatch
+            return match.exists ? match : nil
+        }
 
         while Date() < deadline {
-            if field.exists { return field }
-            if textView.exists { return textView }
-            if let container {
+            if let element = locateElement() {
+                if !element.isHittable {
+                    for container in self.scrollContainers {
+                        container.scrollTo(element: element)
+                        if element.isHittable { break }
+                    }
+                }
+                return element
+            }
+
+            for container in self.scrollContainers {
                 container.swipeUp()
-                RunLoop.current.run(until: Date().addingTimeInterval(0.1))
-            } else {
-                RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+                RunLoop.current.run(until: Date().addingTimeInterval(0.05))
             }
         }
         return nil
     }
 
-    private var primaryScrollableContainer: XCUIElement? {
-        if self.collectionViews.firstMatch.exists { return self.collectionViews.firstMatch }
-        if self.tables.firstMatch.exists { return self.tables.firstMatch }
-        if self.scrollViews.firstMatch.exists { return self.scrollViews.firstMatch }
-        return nil
+    private var scrollContainers: [XCUIElement] {
+        var containers: [XCUIElement] = []
+        containers.append(contentsOf: self.collectionViews.allElementsBoundByIndex)
+        containers.append(contentsOf: self.tables.allElementsBoundByIndex)
+        containers.append(contentsOf: self.scrollViews.allElementsBoundByIndex)
+        return containers.filter(\.exists)
     }
 }
 
@@ -52,9 +54,15 @@ extension XCUIElement {
         _ = XCTWaiter.wait(for: [expectation], timeout: timeout)
     }
 
+    func waitForNonExistence(timeout: TimeInterval) -> Bool {
+        let predicate = NSPredicate(format: "exists == false")
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: self)
+        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
+    }
+
     func scrollTo(element: XCUIElement, maxSwipes: Int = 20) {
         var swipes = 0
-        while !element.exists, swipes < maxSwipes {
+        while !element.isHittable, swipes < maxSwipes {
             self.swipeUp()
             RunLoop.current.run(until: Date().addingTimeInterval(0.05))
             swipes += 1

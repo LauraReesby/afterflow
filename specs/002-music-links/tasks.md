@@ -3,11 +3,11 @@
 _Status reset 2025‑11‑29: pivoted from Spotify-only OAuth to general playlist links with tiered provider support._
 
 ## Phase 1 – Metadata Pipeline
-- [ ] T201 [US1] Implement `MusicLinkMetadataService` URL normalization + provider classification (Spotify, YouTube, SoundCloud, Other).  
-- [ ] T202 [US1] Fetch oEmbed metadata for Tier‑1 providers (Spotify + YouTube) with timeout/retry logic.  
-- [ ] T203 [US1] Provide graceful fallback + caching when metadata fails (store raw URL + provider label).  
-- [ ] T204 [US1] Unit tests covering classification, oEmbed decoding, and error handling.  
-- [ ] T205 [US1] QA verification: privacy (no tokens), accessibility of copy, performance profiling (<3 s fetch).  
+- [x] T201 [US1] Implement `MusicLinkMetadataService` URL normalization + provider classification (Spotify, YouTube, SoundCloud, Other).  
+- [x] T202 [US1] Fetch oEmbed metadata for Tier‑1 providers (Spotify + YouTube) with timeout/retry logic.  
+- [x] T203 [US1] Provide graceful fallback + caching when metadata fails (store raw URL + provider label).  
+- [x] T204 [US1] Unit tests covering classification, oEmbed decoding, and error handling.  
+- [x] T205 [US1] QA verification: privacy (no tokens), accessibility of copy, performance profiling (<3 s fetch).  
 
 ## Phase 2 – Session Form UX
 - [ ] T206 [US1] Add “Playlist Link” input row with validation status + provider badge, including edit/replace and clear actions.  

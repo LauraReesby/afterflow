@@ -1,23 +1,42 @@
 //  Constitutional Compliance: Privacy-First, SwiftUI Native, Therapeutic Value-First
 
-//  Constitutional Compliance: Privacy-First, SwiftUI Native, Therapeutic Value-First
-
 import SwiftData
 import SwiftUI
 
 struct SessionFormView: View {
-    @Environment(\.modelContext) private var modelContext
+    private enum Mode {
+        case create
+        case edit(TherapeuticSession)
+
+        var isEditing: Bool {
+            if case .edit = self { return true }
+            return false
+        }
+
+        var session: TherapeuticSession? {
+            switch self {
+            case .create:
+                nil
+            case let .edit(session):
+                session
+            }
+        }
+    }
+
     @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var sessionStore
 
+    private let mode: Mode
+
     // MARK: - Form State
 
-    @State private var sessionDate = Date()
-    @State private var selectedTreatmentType = PsychedelicTreatmentType.ketamine
-    @State private var selectedAdministration = AdministrationMethod.intravenous
-    @State private var intention = ""
-    @State private var moodBefore = 5
-    @State private var moodAfter = 5
+    @State private var sessionDate: Date
+    @State private var selectedTreatmentType: PsychedelicTreatmentType
+    @State private var selectedAdministration: AdministrationMethod
+    @State private var intention: String
+    @State private var moodBefore: Int
+    @State private var moodAfter: Int
+    @State private var reflectionText: String
 
     // MARK: - Focus Management
 
@@ -25,6 +44,7 @@ struct SessionFormView: View {
 
     enum FormField: CaseIterable {
         case intention
+        case reflection
     }
 
     // MARK: - Validation
@@ -45,6 +65,30 @@ struct SessionFormView: View {
     @State private var showReminderPrompt = false
     @State private var pendingSessionForReminder: TherapeuticSession?
 
+    // MARK: - Init
+
+    init(session: TherapeuticSession? = nil) {
+        if let session {
+            self.mode = .edit(session)
+            _sessionDate = State(initialValue: session.sessionDate)
+            _selectedTreatmentType = State(initialValue: session.treatmentType)
+            _selectedAdministration = State(initialValue: session.administration)
+            _intention = State(initialValue: session.intention)
+            _moodBefore = State(initialValue: session.moodBefore)
+            _moodAfter = State(initialValue: session.moodAfter)
+            _reflectionText = State(initialValue: session.reflections)
+        } else {
+            self.mode = .create
+            _sessionDate = State(initialValue: Date())
+            _selectedTreatmentType = State(initialValue: .ketamine)
+            _selectedAdministration = State(initialValue: .intravenous)
+            _intention = State(initialValue: "")
+            _moodBefore = State(initialValue: 5)
+            _moodAfter = State(initialValue: 5)
+            _reflectionText = State(initialValue: "")
+        }
+    }
+
     // MARK: - Computed Properties
 
     private var isFormValid: Bool {
@@ -57,152 +101,243 @@ struct SessionFormView: View {
         return self.validator.validateForm(formData)
     }
 
-    private var sessionPhase: SessionLifecycleStatus {
-        let intentionComplete = !self.intention.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return intentionComplete ? .needsReflection : .draft
+    private var navigationTitle: String {
+        self.mode.isEditing ? "Edit Session" : "New Session"
     }
 
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    SessionStatusIndicatorView(status: self.sessionPhase)
-                        .listRowBackground(Color.clear)
-                }
+    private var statusTitle: String {
+        if let session = self.mode.session {
+            return "\(session.treatmentType.displayName) • \(session.status.displayName)"
+        }
+        return "Draft • Capture your intention"
+    }
 
-                Section {
-                    DatePicker(
-                        "Session Date",
-                        selection: self.$sessionDate,
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                    .datePickerStyle(.compact)
-                    .onChange(of: self.sessionDate) { oldValue, newValue in
-                        self.handleDateChange(from: oldValue, to: newValue)
-                    }
-                    .inlineValidation(self.dateValidation)
+    private var statusSubtitle: String {
+        self.mode.isEditing ? "Update details and tap Done when finished." : "You can add mood and reflections later."
+    }
 
-                    // Show date normalization hint if needed - use more stable layout
-                    if self.showDateNormalizationHint, !self.dateNormalizationMessage.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Image(systemName: "clock")
-                                    .foregroundColor(.blue)
-                                    .font(.caption)
+    private var primaryButtonTitle: String {
+        self.mode.isEditing ? "Done" : "Save"
+    }
 
-                                Text(self.dateNormalizationMessage)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .multilineTextAlignment(.leading)
+    private var showStickyFooter: Bool { !self.mode.isEditing }
 
-                                Spacer()
-                            }
-                        }
-                        .padding(.horizontal, 4)
-                        .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.2), value: self.showDateNormalizationHint)
-                    }
-                } header: {
-                    Text("1 · When is this session?")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                }
+    private var editingSession: TherapeuticSession? { self.mode.session }
 
-                Section {
-                    Picker("Type", selection: self.$selectedTreatmentType) {
-                        ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
-                            Text(type.displayName).tag(type)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .onChange(of: self.selectedTreatmentType) { _, _ in
-                        self.scheduleDraftSave()
-                    }
+    private var statusBanner: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(self.statusTitle)
+                .font(.headline)
+            Text(self.statusSubtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
 
-                    Picker("Administration", selection: self.$selectedAdministration) {
-                        ForEach(AdministrationMethod.allCases, id: \.self) { method in
-                            Text(method.displayName).tag(method)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .onChange(of: self.selectedAdministration) { _, _ in
-                        self.scheduleDraftSave()
-                    }
-                } header: {
-                    Text("2 · Treatment details")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                }
-
-                Section {
-                    TextField(
-                        "What do you hope to explore or heal?",
-                        text: self.$intention,
-                        axis: .vertical
-                    )
-                    .lineLimit(3 ... 6)
-                    .textContentType(.none)
-                    .focused(self.$focusedField, equals: .intention)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        if self.isFormValid {
-                            self.saveSession()
-                        }
-                    }
-                    .onChange(of: self.intention) { _, _ in
-                        self.debounceValidation()
-                        self.scheduleDraftSave()
-                    }
-                    .inlineValidation(self.intentionValidation)
-                    .accessibilityIdentifier("intentionField")
-                    .accessibilityLabel("Intention")
-                    .accessibilityHint("Describe what you hope to explore or heal during this session")
-                } header: {
-                    Text("3 · Set your intention")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                }
-
-                Section {
+    @ViewBuilder
+    private var moodSection: some View {
+        if self.mode.isEditing {
+            Section("Mood") {
+                VStack(alignment: .leading, spacing: 16) {
                     MoodRatingView(
                         value: self.$moodBefore,
                         title: "Before Session",
                         accessibilityIdentifier: "moodBeforeSlider"
                     )
-                    .onChange(of: self.moodBefore) { _, _ in
-                        self.scheduleDraftSave()
-                    }
-                } header: {
-                    Text("4 · Track your mood")
-                        .font(.headline)
-                        .foregroundColor(.primary)
+                    MoodRatingView(
+                        value: self.$moodAfter,
+                        title: "After Session",
+                        accessibilityIdentifier: "moodAfterSlider"
+                    )
+                }
+                .onChange(of: self.moodBefore) { _, _ in
+                    self.scheduleDraftSave()
+                }
+                .onChange(of: self.moodAfter) { _, _ in
+                    self.scheduleDraftSave()
                 }
             }
-            .navigationTitle("New Session")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        self.dismissKeyboard()
-                        self.sessionStore.clearDraft()
-                        self.dismiss()
+        } else {
+            Section("Mood before") {
+                VStack(alignment: .leading, spacing: 8) {
+                    MoodRatingView(
+                        value: self.$moodBefore,
+                        title: "Before Session",
+                        accessibilityIdentifier: "moodBeforeSlider"
+                    )
+                }
+                .onChange(of: self.moodBefore) { _, _ in
+                    self.scheduleDraftSave()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var reflectionSection: some View {
+        if self.mode.isEditing {
+            Section("Reflection") {
+                TextEditor(text: self.$reflectionText)
+                    .frame(minHeight: 140)
+                    .focused(self.$focusedField, equals: .reflection)
+                    .accessibilityIdentifier("reflectionEditor")
+            }
+        } else {
+            Section("Reflection") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Reflections are for after your session.")
+                        .font(.subheadline)
+                    Text("We'll remind you gently when you're ready.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+        }
+    }
+
+    // MARK: - Body
+
+    var body: some View {
+        List {
+            Section {
+                self.statusBanner
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(.init(top: 8, leading: 0, bottom: 0, trailing: 0))
+
+            Section("When is this session?") {
+                DatePicker(
+                    "Date & Time",
+                    selection: self.$sessionDate,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .datePickerStyle(.compact)
+                .onChange(of: self.sessionDate) { oldValue, newValue in
+                    self.handleDateChange(from: oldValue, to: newValue)
+                }
+                .inlineValidation(self.dateValidation)
+
+                if self.showDateNormalizationHint, !self.dateNormalizationMessage.isEmpty {
+                    Text(self.dateNormalizationMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section("Treatment") {
+                Picker("Treatment Type", selection: self.$selectedTreatmentType) {
+                    ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
+                        Text(type.displayName).tag(type)
                     }
+                }
+                .pickerStyle(.menu)
+                .onChange(of: self.selectedTreatmentType) { _, _ in
+                    self.scheduleDraftSave()
                 }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        self.saveSession()
+                Picker("Administration", selection: self.$selectedAdministration) {
+                    ForEach(AdministrationMethod.allCases, id: \.self) { method in
+                        Text(method.displayName).tag(method)
                     }
-                    .disabled(self.isLoading || !self.isFormValid)
+                }
+                .pickerStyle(.menu)
+                .onChange(of: self.selectedAdministration) { _, _ in
+                    self.scheduleDraftSave()
                 }
             }
-            .disabled(self.isLoading)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                self.dismissKeyboard()
+
+            Section("Intention") {
+                TextField(
+                    "What do you hope to explore or heal?",
+                    text: self.$intention,
+                    axis: .vertical
+                )
+                .lineLimit(3 ... 6)
+                .focused(self.$focusedField, equals: .intention)
+                .submitLabel(.done)
+                .textInputAutocapitalization(.sentences)
+                .onSubmit {
+                    if self.isFormValid {
+                        self.saveSession()
+                    }
+                }
+                .onChange(of: self.intention) { _, _ in
+                    self.debounceValidation()
+                    self.scheduleDraftSave()
+                }
+                .inlineValidation(self.intentionValidation)
+                .accessibilityIdentifier("intentionField")
             }
-            .scrollContentBackground(.visible)
+
+            self.moodSection
+
+            Section("Music") {
+                if let session = self.editingSession, session.hasMusicLink {
+                    MusicLinkSummaryCard(session: session)
+                } else {
+                    Button {
+                        // Placeholder action – handled in Feature 002
+                    } label: {
+                        Label("Attach music link", systemImage: "link")
+                    }
+                    .buttonStyle(.borderless)
+                }
+            }
+
+            self.reflectionSection
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle(self.navigationTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    self.cancel()
+                }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button(self.primaryButtonTitle) {
+                    self.saveSession()
+                }
+                .disabled(self.isLoading || !self.isFormValid)
+            }
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Hide Keyboard") {
+                    self.focusedField = nil
+                }
+                .accessibilityIdentifier("keyboardAccessoryHide")
+                .disabled(self.focusedField == nil)
+            }
+        }
+        .disabled(self.isLoading)
+        .scrollContentBackground(.hidden)
+        .background(Color(uiColor: .systemGroupedBackground))
+        .safeAreaInset(edge: .bottom) {
+            if self.showStickyFooter {
+                VStack(alignment: .leading, spacing: 4) {
+                    Button(action: self.saveSession) {
+                        Text("Save Draft")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier("saveDraftButton")
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                .overlay(Divider(), alignment: .top)
+            }
         }
         .scrollDismissesKeyboard(.immediately)
         .alert("Error", isPresented: self.$showError) {
@@ -221,16 +356,20 @@ struct SessionFormView: View {
         }
         .onAppear {
             self.setupInitialState()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if self.intention.isEmpty {
-                    self.focusedField = .intention
+            if !self.mode.isEditing {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if self.intention.isEmpty {
+                        self.focusedField = .intention
+                    }
                 }
             }
         }
         .onDisappear {
-            self.draftSaveTask?.cancel()
-            if !self.isLoading, self.pendingSessionForReminder == nil {
-                self.sessionStore.clearDraft()
+            if !self.mode.isEditing {
+                self.draftSaveTask?.cancel()
+                if !self.isLoading, self.pendingSessionForReminder == nil {
+                    self.sessionStore.clearDraft()
+                }
             }
         }
     }
@@ -238,21 +377,15 @@ struct SessionFormView: View {
     // MARK: - Validation Methods
 
     private func handleDateChange(from oldDate: Date, to newDate: Date) {
-        // Normalize the date
         let normalizedDate = self.validator.normalizeSessionDate(newDate)
-
-        // Check if normalization changed the date significantly
         if let message = validator.getDateNormalizationMessage(originalDate: newDate, normalizedDate: normalizedDate) {
-            // Update the date to normalized version if significantly different
             if abs(normalizedDate.timeIntervalSince(newDate)) > 60 {
                 self.sessionDate = normalizedDate
             }
 
-            // Show hint message
             self.dateNormalizationMessage = message
             self.showDateNormalizationHint = true
 
-            // Hide hint after 4 seconds
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(4))
                 self.showDateNormalizationHint = false
@@ -264,24 +397,16 @@ struct SessionFormView: View {
     }
 
     private func debounceValidation() {
-        // Cancel previous validation task
         self.validationTask?.cancel()
-
-        // Start new validation task with 300ms delay
         self.validationTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(300))
-
             guard !Task.isCancelled else { return }
-
             self.performValidation()
         }
     }
 
     @MainActor private func performValidation() {
-        // Validate individual fields with enhanced date validation
         self.intentionValidation = self.validator.validateIntention(self.intention)
-
-        // Use normalized date for validation
         let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
         self.dateValidation = self.validator.validateSessionDate(normalizedDate)
     }
@@ -289,20 +414,12 @@ struct SessionFormView: View {
     // MARK: - Lifecycle
 
     private func setupInitialState() {
+        guard !self.mode.isEditing else { return }
         if let draft = self.sessionStore.recoverDraft() {
             self.applyDraft(draft)
             return
         }
 
-        if let lastSession = self.sessionStore.sessions.first {
-            self.selectedTreatmentType = lastSession.treatmentType
-            self.selectedAdministration = lastSession.administration
-        } else {
-            self.selectedTreatmentType = .ketamine
-            self.selectedAdministration = .intravenous
-        }
-
-        // Perform initial validation
         Task { @MainActor in
             self.performValidation()
         }
@@ -310,56 +427,66 @@ struct SessionFormView: View {
 
     // MARK: - Actions
 
-    private func dismissKeyboard() {
-        self.focusedField = nil
+    private func cancel() {
+        if !self.mode.isEditing {
+            self.sessionStore.clearDraft()
+        }
+        self.dismiss()
     }
 
     private func saveSession() {
-        // Normalize date before final validation and saving
-        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
-
-        // Final validation before saving
-        let formData = SessionFormData(
-            sessionDate: normalizedDate,
-            treatmentType: selectedTreatmentType,
-            administration: selectedAdministration,
-            intention: intention
-        )
-
-        guard self.validator.validateForm(formData) else {
+        guard self.isFormValid else {
             self.performValidation()
             return
         }
 
-        guard self.sessionPhase == .needsReflection else {
-            self.showError(message: "Finish the intention and mood before saving.")
-            return
-        }
+        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
+        let trimmedIntention = self.intention.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        self.isLoading = true
-        defer { isLoading = false }
+        switch self.mode {
+        case .create:
+            self.isLoading = true
+            let newSession = TherapeuticSession(
+                sessionDate: normalizedDate,
+                treatmentType: selectedTreatmentType,
+                administration: self.selectedAdministration,
+                intention: trimmedIntention,
+                moodBefore: self.moodBefore,
+                moodAfter: self.moodAfter
+            )
 
-        let newSession = TherapeuticSession(
-            sessionDate: normalizedDate,
-            treatmentType: selectedTreatmentType,
-            administration: self.selectedAdministration,
-            intention: self.intention.trimmingCharacters(in: .whitespacesAndNewlines),
-            moodBefore: self.moodBefore,
-            moodAfter: self.moodAfter
-        )
+            Task {
+                do {
+                    try self.sessionStore.create(newSession)
+                    self.sessionStore.clearDraft()
+                    await MainActor.run {
+                        self.pendingSessionForReminder = newSession
+                        self.showReminderPrompt = true
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.showError(message: "Unable to save session: \(error.localizedDescription)")
+                    }
+                }
+                await MainActor.run {
+                    self.isLoading = false
+                }
+            }
 
-        Task {
+        case let .edit(session):
+            session.sessionDate = normalizedDate
+            session.treatmentType = self.selectedTreatmentType
+            session.administration = self.selectedAdministration
+            session.intention = trimmedIntention
+            session.moodBefore = self.moodBefore
+            session.moodAfter = self.moodAfter
+            session.reflections = self.reflectionText.trimmingCharacters(in: .whitespacesAndNewlines)
+
             do {
-                try self.sessionStore.create(newSession)
-                self.sessionStore.clearDraft()
-                await MainActor.run {
-                    self.pendingSessionForReminder = newSession
-                    self.showReminderPrompt = true
-                }
+                try self.sessionStore.update(session)
+                self.dismiss()
             } catch {
-                await MainActor.run {
-                    self.showError(message: "Unable to save session: \(error.localizedDescription)")
-                }
+                self.showError(message: "Unable to update session: \(error.localizedDescription)")
             }
         }
     }
@@ -379,6 +506,7 @@ struct SessionFormView: View {
     }
 
     private func scheduleDraftSave() {
+        guard !self.mode.isEditing else { return }
         self.draftSaveTask?.cancel()
         let snapshot = self.buildDraftSnapshot()
         self.draftSaveTask = Task { @MainActor in
@@ -396,41 +524,41 @@ struct SessionFormView: View {
             administration: self.selectedAdministration,
             intention: self.intention,
             moodBefore: self.moodBefore,
-            moodAfter: self.moodAfter,
-            reminderDate: nil
+            moodAfter: self.moodAfter
         )
     }
 
-    private func handleReminderSelection(_ selection: ReminderOption) {
+    private func handleReminderSelection(_ option: ReminderOption) {
         guard let session = self.pendingSessionForReminder else {
             self.dismiss()
             return
         }
 
-        Task { @MainActor in
+        Task {
             do {
-                try await self.sessionStore.setReminder(for: session, option: selection)
-                self.pendingSessionForReminder = nil
-                self.dismiss()
+                try await self.sessionStore.setReminder(for: session, option: option)
             } catch {
-                self.showError(message: "Reminder preference could not be saved: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.showError(message: "Unable to schedule reminder: \(error.localizedDescription)")
+                }
+            }
+            await MainActor.run {
+                self.dismiss()
             }
         }
     }
 }
 
 #Preview {
-    let container: ModelContainer
-    do {
-        container = try ModelContainer(
-            for: TherapeuticSession.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    } catch {
-        fatalError("Failed to create preview container: \(error)")
-    }
+    let container = try! ModelContainer(
+        for: TherapeuticSession.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
-    return SessionFormView()
-        .modelContainer(container)
-        .environment(store)
+
+    return NavigationStack {
+        SessionFormView()
+            .environment(store)
+    }
+    .modelContainer(container)
 }

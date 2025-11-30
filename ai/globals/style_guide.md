@@ -28,11 +28,11 @@ Applies to every agent touching Swift, Markdown, or automation scripts. Suppleme
 - Use the in-memory `ModelContainer` scaffold when testing SwiftData interactions:
   ```swift
   @MainActor
-  func makeTestEnvironment() -> (ModelContainer, SessionDataService) {
+  func makeTestEnvironment() -> (ModelContainer, SessionStore) {
       let config = ModelConfiguration(isStoredInMemoryOnly: true)
       let container = try! ModelContainer(for: TherapeuticSession.self, configurations: config)
-      let service = SessionDataService(modelContext: container.mainContext)
-      return (container, service)
+      let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
+      return (container, store)
   }
   ```
 - UI and accessibility flows rely on XCUITest (`AfterflowUITests/`); snapshot VoiceOver + Dynamic Type tests mirror the acceptance criteria in `specs/<id>/tasks.md`.

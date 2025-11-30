@@ -26,8 +26,7 @@ _Covers tasks T010, T020, T025, and T030 for Feature 001 – Core Session Loggin
 
 ## Phase 5 – Reflections QA
 - **Automated coverage**  
-  - `SessionDetailViewUITests` creates a session, edits reflections, and verifies the helper copy, save button, and persistence.  
-  - `SessionDetailViewModelTests` assert the new persistence layer surfaces errors and keeps success banners transient.  
+  - `SessionDetailViewUITests` creates a session, uses the Edit flow (Calendar-style detail -> edit screen), and verifies reflections persist after tapping Done.  
 - **Manual accessibility check**  
   - Used Accessibility Inspector on the detail screen; `reflectionEditor` exposes its placeholder, helper copy, and success banner to VoiceOver.  
   - Empty-state helper text remains readable under Dynamic Type XXXL.  

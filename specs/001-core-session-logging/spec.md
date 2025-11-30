@@ -25,7 +25,7 @@ Existing solutions require network access or expose data.
 ## Session Status States
 - **🟦 Draft:** The user is filling out the core form. Drafts are held in-memory only (auto-save/draft-recovery) and not written to SwiftData. A session becomes a “draft” when:
   - `sessionDate` (defaults to now) is set  
-  - `treatmentType` (defaults to psilocybin) is chosen  
+  - `treatmentType` (defaults to ketamine) and `administration` (defaults to intravenous) are chosen  
   - `moodBefore` slider has a value  
   - `intention` is non-empty  
 - **🟧 Needs Reflection:** Once the user saves the draft (above fields complete), the session is persisted. The app prompts: “Would you like a reminder to add reflections later?” with options **In 3 hours / Tomorrow / None**. Selecting a reminder schedules a local notification. Sessions in this state are highlighted in the list until reflections are added.  
@@ -98,12 +98,12 @@ Existing solutions require network access or expose data.
 | ID | Description |
 |----|--------------|
 | TR-001 | SwiftUI 5.9 + SwiftData on iOS ≥ 17.6 (tested on 17.6+). |
-| TR-002 | SwiftData entity `TherapeuticSession` fields:<br> `id (UUID)`, `date (Date)`, `treatmentType (Enum)`, `dose (String?)`, `intention (String?)`, `beforeMood (Int?)`, `afterMood (Int?)`, `reflection (String?)`, `createdAt (Date)`, `updatedAt (Date)` |
+| TR-002 | SwiftData entity `TherapeuticSession` fields:<br> `id (UUID)`, `sessionDate (Date)`, `treatmentTypeRawValue (String)`, `administrationRawValue (String)`, `intention (String)`, `moodBefore (Int)`, `moodAfter (Int)`, `reflections (String)`, `reminderDate (Date?)`, `musicLinkURL/WebURL/Title/Author/Artwork/Provider`, `createdAt (Date)`, `updatedAt (Date)` |
 | TR-003 | Offline SQLite storage; optional CloudKit sync later. |
 | TR-004 | SwiftData queries in ViewModels only for derived state. |
 | TR-005 | Biometric unlock (optional). |
 | TR-006 | Performance → launch < 2 s; I/O < 16 ms main thread (constitutional requirements). |
-| TR-007 | Session state machine owned by ViewModel; SwiftData stores `status` enum once persisted plus reminder metadata. |
+| TR-007 | Session lifecycle derived via `TherapeuticSession.status` (computed). SwiftData stores only primitives; SessionStore determines status and schedules reminders. |
 | TR-008 | Reminder scheduling implemented via `UNUserNotificationCenter` with notification categories allowing quick mark-as-complete. |
 
 ---

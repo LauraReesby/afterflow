@@ -9,12 +9,13 @@ struct MusicLinkMetadataServiceTests {
             case response(Data, Int)
             case error(Error)
         }
+
         private var steps: [Step]
         init(steps: [Step]) { self.steps = steps }
 
         func data(for request: URLRequest) async throws -> (Data, URLResponse) {
-            guard !steps.isEmpty else { throw URLError(.badServerResponse) }
-            let step = steps.removeFirst()
+            guard !self.steps.isEmpty else { throw URLError(.badServerResponse) }
+            let step = self.steps.removeFirst()
             switch step {
             case let .response(data, statusCode):
                 let response = HTTPURLResponse(
@@ -30,16 +31,14 @@ struct MusicLinkMetadataServiceTests {
         }
     }
 
-    @Test("Classifies Spotify deep link into canonical URL")
-    func classifyDeepLink() async throws {
+    @Test("Classifies Spotify deep link into canonical URL") func classifyDeepLink() async throws {
         let service = MusicLinkMetadataService()
         let result = service.classify(urlString: "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M")
         #expect(result?.provider == .spotify)
         #expect(result?.canonicalURL.absoluteString == "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M")
     }
 
-    @Test("Fetches Spotify oEmbed metadata")
-    func fetchSpotifyMetadata() async throws {
+    @Test("Fetches Spotify oEmbed metadata") func fetchSpotifyMetadata() async throws {
         let payload = Data("""
         {
           "title": "Deep Focus",
@@ -57,12 +56,65 @@ struct MusicLinkMetadataServiceTests {
         #expect(metadata.thumbnailURL?.absoluteString == "https://i.scdn.co/image/test")
     }
 
-    @Test("Unsupported provider falls back to link-only metadata")
-    func fallbackForUnsupportedProvider() async throws {
+    @Test("Unsupported provider falls back to link-only metadata") func fallbackForUnsupportedProvider() async throws {
         let service = MusicLinkMetadataService()
         let metadata = try await service.fetchMetadata(for: "https://music.apple.com/us/playlist/calm/pl.u-123")
         #expect(metadata.provider == .appleMusic)
         #expect(metadata.title == nil)
         #expect(metadata.thumbnailURL == nil)
+    }
+    @Test("Classifies YouTube short link into canonical URL") func classifyYouTubeShortLink() async throws {
+        let service = MusicLinkMetadataService()
+        let result = service.classify(urlString: "https://youtu.be/abcd1234")
+        #expect(result?.provider == .youtube)
+        #expect(result?.canonicalURL.absoluteString == "https://www.youtube.com/watch?v=abcd1234")
+    }
+
+    @Test("Fetches YouTube oEmbed metadata") func fetchYouTubeMetadata() async throws {
+        let payload = Data("""
+        {
+          "title": "Morning Energy",
+          "author_name": "Slow Vibes",
+          "thumbnail_url": "https://img.youtube.com/vi/track/default.jpg"
+        }
+        """.utf8)
+        let service = MusicLinkMetadataService(
+            urlSession: MockSession(steps: [.response(payload, 200)])
+        )
+        let metadata = try await service.fetchMetadata(for: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        #expect(metadata.provider == .youtube)
+        #expect(metadata.title == "Morning Energy")
+        #expect(metadata.authorName == "Slow Vibes")
+        #expect(metadata.thumbnailURL?.absoluteString == "https://img.youtube.com/vi/track/default.jpg")
+    }
+
+    @Test("Network failures fall back to minimal metadata instead of throwing") func requestFailureFallsBack() async throws {
+        let service = MusicLinkMetadataService(
+            urlSession: MockSession(steps: [.error(URLError(.timedOut))])
+        )
+        let metadata = try await service.fetchMetadata(for: "https://open.spotify.com/playlist/123")
+        #expect(metadata.provider == .spotify)
+        #expect(metadata.title == nil)
+        #expect(metadata.thumbnailURL == nil)
+    }
+
+    @Test("Successful fetches cache results to avoid duplicate requests") func cachingPreventsDuplicateRequests() async throws {
+        let payload = Data("""
+        {
+          "title": "Deep Focus",
+          "author_name": "Spotify",
+          "thumbnail_url": "https://i.scdn.co/image/test"
+        }
+        """.utf8)
+        let service = MusicLinkMetadataService(
+            urlSession: MockSession(steps: [.response(payload, 200)])
+        )
+
+        let first = try await service.fetchMetadata(for: "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M")
+        #expect(first.title == "Deep Focus")
+
+        // second fetch should hit cache even though the mock has no steps left
+        let second = try await service.fetchMetadata(for: "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M")
+        #expect(second.title == "Deep Focus")
     }
 }

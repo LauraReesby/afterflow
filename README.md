@@ -100,8 +100,8 @@ xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPho
 # Model tests only
 xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:AfterflowTests/TherapeuticSessionTests
 
-# Service tests only  
-xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:AfterflowTests/SessionDataServiceTests
+# SessionStore tests only
+xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:AfterflowTests/SessionStoreTests
 ```
 
 ### Test Coverage
@@ -142,11 +142,12 @@ Afterflow/
 ├── Models/
 │   └── TherapeuticSession.swift
 ├── Services/
-│   └── SessionDataService.swift
+│   ├── SessionStore.swift
+│   ├── ReminderScheduler.swift
+│   └── MusicLinkMetadataService.swift
 ├── ViewModels/
 │   ├── FormValidation.swift
 │   ├── MoodRatingScale.swift
-│   ├── SessionDetailViewModel.swift
 │   └── SessionListViewModel.swift
 ├── Views/
 │   ├── ContentView.swift
@@ -154,6 +155,7 @@ Afterflow/
 │   ├── SessionDetailView.swift
 │   └── Components/
 │       ├── MoodRatingView.swift
+│       ├── MusicLinkSummaryCard.swift
 │       ├── UndoBannerView.swift
 │       └── ValidationErrorView.swift
 └── Resources/
@@ -196,7 +198,7 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI:
 
 ### ✅ Phase 1: Foundation (Complete)
 - [x] Core data model (TherapeuticSession)
-- [x] Persistence layer (SessionDataService)
+- [x] Persistence layer (SessionStore + SwiftData)
 - [x] Comprehensive test suite
 - [x] Basic session list view
 
@@ -206,7 +208,7 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI:
 - [x] Date/treatment type pickers with auto-save/draft recovery
 
 ### ✅ Phase 3–5: Enhanced UI Components
-- [x] Environment and music input fields
+- [x] Music link preview card + “attach link” flow
 - [x] Mood rating sliders with emoji map + accessibility tests
 - [x] Session detail view with editable reflections and persistence error handling
 

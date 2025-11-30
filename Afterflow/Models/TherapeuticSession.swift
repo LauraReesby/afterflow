@@ -95,16 +95,16 @@ enum MusicLinkProvider: String, Codable, CaseIterable {
                 let id = segments[2]
                 return URL(string: "https://open.spotify.com/\(type)/\(id)")
             }
-            return enforceHTTPS(for: originalURL)
+            return self.enforceHTTPS(for: originalURL)
         case .youtube:
             if originalURL.host == "youtu.be" {
                 let videoID = originalURL.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
                 guard !videoID.isEmpty else { return nil }
                 return URL(string: "https://www.youtube.com/watch?v=\(videoID)")
             }
-            return enforceHTTPS(for: originalURL)
+            return self.enforceHTTPS(for: originalURL)
         case .soundcloud, .appleMusic, .bandcamp, .linkOnly, .unknown:
-            return enforceHTTPS(for: originalURL)
+            return self.enforceHTTPS(for: originalURL)
         }
     }
 
@@ -272,6 +272,12 @@ extension TherapeuticSession {
             return url
         }
         return nil
+    }
+
+    /// Display string for reminder timestamp
+    var reminderDisplayText: String? {
+        guard let reminderDate else { return nil }
+        return reminderDate.formatted(date: .abbreviated, time: .shortened)
     }
 
     /// Validation for required fields and psychedelic treatment types

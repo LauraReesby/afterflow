@@ -53,7 +53,7 @@ final class SessionMoodRatingUITests: XCTestCase {
 
         guard let intentionField = app.waitForTextInput("intentionField") else {
             XCTFail("Intention field should exist")
-            return app.textFields["intentionField"]
+            return app.textViews["intentionField"]
         }
         return intentionField
     }

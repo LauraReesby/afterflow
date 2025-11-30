@@ -25,6 +25,17 @@ struct ContentView: View {
                                 Label("Needs Reflection", systemImage: "bell.badge")
                                     .font(.caption)
                                     .foregroundColor(.orange)
+                                if let reminderLabel = session.reminderDisplayText {
+                                    Label("Reminder: \(reminderLabel)", systemImage: "bell")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                        .accessibilityIdentifier("needsReflectionReminderLabel")
+                                } else {
+                                    Label("No reminder scheduled", systemImage: "bell.slash")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                        .accessibilityIdentifier("needsReflectionReminderLabel")
+                                }
                             } else if session.status == .complete {
                                 Label("Complete", systemImage: "checkmark.circle")
                                     .font(.caption)
@@ -67,11 +78,13 @@ struct ContentView: View {
             Text("Select a session")
         }
         .sheet(isPresented: self.$showingSessionForm) {
-            SessionFormView()
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-                .presentationCornerRadius(16)
-                .toolbarBackground(.visible, for: .automatic)
+            NavigationStack {
+                SessionFormView()
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(16)
+            .toolbarBackground(.visible, for: .automatic)
         }
         .overlay(alignment: .bottom) {
             if self.showUndoBanner, let deletedSession = recentlyDeleted?.session {

@@ -15,19 +15,22 @@ Implements FR-001 → FR-010 using SwiftUI + SwiftData in modular structure.
 ## File Structure
 ```
 Models/        TherapeuticSession.swift
-ViewModels/    SessionFormViewModel.swift
+ViewModels/    SessionListViewModel.swift, FormValidation.swift, MoodRatingScale.swift
 Views/
  ├── SessionFormView.swift
- ├── EnvironmentInputView.swift
- ├── MoodRatingView.swift
  ├── SessionDetailView.swift
- └── SessionListView.swift
-Services/      SessionStore.swift
+ ├── ContentView (history list + filters)
+ └── Components/
+     ├── MoodRatingView.swift
+     ├── SessionStatusIndicatorView.swift
+     ├── MusicLinkSummaryCard.swift
+     └── UndoBannerView.swift
+Services/      SessionStore.swift, ReminderScheduler.swift
 Tests/
  ├── ModelTests/
- ├── ViewModelTests/
+ ├── ServiceTests/
  ├── UITests/
- └── AccessibilityTests/
+ └── Performance/
 ```
 
 ## Phases & Milestones
@@ -35,7 +38,7 @@ Tests/
 |-------|--------|------------------|
 | 1 | Model & Persistence | SwiftData entity + auto-save service |
 | 2 | Session Form | SwiftUI form + validation + draft recovery |
-| 3 | Environment / Music | input views + tone-checked copy |
+| 3 | Status & Reminder UX | field grouping, banner, reminder prompt |
 | 4 | Mood Ratings | sliders + emoji + A11y tests |
 | 5 | Reflections | editable detail + auto-save + error banner |
 | 6 | History List | list view + delete + Undo + perf tests |

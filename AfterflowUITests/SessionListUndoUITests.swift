@@ -48,10 +48,9 @@ final class SessionListUndoUITests: XCTestCase {
         if app.buttons["None"].waitForExistence(timeout: 1) {
             app.buttons["None"].tap()
         }
-        XCTAssertFalse(app.navigationBars["New Session"].waitForExistence(timeout: 2))
-        if app.buttons["Close"].waitForExistence(timeout: 1) {
-            app.buttons["Close"].tap()
-        }
+        let rootAddButton = app.buttons["addSessionButton"]
+        XCTAssertTrue(rootAddButton.waitForExistence(timeout: 5), "Main list should return after saving")
+        rootAddButton.waitForHittable()
         let list = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch
         let cell = app.cells.containing(.staticText, identifier: intention).firstMatch
         if list.exists {

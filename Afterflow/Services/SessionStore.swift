@@ -125,13 +125,6 @@ final class SessionStore {
     }
 }
 
-// Allow view models to depend on a narrow persistence surface.
-extension SessionStore: SessionReflectionPersisting {
-    func updateSession(_ session: TherapeuticSession) throws {
-        try self.update(session)
-    }
-}
-
 // MARK: - Draft DTO
 
 private struct SessionDraft: Codable {

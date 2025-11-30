@@ -30,6 +30,7 @@ final class MusicLinkMetadataService {
 
     private let urlSession: URLSessioning
     private let timeout: TimeInterval
+    private var cache: [String: MusicLinkMetadata] = [:]
 
     init(urlSession: URLSessioning = URLSession.shared, timeout: TimeInterval = 3.0) {
         self.urlSession = urlSession
@@ -48,19 +49,38 @@ final class MusicLinkMetadataService {
             throw ServiceError.invalidURL
         }
 
-        guard classification.provider.supportsOEmbed,
-              let endpoint = classification.provider.oEmbedURL(for: classification.canonicalURL)
-        else {
-            return MusicLinkMetadata(
-                provider: classification.provider,
-                originalURL: classification.originalURL,
-                canonicalURL: classification.canonicalURL,
-                title: nil,
-                authorName: nil,
-                thumbnailURL: nil
-            )
+        let cacheKey = classification.canonicalURL.absoluteString.lowercased()
+        if let cached = self.cache[cacheKey] {
+            return cached
         }
 
+        let metadata: MusicLinkMetadata
+
+        if classification.provider.supportsOEmbed,
+           let endpoint = classification.provider.oEmbedURL(for: classification.canonicalURL)
+        {
+            do {
+                let payload = try await self.fetchOEmbedPayload(endpoint: endpoint)
+                metadata = MusicLinkMetadata(
+                    provider: classification.provider,
+                    originalURL: classification.originalURL,
+                    canonicalURL: classification.canonicalURL,
+                    title: payload.title,
+                    authorName: payload.authorName,
+                    thumbnailURL: payload.thumbnailURL
+                )
+            } catch {
+                metadata = self.fallbackMetadata(for: classification)
+            }
+        } else {
+            metadata = self.fallbackMetadata(for: classification)
+        }
+
+        self.cache[cacheKey] = metadata
+        return metadata
+    }
+
+    private func fetchOEmbedPayload(endpoint: URL) async throws -> OEmbedResponse {
         var request = URLRequest(url: endpoint)
         request.timeoutInterval = self.timeout
 
@@ -70,18 +90,20 @@ final class MusicLinkMetadataService {
         }
 
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
         guard let payload = try? decoder.decode(OEmbedResponse.self, from: data) else {
             throw ServiceError.decodingFailed
         }
+        return payload
+    }
 
-        return MusicLinkMetadata(
+    private func fallbackMetadata(for classification: ClassificationResult) -> MusicLinkMetadata {
+        MusicLinkMetadata(
             provider: classification.provider,
             originalURL: classification.originalURL,
             canonicalURL: classification.canonicalURL,
-            title: payload.title,
-            authorName: payload.authorName,
-            thumbnailURL: payload.thumbnailURL
+            title: nil,
+            authorName: nil,
+            thumbnailURL: nil
         )
     }
 
@@ -115,7 +137,8 @@ final class MusicLinkMetadataService {
         if host.hasPrefix("www.") { host.removeFirst(4) }
 
         if host.contains("spotify.com") { return .spotify }
-        if host.contains("youtube.com") || host == "youtu.be" || host.contains("youtube-nocookie.com") { return .youtube }
+        if host.contains("youtube.com") || host == "youtu.be" || host
+            .contains("youtube-nocookie.com") { return .youtube }
         if host.contains("soundcloud.com") { return .soundcloud }
         if host.contains("music.apple.com") || host.contains("itunes.apple.com") { return .appleMusic }
         if host.contains("bandcamp.com") { return .bandcamp }
@@ -127,4 +150,10 @@ private struct OEmbedResponse: Decodable {
     let title: String?
     let authorName: String?
     let thumbnailURL: URL?
+
+    enum CodingKeys: String, CodingKey {
+        case title
+        case authorName = "author_name"
+        case thumbnailURL = "thumbnail_url"
+    }
 }

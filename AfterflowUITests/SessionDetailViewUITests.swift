@@ -20,35 +20,53 @@ final class SessionDetailViewUITests: XCTestCase {
         sessionCell.waitForHittable()
         sessionCell.forceTap()
 
-        XCTAssertTrue(app.navigationBars["Session Details"].waitForExistence(timeout: 2), "Detail view should appear")
+        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 2), "Detail view should appear")
 
-        let reflectionEditor = app.textViews["reflectionEditor"]
-        if !reflectionEditor.waitForExistence(timeout: 3) {
-            list.scrollTo(element: reflectionEditor)
+        app.navigationBars["Session"].buttons["Edit"].tap()
+
+        guard let reflectionEditor = app.waitForTextInput("reflectionEditor") else {
+            XCTFail("Reflection editor should appear on edit screen")
+            return
         }
-        XCTAssertTrue(reflectionEditor.waitForExistence(timeout: 3), "Reflection editor should appear")
         reflectionEditor.tap()
         reflectionEditor.typeText("Gentle integration notes for testing.")
 
-        let saveButton = app.navigationBars.buttons["Save"]
-        XCTAssertTrue(saveButton.waitForExistence(timeout: 2), "Save button should exist on detail view")
-        saveButton.tap()
+        let doneButton = app.navigationBars.buttons["Done"]
+        XCTAssertTrue(doneButton.waitForExistence(timeout: 2), "Done button should exist")
+        doneButton.tap()
 
-        XCTAssertFalse(app.navigationBars["Session Details"].waitForExistence(timeout: 1))
+        let reflectionText = app.staticTexts["Gentle integration notes for testing."]
+        XCTAssertTrue(reflectionText.waitForExistence(timeout: 3), "Reflection should appear on detail view")
+    }
 
-        // Reopen to ensure persistence
-        let reopenedCell = app.cells.containing(.staticText, identifier: intention).firstMatch
-        XCTAssertTrue(reopenedCell.waitForExistence(timeout: 2))
-        list.scrollTo(element: reopenedCell)
-        reopenedCell.waitForHittable()
-        reopenedCell.forceTap()
-        XCTAssertTrue(reflectionEditor.waitForExistence(timeout: 2))
-        XCTAssertTrue((reflectionEditor.value as? String)?.contains("Gentle integration notes") == true)
+    func testNeedsReflectionReminderMetadataVisible() throws {
+        let app = self.makeApp()
+        app.launch()
+
+        let intention = "Needs Reflection Reminder"
+        self.createSession(in: app, intention: intention, reminderChoice: "In 3 hours")
+
+        let list = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch
+        let sessionCell = app.cells.containing(.staticText, identifier: intention).firstMatch
+        XCTAssertTrue(sessionCell.waitForExistence(timeout: 3))
+        list.scrollTo(element: sessionCell)
+        sessionCell.waitForHittable()
+
+        let reminderBadge = sessionCell.staticTexts["needsReflectionReminderLabel"]
+        XCTAssertTrue(reminderBadge.waitForExistence(timeout: 2))
+
+        sessionCell.forceTap()
+        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["detailReminderLabel"].waitForExistence(timeout: 2))
     }
 
     // MARK: - Helpers
 
-    private func createSession(in app: XCUIApplication, intention: String) {
+    private func createSession(
+        in app: XCUIApplication,
+        intention: String,
+        reminderChoice: String = "None"
+    ) {
         let addSessionButton = app.buttons["addSessionButton"]
         XCTAssertTrue(addSessionButton.waitForExistence(timeout: 5))
         addSessionButton.tap()
@@ -61,9 +79,16 @@ final class SessionDetailViewUITests: XCTestCase {
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2))
         intentionField.typeText(intention)
 
-        app.navigationBars["New Session"].buttons["Save"].tap()
-        if app.buttons["None"].waitForExistence(timeout: 1) {
-            app.buttons["None"].tap()
+        if app.buttons["saveDraftButton"].waitForExistence(timeout: 2) {
+            app.buttons["saveDraftButton"].tap()
+        } else {
+            app.navigationBars.buttons["Save"].tap()
         }
+        if app.buttons[reminderChoice].waitForExistence(timeout: 2) {
+            app.buttons[reminderChoice].tap()
+        }
+
+        let rootAddButton = app.buttons["addSessionButton"]
+        XCTAssertTrue(rootAddButton.waitForExistence(timeout: 5), "Main list should reappear after saving")
     }
 }

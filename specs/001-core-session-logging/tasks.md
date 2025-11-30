@@ -45,7 +45,7 @@
 - [x] T028 [US5] Delete + Undo flow.  
 - [x] T029 [US5] Large dataset fixture + perf tests.  
 - [x] T030 [US5] Constitutional QA verification: accessibility, performance profiling, privacy compliance.  
-- [ ] T030a [US5] Surface Needs Reflection badge + reminder metadata in list/detail + UI tests.  
+- [x] T030a [US5] Surface Needs Reflection badge + reminder metadata in list/detail + UI tests.  
 
 ## Phase 7 – Polish & Cross-Cutting
 - [ ] T031 [Polish] Add accessibility labels + VoiceOver tests.  

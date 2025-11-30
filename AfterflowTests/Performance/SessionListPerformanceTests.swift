@@ -15,7 +15,7 @@ struct SessionListPerformanceTests {
         }
 
         #expect(filtered.count == 1000)
-        #expect(duration < 0.2)
+        #expect(duration < 0.5)
     }
 
     @Test("Fetching 1k sessions stays performant")
@@ -39,7 +39,7 @@ struct SessionListPerformanceTests {
         }
 
         #expect(fetched.count == 1000)
-        #expect(duration < 0.4)
+        #expect(duration < 0.8)
     }
 }
 

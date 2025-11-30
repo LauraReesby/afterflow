@@ -55,18 +55,14 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
             "Keyboard should appear after focusing intention field"
         )
 
-        // Tap outside the text field - try a different approach since navigation bar tap might not work
-        // Tap on a section header or form area
-        let formTitle = app.staticTexts["2 · Treatment details"]
-        if formTitle.exists {
-            formTitle.tap()
-        } else if app.staticTexts["Treatment"].exists {
-            app.staticTexts["Treatment"].tap()
-        } else {
-            app.navigationBars["New Session"].tap()
-        }
+        let hideButton = app.buttons["keyboardAccessoryHide"]
+        XCTAssertTrue(hideButton.waitForExistence(timeout: 2), "Hide Keyboard button should appear with keyboard")
+        hideButton.tap()
 
-        XCTAssertTrue(self.waitForKeyboard(keyboard, appears: false), "Keyboard should dismiss after tapping outside")
+        XCTAssertTrue(
+            self.waitForKeyboard(keyboard, appears: false),
+            "Keyboard should dismiss after tapping Hide Keyboard"
+        )
     }
 
     func testKeyboardToolbarDoneButton() throws {
@@ -82,12 +78,15 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
         let keyboard = app.keyboards.firstMatch
         XCTAssertTrue(self.waitForKeyboard(keyboard, appears: true), "Keyboard should appear for intention field")
 
-        if app.keyboards.buttons["Done"].waitForExistence(timeout: 2) {
-            app.keyboards.buttons["Done"].tap()
+        let hideButton = app.buttons["keyboardAccessoryHide"]
+        XCTAssertTrue(hideButton.waitForExistence(timeout: 2), "Hide Keyboard button should exist")
+        hideButton.tap()
 
-            XCTAssertTrue(self.waitForKeyboard(keyboard, appears: false), "Keyboard should dismiss after tapping Done")
-            XCTAssertFalse(intentionField.hasKeyboardFocus, "Field should lose focus after tapping Done")
-        }
+        XCTAssertTrue(
+            self.waitForKeyboard(keyboard, appears: false),
+            "Keyboard should dismiss after tapping Hide Keyboard"
+        )
+        XCTAssertFalse(intentionField.hasKeyboardFocus, "Field should lose focus after hiding keyboard")
     }
 
     func testSubmitOnLastField() throws {
@@ -114,8 +113,6 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
         // Simple verification that the text was entered
         let fieldValue = intentionField.value as? String ?? ""
         XCTAssertTrue(fieldValue.contains("Test intention"), "Intention field should contain the typed text")
-
-        print("DEBUG: Submit test completed successfully - intention field value: '\(fieldValue)'")
     }
 
     func testAccessibilityLabelsAndHints() throws {
@@ -128,9 +125,6 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
         }
 
         if intentionField.exists {
-            print("DEBUG: Intention field exists, testing interaction...")
-
-            // Make sure no keyboard is active before tapping
             self.dismissKeyboardIfPresent(app)
 
             intentionField.tap()
@@ -145,8 +139,6 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
                 "Test intention",
                 "Should be able to enter text in intention field"
             )
-
-            print("DEBUG: Accessibility test completed successfully")
         }
     }
 
@@ -185,10 +177,16 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
 
     private func dismissKeyboardIfPresent(_ app: XCUIApplication) {
         let keyboard = app.keyboards.firstMatch
-        if keyboard.exists {
+        guard keyboard.exists else { return }
+
+        if app.buttons["keyboardAccessoryHide"].waitForExistence(timeout: 1) {
+            app.buttons["keyboardAccessoryHide"].tap()
+        } else if app.toolbars.buttons["Hide Keyboard"].exists {
+            app.toolbars.buttons["Hide Keyboard"].tap()
+        } else {
             app.tap()
-            _ = self.waitForKeyboard(keyboard, appears: false)
         }
+        _ = self.waitForKeyboard(keyboard, appears: false)
     }
 }
 
