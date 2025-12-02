@@ -3,7 +3,7 @@
 import SwiftData
 import SwiftUI
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 struct SessionFormView: View {
@@ -144,38 +144,6 @@ struct SessionFormView: View {
     }
 
     private var editingSession: TherapeuticSession? { self.mode.session }
-
-    private var trimmedMusicLinkInput: String {
-        self.musicLinkInput.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private var hasExistingSessionMusicLink: Bool {
-        guard let session = self.editingSession else { return false }
-        return session.hasMusicLink && !self.didClearMusicLink && self.musicLinkMetadata == nil
-    }
-
-    private var hasAnyMusicLink: Bool {
-        self.musicLinkMetadata != nil || self.hasExistingSessionMusicLink || !self.trimmedMusicLinkInput.isEmpty
-    }
-
-    private var currentMusicProviderLabel: String? {
-        if let metadata = self.musicLinkMetadata {
-            return metadata.provider.displayName
-        }
-        if self.hasExistingSessionMusicLink, let raw = self.editingSession?.musicLinkProviderRawValue,
-           let provider = MusicLinkProvider(rawValue: raw)
-        {
-            return provider.displayName
-        }
-        if let classification = self.metadataService.classify(urlString: self.musicLinkInput) {
-            return classification.provider.displayName
-        }
-        return nil
-    }
-
-    private var shouldShowMusicLinkHelper: Bool {
-        self.trimmedMusicLinkInput.isEmpty && self.musicLinkMetadata == nil && !self.hasExistingSessionMusicLink
-    }
 
     private var statusBanner: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -344,14 +312,14 @@ struct SessionFormView: View {
                             .font(.footnote)
                             .foregroundStyle(.secondary)
 
-#if canImport(UIKit)
-                        Button {
-                            self.pasteMusicLinkFromClipboard()
-                        } label: {
-                            Label("Paste from clipboard", systemImage: "doc.on.clipboard")
-                        }
-                        .buttonStyle(.bordered)
-#endif
+                        #if canImport(UIKit)
+                            Button {
+                                self.pasteMusicLinkFromClipboard()
+                            } label: {
+                                Label("Paste from clipboard", systemImage: "doc.on.clipboard")
+                            }
+                            .buttonStyle(.bordered)
+                        #endif
                     }
 
                     HStack(alignment: .center, spacing: 8) {
@@ -371,7 +339,6 @@ struct SessionFormView: View {
                             ProgressView()
                                 .progressViewStyle(.circular)
                         }
-
                     }
 
                     if let providerLabel = self.currentMusicProviderLabel {
@@ -438,10 +405,9 @@ struct SessionFormView: View {
         } message: {
             Text(self.errorMessage)
         }
-        .confirmationDialog(
+        .alert(
             "Would you like a reminder to add reflections later?",
-            isPresented: self.$showReminderPrompt,
-            titleVisibility: .visible
+            isPresented: self.$showReminderPrompt
         ) {
             Button("In 3 hours") { self.handleReminderSelection(.threeHours) }
             Button("Tomorrow") { self.handleReminderSelection(.tomorrow) }
@@ -466,189 +432,40 @@ struct SessionFormView: View {
             }
         }
     }
+}
 
-    // MARK: - Validation Methods
+extension SessionFormView {
+    // MARK: - Music Logic
 
-    private func handleDateChange(from oldDate: Date, to newDate: Date) {
-        let normalizedDate = self.validator.normalizeSessionDate(newDate)
-        if let message = validator.getDateNormalizationMessage(originalDate: newDate, normalizedDate: normalizedDate) {
-            if abs(normalizedDate.timeIntervalSince(newDate)) > 60 {
-                self.sessionDate = normalizedDate
-            }
-
-            self.dateNormalizationMessage = message
-            self.showDateNormalizationHint = true
-
-            Task { @MainActor in
-                try? await Task.sleep(for: .seconds(4))
-                self.showDateNormalizationHint = false
-            }
-        }
-
-        self.debounceValidation()
-        self.scheduleDraftSave()
+    private var trimmedMusicLinkInput: String {
+        self.musicLinkInput.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private func debounceValidation() {
-        self.validationTask?.cancel()
-        self.validationTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled else { return }
-            self.performValidation()
-        }
+    private var hasExistingSessionMusicLink: Bool {
+        guard let session = self.editingSession else { return false }
+        return session.hasMusicLink && !self.didClearMusicLink && self.musicLinkMetadata == nil
     }
 
-    @MainActor private func performValidation() {
-        self.intentionValidation = self.validator.validateIntention(self.intention)
-        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
-        self.dateValidation = self.validator.validateSessionDate(normalizedDate)
+    private var hasAnyMusicLink: Bool {
+        self.musicLinkMetadata != nil || self.hasExistingSessionMusicLink || !self.trimmedMusicLinkInput.isEmpty
     }
 
-    // MARK: - Lifecycle
-
-    private func setupInitialState() {
-        guard !self.mode.isEditing else { return }
-        if let draft = self.sessionStore.recoverDraft() {
-            self.applyDraft(draft)
-            return
+    private var currentMusicProviderLabel: String? {
+        if let metadata = self.musicLinkMetadata {
+            return metadata.provider.displayName
         }
-
-        Task { @MainActor in
-            self.performValidation()
+        if self.hasExistingSessionMusicLink, let raw = self.editingSession?.musicLinkProviderRawValue,
+           let provider = MusicLinkProvider(rawValue: raw) {
+            return provider.displayName
         }
+        if let classification = self.metadataService.classify(urlString: self.musicLinkInput) {
+            return classification.provider.displayName
+        }
+        return nil
     }
 
-    // MARK: - Actions
-
-    private func cancel() {
-        if !self.mode.isEditing {
-            self.sessionStore.clearDraft()
-        }
-        self.dismiss()
-    }
-
-    private func saveSession() {
-        guard self.isFormValid else {
-            self.performValidation()
-            return
-        }
-
-        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
-        let trimmedIntention = self.intention.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        switch self.mode {
-        case .create:
-            self.isLoading = true
-            let newSession = TherapeuticSession(
-                sessionDate: normalizedDate,
-                treatmentType: selectedTreatmentType,
-                administration: self.selectedAdministration,
-                intention: trimmedIntention,
-                moodBefore: self.moodBefore,
-                moodAfter: self.moodAfter
-            )
-            self.applyMusicLink(to: newSession)
-
-            Task {
-                do {
-                    try self.sessionStore.create(newSession)
-                    self.sessionStore.clearDraft()
-                    await MainActor.run {
-                        self.pendingSessionForReminder = newSession
-                        self.showReminderPrompt = true
-                    }
-                } catch {
-                    await MainActor.run {
-                        self.showError(message: "Unable to save session: \(error.localizedDescription)")
-                    }
-                }
-                await MainActor.run {
-                    self.isLoading = false
-                }
-            }
-
-        case let .edit(session):
-            session.sessionDate = normalizedDate
-            session.treatmentType = self.selectedTreatmentType
-            session.administration = self.selectedAdministration
-            session.intention = trimmedIntention
-            session.moodBefore = self.moodBefore
-            session.moodAfter = self.moodAfter
-            session.reflections = self.reflectionText.trimmingCharacters(in: .whitespacesAndNewlines)
-            self.applyMusicLink(to: session)
-
-            do {
-                try self.sessionStore.update(session)
-                self.dismiss()
-            } catch {
-                self.showError(message: "Unable to update session: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    private func showError(message: String) {
-        self.errorMessage = message
-        self.showError = true
-    }
-
-    private func applyDraft(_ draft: TherapeuticSession) {
-        self.sessionDate = draft.sessionDate
-        self.selectedTreatmentType = draft.treatmentType
-        self.selectedAdministration = draft.administration
-        self.intention = draft.intention
-        self.moodBefore = draft.moodBefore
-        self.moodAfter = draft.moodAfter
-        self.musicLinkInput = draft.musicLinkWebURL ?? draft.musicLinkURL ?? ""
-        self.musicLinkMetadata = SessionFormView.metadata(from: draft)
-        self.musicLinkError = nil
-        self.didClearMusicLink = false
-        self.isFetchingMusicLink = false
-        self.pendingMetadataRequest = nil
-    }
-
-    private func scheduleDraftSave() {
-        guard !self.mode.isEditing else { return }
-        self.draftSaveTask?.cancel()
-        let snapshot = self.buildDraftSnapshot()
-        self.draftSaveTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(350))
-            guard !Task.isCancelled else { return }
-            self.sessionStore.saveDraft(snapshot)
-        }
-    }
-
-    private func buildDraftSnapshot() -> TherapeuticSession {
-        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
-        let draft = TherapeuticSession(
-            sessionDate: normalizedDate,
-            treatmentType: self.selectedTreatmentType,
-            administration: self.selectedAdministration,
-            intention: self.intention,
-            moodBefore: self.moodBefore,
-            moodAfter: self.moodAfter
-        )
-        self.applyMusicLink(to: draft)
-        return draft
-    }
-
-    private func handleReminderSelection(_ option: ReminderOption) {
-        guard let session = self.pendingSessionForReminder else {
-            self.dismiss()
-            return
-        }
-
-        Task {
-            do {
-                try await self.sessionStore.setReminder(for: session, option: option)
-            } catch {
-                await MainActor.run {
-                    self.showError(message: "Unable to schedule reminder: \(error.localizedDescription)")
-                }
-            }
-            await MainActor.run {
-                self.dismiss()
-            }
-        }
+    private var shouldShowMusicLinkHelper: Bool {
+        self.trimmedMusicLinkInput.isEmpty && self.musicLinkMetadata == nil && !self.hasExistingSessionMusicLink
     }
 
     private func removeMusicLink() {
@@ -663,14 +480,13 @@ struct SessionFormView: View {
 
     private func pasteMusicLinkFromClipboard() {
         #if canImport(UIKit)
-        if let clipboard = UIPasteboard.general.string?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-            !clipboard.isEmpty
-        {
-            self.musicLinkInput = clipboard
-        } else {
-            self.musicLinkError = "Clipboard is empty."
-        }
+            if let clipboard = UIPasteboard.general.string?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+                !clipboard.isEmpty {
+                self.musicLinkInput = clipboard
+            } else {
+                self.musicLinkError = "Clipboard is empty."
+            }
         #endif
     }
 
@@ -681,7 +497,6 @@ struct SessionFormView: View {
             self.isFetchingMusicLink = false
             self.musicLinkMetadata = nil
             self.musicLinkError = nil
-            self.didClearMusicLink = false
             self.pendingMetadataRequest = nil
             return
         }
@@ -744,6 +559,7 @@ struct SessionFormView: View {
             session.musicLinkProvider = .unknown
         }
     }
+
     private func assign(_ metadata: MusicLinkMetadata, to session: TherapeuticSession) {
         session.musicLinkURL = metadata.originalURL.absoluteString
         session.musicLinkWebURL = metadata.canonicalURL.absoluteString
@@ -753,7 +569,7 @@ struct SessionFormView: View {
         session.musicLinkProvider = metadata.provider
     }
 
-    private static func metadata(from session: TherapeuticSession) -> MusicLinkMetadata? {
+    static func metadata(from session: TherapeuticSession) -> MusicLinkMetadata? {
         guard session.hasMusicLink else { return nil }
         guard
             let originalString = session.musicLinkURL ?? session.musicLinkWebURL,
@@ -770,14 +586,205 @@ struct SessionFormView: View {
             thumbnailURL: session.musicLinkArtworkURL.flatMap(URL.init(string:))
         )
     }
+}
 
+private extension SessionFormView {
+    // MARK: - Validation Methods
+
+    func handleDateChange(from oldDate: Date, to newDate: Date) {
+        let normalizedDate = self.validator.normalizeSessionDate(newDate)
+        if let message = validator.getDateNormalizationMessage(originalDate: newDate, normalizedDate: normalizedDate) {
+            if abs(normalizedDate.timeIntervalSince(newDate)) > 60 {
+                self.sessionDate = normalizedDate
+            }
+
+            self.dateNormalizationMessage = message
+            self.showDateNormalizationHint = true
+
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(4))
+                self.showDateNormalizationHint = false
+            }
+        }
+
+        self.debounceValidation()
+        self.scheduleDraftSave()
+    }
+
+    func debounceValidation() {
+        self.validationTask?.cancel()
+        self.validationTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled else { return }
+            self.performValidation()
+        }
+    }
+
+    @MainActor func performValidation() {
+        self.intentionValidation = self.validator.validateIntention(self.intention)
+        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
+        self.dateValidation = self.validator.validateSessionDate(normalizedDate)
+    }
+
+    // MARK: - Lifecycle
+
+    func setupInitialState() {
+        guard !self.mode.isEditing else { return }
+        if let draft = self.sessionStore.recoverDraft() {
+            self.applyDraft(draft)
+            return
+        }
+
+        Task { @MainActor in
+            self.performValidation()
+        }
+    }
+
+    // MARK: - Actions
+
+    func cancel() {
+        if !self.mode.isEditing {
+            self.sessionStore.clearDraft()
+        }
+        self.dismiss()
+    }
+
+    func saveSession() {
+        guard self.isFormValid else {
+            self.performValidation()
+            return
+        }
+
+        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
+        let trimmedIntention = self.intention.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        switch self.mode {
+        case .create:
+            self.isLoading = true
+            let newSession = TherapeuticSession(
+                sessionDate: normalizedDate,
+                treatmentType: selectedTreatmentType,
+                administration: self.selectedAdministration,
+                intention: trimmedIntention,
+                moodBefore: self.moodBefore,
+                moodAfter: self.moodAfter
+            )
+            self.applyMusicLink(to: newSession)
+
+            Task {
+                do {
+                    try self.sessionStore.create(newSession)
+                    self.sessionStore.clearDraft()
+                    await MainActor.run {
+                        self.pendingSessionForReminder = newSession
+                        self.showReminderPrompt = true
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.showError(message: "Unable to save session: \(error.localizedDescription)")
+                    }
+                }
+                await MainActor.run {
+                    self.isLoading = false
+                }
+            }
+
+        case let .edit(session):
+            session.sessionDate = normalizedDate
+            session.treatmentType = self.selectedTreatmentType
+            session.administration = self.selectedAdministration
+            session.intention = trimmedIntention
+            session.moodBefore = self.moodBefore
+            session.moodAfter = self.moodAfter
+            session.reflections = self.reflectionText.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.applyMusicLink(to: session)
+
+            do {
+                try self.sessionStore.update(session)
+                self.dismiss()
+            } catch {
+                self.showError(message: "Unable to update session: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func showError(message: String) {
+        self.errorMessage = message
+        self.showError = true
+    }
+
+    func applyDraft(_ draft: TherapeuticSession) {
+        self.sessionDate = draft.sessionDate
+        self.selectedTreatmentType = draft.treatmentType
+        self.selectedAdministration = draft.administration
+        self.intention = draft.intention
+        self.moodBefore = draft.moodBefore
+        self.moodAfter = draft.moodAfter
+        self.musicLinkInput = draft.musicLinkWebURL ?? draft.musicLinkURL ?? ""
+        self.musicLinkMetadata = SessionFormView.metadata(from: draft)
+        self.musicLinkError = nil
+        self.didClearMusicLink = false
+        self.isFetchingMusicLink = false
+        self.pendingMetadataRequest = nil
+    }
+
+    func scheduleDraftSave() {
+        guard !self.mode.isEditing else { return }
+        self.draftSaveTask?.cancel()
+        let snapshot = self.buildDraftSnapshot()
+        self.draftSaveTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(350))
+            guard !Task.isCancelled else { return }
+            self.sessionStore.saveDraft(snapshot)
+        }
+    }
+
+    func buildDraftSnapshot() -> TherapeuticSession {
+        let normalizedDate = self.validator.normalizeSessionDate(self.sessionDate)
+        let draft = TherapeuticSession(
+            sessionDate: normalizedDate,
+            treatmentType: self.selectedTreatmentType,
+            administration: self.selectedAdministration,
+            intention: self.intention,
+            moodBefore: self.moodBefore,
+            moodAfter: self.moodAfter
+        )
+        self.applyMusicLink(to: draft)
+        return draft
+    }
+
+    func handleReminderSelection(_ option: ReminderOption) {
+        guard let session = self.pendingSessionForReminder else {
+            self.dismiss()
+            return
+        }
+
+        Task {
+            do {
+                try await self.sessionStore.setReminder(for: session, option: option)
+            } catch {
+                await MainActor.run {
+                    self.showError(message: "Unable to schedule reminder: \(error.localizedDescription)")
+                }
+            }
+            await MainActor.run {
+                self.dismiss()
+            }
+        }
+    }
 }
 
 #Preview {
-    let container = try! ModelContainer(
-        for: TherapeuticSession.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
+    let container: ModelContainer = {
+        do {
+            return try ModelContainer(
+                for: TherapeuticSession.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+        } catch {
+            fatalError("Failed to create preview container: \(error)")
+        }
+    }()
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
 
     return NavigationStack {

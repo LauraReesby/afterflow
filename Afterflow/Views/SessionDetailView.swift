@@ -3,7 +3,7 @@
 import SwiftData
 import SwiftUI
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 struct SessionDetailView: View {
@@ -154,8 +154,7 @@ struct SessionDetailView: View {
                 .padding(.top, 4)
 
                 if self.session.status == .needsReflection,
-                   let reminderLabel = self.session.reminderDisplayText
-                {
+                   let reminderLabel = self.session.reminderDisplayText {
                     ReminderPill(text: reminderLabel)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 2)
@@ -397,15 +396,15 @@ private struct MusicLinkDetailCard: View {
                         ProgressView()
                     }
                 case .failure:
-                    fallbackArtwork
+                    self.fallbackArtwork
                 @unknown default:
-                    fallbackArtwork
+                    self.fallbackArtwork
                 }
             }
             .frame(width: 64, height: 64)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
-            fallbackArtwork
+            self.fallbackArtwork
         }
     }
 
@@ -449,13 +448,19 @@ extension SessionDetailView {
 }
 
 #Preview {
-    let container = try! ModelContainer(
-        for: TherapeuticSession.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
+    let container: ModelContainer = {
+        do {
+            return try ModelContainer(
+                for: TherapeuticSession.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+        } catch {
+            fatalError("Failed to create preview container: \(error)")
+        }
+    }()
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
     let session = TherapeuticSession(intention: "Feel more open with my partner", moodBefore: 4, moodAfter: 7)
-    try! store.create(session)
+    try? store.create(session)
     return NavigationStack {
         SessionDetailView(session: session)
     }

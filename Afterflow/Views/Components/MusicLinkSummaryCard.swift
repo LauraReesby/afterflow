@@ -8,15 +8,13 @@ struct MusicLinkSummaryCard: View {
             Text(self.session.musicLinkTitle ?? "Playlist link")
                 .font(.headline)
             if let providerRaw = session.musicLinkProviderRawValue,
-               let provider = MusicLinkProvider(rawValue: providerRaw)
-            {
+               let provider = MusicLinkProvider(rawValue: providerRaw) {
                 Text(provider.displayName)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             if let urlString = session.musicLinkWebURL ?? session.musicLinkURL,
-               let url = URL(string: urlString)
-            {
+               let url = URL(string: urlString) {
                 Text(url.absoluteString)
                     .font(.footnote)
                     .foregroundStyle(.secondary)

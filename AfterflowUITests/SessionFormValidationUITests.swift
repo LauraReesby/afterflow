@@ -50,8 +50,8 @@ final class SessionFormValidationUITests: XCTestCase {
         musicField.typeText("https://music.apple.com/us/playlist/calm/pl.u-123")
 
         let preview = app.otherElements["musicLinkPreview"].exists
-        ? app.otherElements["musicLinkPreview"]
-        : app.otherElements["musicLinkRawPreview"]
+            ? app.otherElements["musicLinkPreview"]
+            : app.otherElements["musicLinkRawPreview"]
         XCTAssertTrue(preview.waitForExistence(timeout: 8), "Preview should appear after entering a link")
 
         let removeButton = app.buttons["removeMusicLinkButton"]
