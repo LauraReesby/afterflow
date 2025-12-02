@@ -80,12 +80,12 @@ extension XCUIElement {
             self.tap()
             return
         }
-        
+
         // Wait a bit for layout to settle
         if !self.exists {
             return
         }
-        
+
         // Give the view time to get a valid frame
         let deadline = Date().addingTimeInterval(2)
         while Date() < deadline {
@@ -93,19 +93,20 @@ extension XCUIElement {
                 self.tap()
                 return
             }
-            
+
             let frame = self.frame
             // Check if frame is valid (not negative, not NaN, not infinite)
             if frame.width > 0, frame.height > 0,
                frame.width.isFinite, frame.height.isFinite,
-               frame.origin.x.isFinite, frame.origin.y.isFinite {
+               frame.origin.x.isFinite, frame.origin.y.isFinite
+            {
                 let center = frame.integral.center
                 let coord = XCUIApplication().coordinate(withNormalizedOffset: .zero)
                     .withOffset(CGVector(dx: center.x, dy: center.y))
                 coord.tap()
                 return
             }
-            
+
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         }
     }

@@ -154,7 +154,8 @@ struct SessionDetailView: View {
                 .padding(.top, 4)
 
                 if self.session.status == .needsReflection,
-                   let reminderLabel = self.session.reminderDisplayText {
+                   let reminderLabel = self.session.reminderDisplayText
+                {
                     ReminderPill(text: reminderLabel)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 2)

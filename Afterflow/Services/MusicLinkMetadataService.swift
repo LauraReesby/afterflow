@@ -57,7 +57,8 @@ final class MusicLinkMetadataService {
         let metadata: MusicLinkMetadata
 
         if classification.provider.supportsOEmbed,
-           let endpoint = classification.provider.oEmbedURL(for: classification.canonicalURL) {
+           let endpoint = classification.provider.oEmbedURL(for: classification.canonicalURL)
+        {
             do {
                 let payload = try await self.fetchOEmbedPayload(endpoint: endpoint)
                 metadata = MusicLinkMetadata(
