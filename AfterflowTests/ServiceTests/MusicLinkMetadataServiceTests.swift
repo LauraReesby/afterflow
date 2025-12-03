@@ -43,7 +43,8 @@ struct MusicLinkMetadataServiceTests {
         {
           "title": "Deep Focus",
           "author_name": "Spotify",
-          "thumbnail_url": "https://i.scdn.co/image/test"
+          "thumbnail_url": "https://i.scdn.co/image/test",
+          "duration": 4980
         }
         """.utf8)
         let service = MusicLinkMetadataService(
@@ -54,13 +55,28 @@ struct MusicLinkMetadataServiceTests {
         #expect(metadata.title == "Deep Focus")
         #expect(metadata.authorName == "Spotify")
         #expect(metadata.thumbnailURL?.absoluteString == "https://i.scdn.co/image/test")
+        #expect(metadata.durationSeconds == 4980)
     }
 
     @Test("Unsupported provider falls back to link-only metadata") func fallbackForUnsupportedProvider() async throws {
         let service = MusicLinkMetadataService()
         let metadata = try await service.fetchMetadata(for: "https://music.apple.com/us/playlist/calm/pl.u-123")
         #expect(metadata.provider == .appleMusic)
-        #expect(metadata.title == nil)
+        #expect(metadata.title == "Calm")
+        #expect(metadata.thumbnailURL == nil)
+    }
+
+    @Test("Classifies Apple Podcasts link and falls back to minimal metadata") func classifyApplePodcastsLink(
+    ) async throws {
+        let service = MusicLinkMetadataService()
+        let url = "https://podcasts.apple.com/us/podcast/example-show/id1234567890"
+        let classification = service.classify(urlString: url)
+        #expect(classification?.provider == .applePodcasts)
+        #expect(classification?.canonicalURL.absoluteString == url)
+
+        let metadata = try await service.fetchMetadata(for: url)
+        #expect(metadata.provider == .applePodcasts)
+        #expect(metadata.title == "Example Show")
         #expect(metadata.thumbnailURL == nil)
     }
 
@@ -98,6 +114,56 @@ struct MusicLinkMetadataServiceTests {
         #expect(metadata.provider == .spotify)
         #expect(metadata.title == nil)
         #expect(metadata.thumbnailURL == nil)
+    }
+
+    @Test("SoundCloud oEmbed fetches metadata") func soundCloudOEmbed() async throws {
+        let payload = Data("""
+        {
+          "title": "Gentle Waves",
+          "author_name": "Calm Artist",
+          "thumbnail_url": "https://soundcloud.com/thumb.png"
+        }
+        """.utf8)
+        let service = MusicLinkMetadataService(
+            urlSession: MockSession(steps: [.response(payload, 200)])
+        )
+        let metadata = try await service.fetchMetadata(for: "https://soundcloud.com/artist/track")
+        #expect(metadata.provider == .soundcloud)
+        #expect(metadata.title == "Gentle Waves")
+        #expect(metadata.authorName == "Calm Artist")
+        #expect(metadata.thumbnailURL?.absoluteString == "https://soundcloud.com/thumb.png")
+    }
+
+    @Test("Bandcamp fallback infers title from path") func bandcampTitleInference() async throws {
+        let service = MusicLinkMetadataService()
+        let metadata = try await service.fetchMetadata(for: "https://artist.bandcamp.com/album/blue-waves")
+        #expect(metadata.provider == .bandcamp)
+        #expect(metadata.title == "Blue Waves")
+    }
+
+    @Test("Tidal fallback infers title from path") func tidalTitleInference() async throws {
+        let service = MusicLinkMetadataService()
+        let metadata = try await service.fetchMetadata(for: "https://tidal.com/album/deep-focus")
+        #expect(metadata.provider == .tidal)
+        #expect(metadata.title == "Deep Focus")
+    }
+
+    @Test("Tidal classification and oEmbed metadata") func tidalOEmbed() async throws {
+        let payload = Data("""
+        {
+          "title": "Chill Sessions",
+          "author_name": "Tidal Artist",
+          "thumbnail_url": "https://tidal.com/thumb.png"
+        }
+        """.utf8)
+        let service = MusicLinkMetadataService(
+            urlSession: MockSession(steps: [.response(payload, 200)])
+        )
+        let metadata = try await service.fetchMetadata(for: "https://tidal.com/browse/playlist/abc123")
+        #expect(metadata.provider == .tidal)
+        #expect(metadata.title == "Chill Sessions")
+        #expect(metadata.authorName == "Tidal Artist")
+        #expect(metadata.thumbnailURL?.absoluteString == "https://tidal.com/thumb.png")
     }
 
     @Test("Successful fetches cache results to avoid duplicate requests") func cachingPreventsDuplicateRequests(

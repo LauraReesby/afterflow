@@ -140,6 +140,7 @@ private struct SessionDraft: Codable {
     let musicLinkAuthorName: String?
     let musicLinkArtworkURL: String?
     let musicLinkProviderRawValue: String?
+    let musicLinkDurationSeconds: Int?
     let reminderDate: Date?
 
     init(session: TherapeuticSession) {
@@ -156,6 +157,7 @@ private struct SessionDraft: Codable {
         self.musicLinkAuthorName = session.musicLinkAuthorName
         self.musicLinkArtworkURL = session.musicLinkArtworkURL
         self.musicLinkProviderRawValue = session.musicLinkProviderRawValue
+        self.musicLinkDurationSeconds = session.musicLinkDurationSeconds
         self.reminderDate = session.reminderDate
     }
 
@@ -176,6 +178,7 @@ private struct SessionDraft: Codable {
         session.musicLinkAuthorName = self.musicLinkAuthorName
         session.musicLinkArtworkURL = self.musicLinkArtworkURL
         session.musicLinkProviderRawValue = self.musicLinkProviderRawValue
+        session.musicLinkDurationSeconds = self.musicLinkDurationSeconds
         return session
     }
 }

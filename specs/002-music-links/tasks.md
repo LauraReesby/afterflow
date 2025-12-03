@@ -18,11 +18,11 @@ _Status reset 2025‑11‑29: pivoted from Spotify-only OAuth to general playlis
 ## Phase 3 – Session Detail UX
 - [x] T210 [US2] Build `MusicLinkCardView` showing title, provider icon, thumbnail (if available), and fallback copy.  
 - [x] T211 [US2] Add “Open playlist” deep link with scheme-aware fallback + remove action on SessionDetailView.  
-- [ ] T212 [US2] UI/VoiceOver polish + snapshot/UI tests for the card states (Tier‑1 preview vs link-only).  
+- [x] T212 [US2] UI/VoiceOver polish + snapshot/UI tests for the card states (Tier‑1 preview vs link-only).  
 
 ## Phase 4 – Extended Providers
-- [ ] T213 [US3] Enable Tier‑2 provider (SoundCloud) via the same oEmbed pipeline, gated behind a configuration flag.  
-- [ ] T214 [US3] Add copy variants for link-only services (Apple Music, Bandcamp, Tidal, Deezer, custom).  
+- [x] T213 [US3] Enable Tier‑2 provider (SoundCloud) via the same oEmbed pipeline.  
+- [x] T214 [US3] Add copy variants for link-only services (Apple Music, Bandcamp, Tidal, Deezer, custom).  
 - [ ] T215 [US3] Regression/UI tests covering Tier‑2 + link-only messaging.  
 
 ## Phase 5 – QA & Governance

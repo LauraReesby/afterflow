@@ -3,7 +3,7 @@ import XCTest
 extension XCTestCase {
     func makeApp(arguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        var launchArguments = ["-ui-testing"]
+        var launchArguments = ["-ui-testing", "-ui-musiclink-fixtures"]
         launchArguments.append(contentsOf: arguments)
         app.launchArguments = launchArguments
         return app

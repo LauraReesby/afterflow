@@ -13,6 +13,7 @@ struct MusicLinkMetadata: Equatable {
     let title: String?
     let authorName: String?
     let thumbnailURL: URL?
+    let durationSeconds: Int?
 }
 
 final class MusicLinkMetadataService {
@@ -32,7 +33,10 @@ final class MusicLinkMetadataService {
     private let timeout: TimeInterval
     private var cache: [String: MusicLinkMetadata] = [:]
 
-    init(urlSession: URLSessioning = URLSession.shared, timeout: TimeInterval = 3.0) {
+    init(
+        urlSession: URLSessioning = URLSession.shared,
+        timeout: TimeInterval = 3.0
+    ) {
         self.urlSession = urlSession
         self.timeout = timeout
     }
@@ -66,7 +70,8 @@ final class MusicLinkMetadataService {
                     canonicalURL: classification.canonicalURL,
                     title: payload.title,
                     authorName: payload.authorName,
-                    thumbnailURL: payload.thumbnailURL
+                    thumbnailURL: payload.thumbnailURL,
+                    durationSeconds: payload.durationSeconds
                 )
             } catch {
                 metadata = self.fallbackMetadata(for: classification)
@@ -96,13 +101,15 @@ final class MusicLinkMetadataService {
     }
 
     private func fallbackMetadata(for classification: ClassificationResult) -> MusicLinkMetadata {
-        MusicLinkMetadata(
+        let parsedTitle = self.inferredTitle(for: classification.provider, url: classification.canonicalURL)
+        return MusicLinkMetadata(
             provider: classification.provider,
             originalURL: classification.originalURL,
             canonicalURL: classification.canonicalURL,
-            title: nil,
+            title: parsedTitle,
             authorName: nil,
-            thumbnailURL: nil
+            thumbnailURL: nil,
+            durationSeconds: nil
         )
     }
 
@@ -135,13 +142,60 @@ final class MusicLinkMetadataService {
         guard var host = url.host?.lowercased() else { return .linkOnly }
         if host.hasPrefix("www.") { host.removeFirst(4) }
 
+        if host
+            .contains("podcasts.apple.com") || (host.contains("itunes.apple.com") && url.path.contains("/podcast/")) {
+            return .applePodcasts
+        }
         if host.contains("spotify.com") { return .spotify }
         if host.contains("youtube.com") || host == "youtu.be" || host
             .contains("youtube-nocookie.com") { return .youtube }
         if host.contains("soundcloud.com") { return .soundcloud }
         if host.contains("music.apple.com") || host.contains("itunes.apple.com") { return .appleMusic }
+        if host.contains("tidal.com") { return .tidal }
         if host.contains("bandcamp.com") { return .bandcamp }
         return .linkOnly
+    }
+
+    private func inferredTitle(for provider: MusicLinkProvider, url: URL) -> String? {
+        switch provider {
+        case .appleMusic, .applePodcasts:
+            let components = url.pathComponents.filter { $0 != "/" }
+            let ignored = Set(["us", "podcast", "album", "playlist"])
+            let candidate = components.reversed().first(where: { component in
+                guard !component.isEmpty else { return false }
+                let lower = component.lowercased()
+                if ignored.contains(lower) { return false }
+                if lower.hasPrefix("id") { return false }
+                if lower.hasPrefix("pl.") { return false }
+                if lower.count <= 2 { return false }
+                return true
+            })
+
+            guard let slug = candidate else { return nil }
+            return Self.normalizedTitle(from: slug)
+        case .bandcamp, .tidal, .linkOnly, .unknown:
+            let components = url.pathComponents.filter { $0 != "/" }
+            if let slug = components.reversed().first(where: { !$0.isEmpty }) {
+                return Self.normalizedTitle(from: slug)
+            }
+            if var host = url.host {
+                if host.hasPrefix("www.") { host.removeFirst(4) }
+                return host.localizedCapitalized
+            }
+            return nil
+        default:
+            return nil
+        }
+    }
+
+    private static func normalizedTitle(from slug: String) -> String {
+        let decoded = slug.removingPercentEncoding ?? slug
+        let trimmedExtension = decoded.split(separator: ".").dropLast().joined(separator: ".")
+        let base = trimmedExtension.isEmpty ? decoded : trimmedExtension
+        let spaced = base
+            .replacingOccurrences(of: "-", with: " ")
+            .replacingOccurrences(of: "_", with: " ")
+        return spaced.localizedCapitalized
     }
 }
 
@@ -149,10 +203,12 @@ private struct OEmbedResponse: Decodable {
     let title: String?
     let authorName: String?
     let thumbnailURL: URL?
+    let durationSeconds: Int?
 
     enum CodingKeys: String, CodingKey {
         case title
         case authorName = "author_name"
         case thumbnailURL = "thumbnail_url"
+        case durationSeconds = "duration"
     }
 }

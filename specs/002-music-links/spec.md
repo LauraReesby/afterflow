@@ -15,7 +15,7 @@ Music is central to the therapeutic setting, yet users can’t easily log what t
 - Accept a playlist URL from popular services and attach it to any TherapeuticSession.
 - Tier‑1 URLs (Spotify, YouTube) automatically fetch preview metadata via oEmbed (title + thumbnail).
 - Tier‑2 services (SoundCloud) reuse the same pipeline later if needed.
-- Link-only services (Apple Music, Bandcamp, Tidal, Deezer, custom) still store the URL and show a graceful fallback card.
+- Link-only services (Apple Music, Bandcamp, Deezer, custom) still store the URL and show a graceful fallback card.
 - No OAuth, logins, or playback—only metadata fetches and deep links out.
 - **Performance**: metadata fetch < 3 s; UI remains responsive even if parsing fails.
 
@@ -48,7 +48,7 @@ Music is central to the therapeutic setting, yet users can’t easily log what t
 ## Functional Requirements
 | ID | Requirement |
 |----|--------------|
-| FR-201 | Parse and validate playlist URLs from user input; classify provider (Spotify, YouTube, SoundCloud, other). |
+| FR-201 | Parse and validate playlist URLs from user input; classify provider (Spotify, YouTube, SoundCloud, Tidal, other). |
 | FR-202 | For Tier‑1 providers (Spotify, YouTube) call their public oEmbed endpoints to retrieve title + thumbnail + author/provider metadata. |
 | FR-203 | Cache fetched metadata in memory for the current editing session to avoid duplicate calls. |
 | FR-204 | Persist the normalized URL plus display fields inside TherapeuticSession (repurpose existing playlist fields as generic music link fields). |
@@ -63,7 +63,7 @@ Music is central to the therapeutic setting, yet users can’t easily log what t
 | ID | Description |
 |----|--------------|
 | TR-201 | Create a `MusicLinkMetadataService` that performs HTTP(S) requests (oEmbed) with 3‑second timeout and JSON decoding. |
-| TR-202 | Tier‑1 providers: Spotify (`https://open.spotify.com/oembed`) and YouTube (`https://www.youtube.com/oembed`). Tier‑2 (SoundCloud) shares the same service but can be feature‑flagged later. |
+| TR-202 | Providers: Spotify (`https://open.spotify.com/oembed`), YouTube (`https://www.youtube.com/oembed`), SoundCloud (`https://soundcloud.com/oembed`), and Tidal (`https://oembed.tidal.com/oembed`). |
 | TR-203 | All other providers fall back to link-only mode; never attempt scraping or unofficial APIs. |
 | TR-204 | No OAuth, tokens, or refresh logic required. |
 | TR-205 | SwiftUI UI additions: inline link input row, metadata preview card, and remove-link confirmation. |

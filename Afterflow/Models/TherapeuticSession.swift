@@ -39,7 +39,9 @@ enum MusicLinkProvider: String, Codable, CaseIterable {
     case youtube
     case soundcloud
     case appleMusic
+    case applePodcasts
     case bandcamp
+    case tidal
     case linkOnly
     case unknown
 
@@ -49,14 +51,16 @@ enum MusicLinkProvider: String, Codable, CaseIterable {
         case .youtube: "YouTube"
         case .soundcloud: "SoundCloud"
         case .appleMusic: "Apple Music"
+        case .applePodcasts: "Apple Podcasts"
         case .bandcamp: "Bandcamp"
+        case .tidal: "Tidal"
         case .linkOnly, .unknown: "Playlist Link"
         }
     }
 
     var supportsOEmbed: Bool {
         switch self {
-        case .spotify, .youtube:
+        case .spotify, .youtube, .soundcloud, .tidal:
             true
         default:
             false
@@ -76,6 +80,14 @@ enum MusicLinkProvider: String, Codable, CaseIterable {
             components.host = "www.youtube.com"
             components.path = "/oembed"
             components.queryItems = [URLQueryItem(name: "format", value: "json")]
+        case .soundcloud:
+            components.scheme = "https"
+            components.host = "soundcloud.com"
+            components.path = "/oembed"
+        case .tidal:
+            components.scheme = "https"
+            components.host = "oembed.tidal.com"
+            components.path = "/oembed"
         default:
             return nil
         }
@@ -103,7 +115,7 @@ enum MusicLinkProvider: String, Codable, CaseIterable {
                 return URL(string: "https://www.youtube.com/watch?v=\(videoID)")
             }
             return self.enforceHTTPS(for: originalURL)
-        case .soundcloud, .appleMusic, .bandcamp, .linkOnly, .unknown:
+        case .soundcloud, .appleMusic, .applePodcasts, .bandcamp, .tidal, .linkOnly, .unknown:
             return self.enforceHTTPS(for: originalURL)
         }
     }
@@ -199,6 +211,9 @@ final class TherapeuticSession {
     /// Playlist artwork/thumbnail URL
     var musicLinkArtworkURL: String?
 
+    /// Link duration (seconds) when available from oEmbed
+    var musicLinkDurationSeconds: Int?
+
     /// Underlying provider raw value
     var musicLinkProviderRawValue: String?
 
@@ -231,6 +246,7 @@ final class TherapeuticSession {
         self.musicLinkTitle = nil
         self.musicLinkAuthorName = nil
         self.musicLinkArtworkURL = nil
+        self.musicLinkDurationSeconds = nil
         self.musicLinkProviderRawValue = nil
     }
 }
@@ -332,6 +348,7 @@ extension TherapeuticSession {
         self.musicLinkTitle = nil
         self.musicLinkAuthorName = nil
         self.musicLinkArtworkURL = nil
+        self.musicLinkDurationSeconds = nil
         self.musicLinkProviderRawValue = nil
         self.markAsUpdated()
     }

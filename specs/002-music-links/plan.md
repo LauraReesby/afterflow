@@ -41,7 +41,7 @@ Tests/
 | 1 | Metadata Foundation | MusicLinkMetadataService (classification + oEmbed) + unit tests |
 | 2 | Session Form UX | Playlist Link input row, inline validation, fetch/retry, remove action |
 | 3 | Session Detail UX | Metadata card, fallback messaging, open button, remove action |
-| 4 | Extended Providers | Optional SoundCloud (Tier‑2) wiring + link-only copy polish |
+| 4 | Extended Providers | SoundCloud wiring + link-only copy polish |
 | 5 | QA & Governance | Accessibility audit, privacy review, documentation updates |
 
 ## Metrics

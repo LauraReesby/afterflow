@@ -48,7 +48,7 @@ struct SessionDetailView: View {
                 if self.session.hasMusicLink {
                     MusicLinkDetailCard(
                         title: self.session.musicLinkTitle ?? "Playlist link",
-                        provider: self.session.musicLinkProvider.displayName,
+                        provider: self.session.musicLinkProvider,
                         author: self.session.musicLinkAuthorName,
                         urlDisplay: self.session.musicLinkWebURL ?? self.session.musicLinkURL ?? "",
                         artworkURL: self.session.musicLinkArtworkURL.flatMap(URL.init(string:)),
@@ -126,21 +126,9 @@ struct SessionDetailView: View {
                     }
                     Spacer()
                     if self.session.hasMusicLink {
-                        Image(systemName: "music.note.list")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                        self.summaryBadge
                             .accessibilityLabel("Music attached")
                     }
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Intention")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    let trimmed = self.session.intention.trimmingCharacters(in: .whitespacesAndNewlines)
-                    Text(trimmed.isEmpty ? "No intention captured." : trimmed)
-                        .font(.body)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
                 HStack(spacing: 8) {
@@ -176,6 +164,40 @@ struct SessionDetailView: View {
         let descriptor = MoodRatingScale.descriptor(for: value)
         let emoji = MoodRatingScale.emoji(for: value)
         return AnyView(SessionDetailRow(title: title, value: "\(value) (\(descriptor)) \(emoji)"))
+    }
+
+    private var summaryBadge: some View {
+        if let brand = brandImage(for: self.session.musicLinkProvider) {
+            return AnyView(
+                brand
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            )
+        }
+        return AnyView(
+            Image(systemName: "music.note.list")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        )
+    }
+
+    private func brandImage(for provider: MusicLinkProvider) -> Image? {
+        let name: String
+        switch provider {
+        case .spotify: name = "spotify"
+        case .youtube: name = "youtube"
+        case .soundcloud: name = "soundcloud"
+        case .appleMusic: name = "appleMusic"
+        case .applePodcasts: name = "applePodcasts"
+        case .bandcamp: name = "bandcamp"
+        case .tidal: name = "tidal"
+        default: return nil
+        }
+
+        guard UIImage(named: name) != nil else { return nil }
+        return Image(name)
     }
 
     private var hasAfterMood: Bool {
@@ -325,7 +347,7 @@ private struct ReminderPill: View {
 
 private struct MusicLinkDetailCard: View {
     let title: String
-    let provider: String
+    let provider: MusicLinkProvider
     let author: String?
     let urlDisplay: String
     let artworkURL: URL?
@@ -375,10 +397,11 @@ private struct MusicLinkDetailCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityIdentifier("musicLinkDetailCard")
     }
 
     private var providerText: String {
-        self.provider.isEmpty ? "Music link" : self.provider
+        self.provider.displayName
     }
 
     @ViewBuilder
@@ -409,15 +432,49 @@ private struct MusicLinkDetailCard: View {
     }
 
     private var fallbackArtwork: some View {
-        ZStack {
-            Color.gray.opacity(0.12)
-            Image(systemName: "music.note.list")
-                .imageScale(.medium)
-                .foregroundStyle(.secondary)
+        if let brand = brandImage(for: self.provider) {
+            return AnyView(
+                brand
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 64, height: 64)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            )
         }
-        .frame(width: 64, height: 64)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+        return AnyView(
+            ZStack {
+                Color.gray.opacity(0.12)
+                Image(systemName: "music.note.list")
+                    .imageScale(.medium)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(width: 64, height: 64)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+        )
     }
+}
+
+// Shared brand loader for summary badge + detail card
+private func brandImage(for provider: MusicLinkProvider) -> Image? {
+    let baseName: String
+    switch provider {
+    case .spotify: baseName = "spotify"
+    case .youtube: baseName = "youtube"
+    case .soundcloud: baseName = "soundcloud"
+    case .appleMusic: baseName = "appleMusic"
+    case .applePodcasts: baseName = "applePodcasts"
+    case .bandcamp: baseName = "bandcamp"
+    case .tidal: baseName = "tidal"
+    default: return nil
+    }
+
+    for candidate in ["Brands/\(baseName)", baseName] {
+        if let uiImage = UIImage(named: candidate) {
+            return Image(uiImage: uiImage)
+        }
+    }
+    return nil
 }
 
 private extension String {

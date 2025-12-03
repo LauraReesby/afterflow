@@ -566,6 +566,7 @@ extension SessionFormView {
         session.musicLinkTitle = metadata.title
         session.musicLinkAuthorName = metadata.authorName
         session.musicLinkArtworkURL = metadata.thumbnailURL?.absoluteString
+        session.musicLinkDurationSeconds = metadata.durationSeconds
         session.musicLinkProvider = metadata.provider
     }
 
@@ -582,7 +583,8 @@ extension SessionFormView {
             canonicalURL: canonical,
             title: session.musicLinkTitle,
             authorName: session.musicLinkAuthorName,
-            thumbnailURL: session.musicLinkArtworkURL.flatMap(URL.init(string:))
+            thumbnailURL: session.musicLinkArtworkURL.flatMap(URL.init(string:)),
+            durationSeconds: session.musicLinkDurationSeconds
         )
     }
 }
