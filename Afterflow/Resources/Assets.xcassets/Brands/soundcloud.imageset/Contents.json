@@ -3,6 +3,16 @@
     {
       "idiom": "universal",
       "filename": "brand-soundcloud-logo.png"
+    },
+    {
+      "idiom": "universal",
+      "filename": "brand-soundcloud-logo-dark.png",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
     }
   ],
   "info": {

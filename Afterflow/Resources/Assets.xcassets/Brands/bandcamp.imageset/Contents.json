@@ -3,6 +3,16 @@
     {
       "idiom": "universal",
       "filename": "brand-bandcamp-logo.png"
+    },
+    {
+      "idiom": "universal",
+      "filename": "brand-bandcamp-logo-dark.png",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
     }
   ],
   "info": {

@@ -3,6 +3,16 @@
     {
       "idiom": "universal",
       "filename": "brand-youtube-logo.png"
+    },
+    {
+      "idiom": "universal",
+      "filename": "brand-youtube-logo-dark.png",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
     }
   ],
   "info": {

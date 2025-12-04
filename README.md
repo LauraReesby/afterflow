@@ -11,7 +11,7 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 - **🔒 Privacy-First**: All data stays on your device. No cloud sync, tracking, or external data collection
 - **📱 Native iOS**: Built with SwiftUI and SwiftData for optimal performance on iPhone and iPad
 - **🌐 Offline-First**: Core functionality works without internet connection
-- **🎵 Music Links**: Planned playlist URL previews (Spotify/YouTube) with graceful fallbacks for other services
+- **🎵 Music Links**: Playlist/track/album previews for oEmbed-capable providers (Spotify, YouTube, SoundCloud, Tidal), plus link-only fallbacks for Apple Music/Podcasts and Bandcamp
 - **📊 Mood Tracking**: Before and after session mood ratings with visual feedback
 - **📝 Comprehensive Logging**: Capture treatment type, intentions, and reflections (editable later in Session Detail)
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
@@ -107,6 +107,7 @@ xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPho
 ### Test Coverage
 
 Current test coverage includes:
+- **Music Link Providers**: Classification, oEmbed decoding, duration parsing, and link-only fallbacks for Apple Music/Podcasts and Bandcamp
 - **Model Tests**: TherapeuticSession entity validation, computed properties, data management
 - **ViewModel Tests**: Form validation, session detail reflections, and history list filters/sorts
 - **Service Tests**: CRUD operations, auto-save, draft recovery, validation
@@ -118,7 +119,8 @@ Current test coverage includes:
 ### Test Categories
 
 - **Unit Tests** (`AfterflowTests/`): Model and service layer testing
-- **UI Tests** (`AfterflowUITests/`): User interface workflow testing
+- **UI Tests** (`AfterflowUITests/`): User interface workflow testing  
+  - Use launch arguments `-ui-testing -ui-musiclink-fixtures` to seed sample sessions with Spotify and Apple Music links during UI runs
 - **Performance Tests**: Data handling and app launch metrics
 
 ## Formatting & Linting
@@ -191,8 +193,18 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI:
 1. **Privacy-First**: No external data transmission
 2. **SwiftUI + SwiftData Native**: Modern Apple frameworks
 3. **Offline-First**: Local-first data storage
-4. **Test-Driven**: 80% minimum test coverage
-5. **Therapeutic Value**: Every feature supports healing
+4. **Careful Network Use**: Only oEmbed fetches for supported music providers; no playback, tracking, or analytics
+5. **Test-Driven**: 80% minimum test coverage
+6. **Therapeutic Value**: Every feature supports healing
+
+## Music Link Support
+
+- **Tier 1 (oEmbed metadata)**: Spotify, YouTube, SoundCloud, Tidal  
+  - Fetches title/author/thumbnail/duration via oEmbed; displays duration (e.g., “1 hr 23 min”) when available.
+- **Tier 2 (link-only providers)**: Apple Music, Apple Podcasts, Bandcamp, custom  
+  - Parses titles from URLs when metadata isn’t available; uses brand logos and fallback thumbnails.
+- **Branding**: Provider logos stored in `Assets.xcassets/Brands` with light/dark variants; UI falls back to a music note when unavailable.
+- **Privacy**: No playback or authentication; only lightweight metadata fetches for oEmbed-capable providers.
 
 ## Development Roadmap
 
@@ -218,7 +230,7 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI:
 - [x] Large dataset fixtures + performance tests (<200 ms scroll for 1k sessions)
 
 ### 🎵 Phase 7+: Music Links & Data Export (Planned)
-- [ ] Playlist link previews (Spotify/YouTube oEmbed, link-only fallback)
+- [x] Playlist link previews (Spotify/YouTube oEmbed, link-only fallback)
 - [ ] CSV/PDF export flows with filters
 - [ ] Additional polish: haptics, privacy manifest, governance sign-off
 

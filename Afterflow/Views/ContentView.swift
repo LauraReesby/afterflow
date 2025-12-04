@@ -23,7 +23,7 @@ struct ContentView: View {
                                 .font(.headline)
                             if session.status == .needsReflection {
                                 HStack(spacing: 8) {
-                                    HStack(spacing: 2) {
+                                    HStack(spacing: 3) {
                                         Image(systemName: "bell.badge")
                                         Text("Reflect")
                                     }
@@ -31,17 +31,17 @@ struct ContentView: View {
                                     .foregroundColor(.orange)
 
                                     if let reminderLabel = session.reminderRelativeDescription {
-                                        HStack(spacing: 2) {
+                                        HStack(spacing: 3) {
                                             Image(systemName: "bell")
                                             Text(reminderLabel)
                                         }
                                         .font(.caption2)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Color(.systemRed).opacity(0.7))
                                         .accessibilityIdentifier("needsReflectionReminderLabel")
                                     }
                                 }
                             } else if session.status == .complete {
-                                HStack(spacing: 2) {
+                                HStack(spacing: 3) {
                                     Image(systemName: "checkmark.circle")
                                     Text("Complete")
                                 }

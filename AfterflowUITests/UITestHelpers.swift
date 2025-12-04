@@ -49,7 +49,7 @@ extension XCUIApplication {
         containers.append(contentsOf: self.collectionViews.allElementsBoundByIndex)
         containers.append(contentsOf: self.tables.allElementsBoundByIndex)
         containers.append(contentsOf: self.scrollViews.allElementsBoundByIndex)
-        return containers.filter(\.exists)
+        return containers.filter { $0.exists && $0.hasUsableFrame }
     }
 }
 
@@ -67,6 +67,8 @@ extension XCUIElement {
     }
 
     func scrollTo(element: XCUIElement, maxSwipes: Int = 20) {
+        guard self.hasUsableFrame else { return }
+
         var swipes = 0
         while !element.isHittable, swipes < maxSwipes {
             self.swipeUp()
@@ -108,6 +110,15 @@ extension XCUIElement {
 
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         }
+    }
+
+    /// Some XCTest APIs surface "Invalid frame dimension" when acting on elements that report NaN/zero-sized frames.
+    /// This helper keeps those elements out of swipe/tap flows.
+    fileprivate var hasUsableFrame: Bool {
+        let frame = self.frame
+        return frame.width.isFinite && frame.height.isFinite &&
+            frame.origin.x.isFinite && frame.origin.y.isFinite &&
+            frame.width > 0 && frame.height > 0
     }
 }
 

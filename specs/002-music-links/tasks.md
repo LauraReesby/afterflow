@@ -23,10 +23,10 @@ _Status reset 2025‑11‑29: pivoted from Spotify-only OAuth to general playlis
 ## Phase 4 – Extended Providers
 - [x] T213 [US3] Enable Tier‑2 provider (SoundCloud) via the same oEmbed pipeline.  
 - [x] T214 [US3] Add copy variants for link-only services (Apple Music, Bandcamp, Tidal, Deezer, custom).  
-- [ ] T215 [US3] Regression/UI tests covering Tier‑2 + link-only messaging.  
+- [x] T215 [US3] Regression/UI tests covering Tier‑2 + link-only messaging.  
 
 ## Phase 5 – QA & Governance
-- [ ] T216 [Polish] Final accessibility + privacy audit (no playback, no analytics).  
-- [ ] T217 [Polish] Documentation & README updates describing supported tiers + usage.  
-- [ ] T218 [Polish] Performance profiling (metadata fetch < 3 s; UI thread budget < 16 ms).  
-- [ ] T219 [Polish] Release readiness + governance sign-off.  
+- [x] T216 [Polish] Final accessibility + privacy audit (no playback, no analytics).  
+- [x] T217 [Polish] Documentation & README updates describing supported tiers + usage.  
+- [x] T218 [Polish] Performance profiling (metadata fetch < 3 s; UI thread budget < 16 ms).  
+- [x] T219 [Polish] Release readiness + governance sign-off.  

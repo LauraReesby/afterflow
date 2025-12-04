@@ -3,6 +3,16 @@
     {
       "idiom": "universal",
       "filename": "brand-spotify-logo.png"
+    },
+    {
+      "idiom": "universal",
+      "filename": "brand-spotify-logo-dark.png",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
     }
   ],
   "info": {

@@ -54,6 +54,7 @@ struct SessionDetailView: View {
                         artworkURL: self.session.musicLinkArtworkURL.flatMap(URL.init(string:)),
                         openAction: self.openMusicLink
                     )
+                    .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
                 } else {
                     Button {
                         self.showingEdit = true
@@ -66,6 +67,7 @@ struct SessionDetailView: View {
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("attachMusicLinkFromDetail")
                     .padding(.vertical, 2)
+                    .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
                 }
             }
 
@@ -142,7 +144,7 @@ struct SessionDetailView: View {
                 .padding(.top, 4)
 
                 if self.session.status == .needsReflection,
-                   let reminderLabel = self.session.reminderDisplayText {
+                   let reminderLabel = self.session.reminderRelativeDescription {
                     ReminderPill(text: reminderLabel)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 2)
@@ -264,7 +266,7 @@ private struct StatusPill: View {
     let status: SessionLifecycleStatus
 
     var body: some View {
-        HStack(spacing: 1) {
+        HStack(spacing: 3) {
             Image(systemName: self.status.symbolName)
             Text(self.labelText)
         }
@@ -289,7 +291,7 @@ private struct MoodDeltaPill: View {
     let after: Int
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 3) {
             Image(systemName: self.iconName)
             Text("Mood \(self.before) → \(self.after)")
         }
@@ -314,7 +316,7 @@ private struct MoodBeforePill: View {
     let value: Int
 
     var body: some View {
-        HStack(spacing: 1) {
+        HStack(spacing: 3) {
             Image(systemName: "face.smiling")
             Text("Mood \(self.value)")
         }
@@ -332,7 +334,7 @@ private struct ReminderPill: View {
 
     var body: some View {
         let tint = Color(.systemRed)
-        return HStack(spacing: 1) {
+        return HStack(spacing: 3) {
             Image(systemName: "bell")
             Text(self.text)
         }
@@ -354,14 +356,14 @@ private struct MusicLinkDetailCard: View {
     let openAction: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Button(action: self.openAction) {
                 HStack(spacing: 12) {
                     self.artworkView
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(self.title)
-                            .font(.headline)
+                            .font(.body)
                             .lineLimit(2)
 
                         HStack(spacing: 6) {
@@ -393,10 +395,11 @@ private struct MusicLinkDetailCard: View {
             }
             .buttonStyle(.plain)
         }
-        .padding()
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityIdentifier("musicLinkDetailCard")
     }
 
@@ -424,7 +427,7 @@ private struct MusicLinkDetailCard: View {
                     self.fallbackArtwork
                 }
             }
-            .frame(width: 64, height: 64)
+            .frame(width: 72, height: 72)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             self.fallbackArtwork
@@ -437,7 +440,7 @@ private struct MusicLinkDetailCard: View {
                 brand
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 64, height: 64)
+                    .frame(width: 72, height: 72)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             )
         }
@@ -449,7 +452,7 @@ private struct MusicLinkDetailCard: View {
                     .imageScale(.medium)
                     .foregroundStyle(.secondary)
             }
-            .frame(width: 64, height: 64)
+            .frame(width: 72, height: 72)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         )
     }
