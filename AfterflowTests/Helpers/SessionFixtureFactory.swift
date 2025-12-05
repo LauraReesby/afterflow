@@ -5,19 +5,20 @@ enum SessionFixtureFactory {
     static func makeSessions(count: Int) -> [TherapeuticSession] {
         let calendar = Calendar.current
         return (0 ..< count).map { index in
-            let date = calendar.date(byAdding: .day, value: -index, to: Date()) ?? Date()
-            let moodBefore = max(1, (index % 10) + 1)
-            let moodAfter = min(10, moodBefore + Int.random(in: -2 ... 4))
+            let now = Date()
+            let moodBefore = (index % 10) + 1
+            let moodAfter = ((index + 3) % 10) + 1
             let treatment = PsychedelicTreatmentType.allCases[index % PsychedelicTreatmentType.allCases.count]
 
             let session = TherapeuticSession(
-                sessionDate: date,
+                sessionDate: now.addingTimeInterval(TimeInterval(-index * 86400)),
                 treatmentType: treatment,
                 administration: .oral,
                 intention: "Fixture Session \(index)",
                 moodBefore: moodBefore,
                 moodAfter: moodAfter,
-                reflections: index.isMultiple(of: 2) ? "Reflection \(index)" : ""
+                reflections: index % 2 == 0 ? "Short reflection \(index)" : "",
+                reminderDate: index % 4 == 0 ? now.addingTimeInterval(TimeInterval(900 * (index + 1))) : nil
             )
             return session
         }

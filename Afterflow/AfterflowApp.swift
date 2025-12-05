@@ -46,6 +46,8 @@ struct AfterflowApp: App {
         }
 
         let now = Date()
+        var seedSessions: [TherapeuticSession] = []
+
         let tier1 = TherapeuticSession(
             sessionDate: now,
             treatmentType: .psilocybin,
@@ -80,7 +82,27 @@ struct AfterflowApp: App {
         linkOnly.musicLinkAuthorName = "Apple Music"
         linkOnly.musicLinkProvider = .appleMusic
 
-        try? self.sessionStore.create(tier1)
-        try? self.sessionStore.create(linkOnly)
+        seedSessions.append(tier1)
+        seedSessions.append(linkOnly)
+
+        // Additional sessions (match preview style: daily offsets, more rows)
+        for i in 1 ... 18 {
+            let session = TherapeuticSession(
+                sessionDate: now.addingTimeInterval(TimeInterval(-i * 86400)),
+                treatmentType: PsychedelicTreatmentType.allCases[i % PsychedelicTreatmentType.allCases.count],
+                administration: .oral,
+                intention: "Seeded Session \(i)",
+                moodBefore: (i % 10) + 1,
+                moodAfter: ((i + 2) % 10) + 1,
+                reflections: "Reflection note \(i)",
+                reminderDate: nil
+            )
+            if i % 3 == 0 {
+                session.reminderDate = now.addingTimeInterval(TimeInterval(i * 600))
+            }
+            seedSessions.append(session)
+        }
+
+        seedSessions.forEach { try? self.sessionStore.create($0) }
     }
 }

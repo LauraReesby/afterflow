@@ -48,10 +48,10 @@
 - [x] T030a [US5] Surface Needs Reflection badge + reminder metadata in list/detail + UI tests.  
 
 ## Phase 7 – Polish & Cross-Cutting
-- [ ] T031 [Polish] Add accessibility labels + VoiceOver tests.  
-- [ ] T032 [Polish] Performance optimization for large lists.  
-- [ ] T033 [Polish] Haptic feedback for key interactions.  
-- [ ] T034 [Polish] Migration Notes documentation.  
-- [ ] T035 [Polish] App Privacy manifest = Data Not Collected.  
-- [ ] T036 [Polish] Final QA review + governance sign-off.  
-- [ ] T037 [Polish] Reminder lifecycle QA (unit + UI tests) covering scheduling, cancelation, completion flows.  
+- [x] T031 [Polish] Add accessibility labels + VoiceOver tests.  
+- [x] T032 [Polish] Performance optimization for large lists.  
+- [x] T033 [Polish] Haptic feedback for key interactions.  
+- [x] T034 [Polish] Migration Notes documentation.  
+- [x] T035 [Polish] App Privacy manifest = Data Not Collected.  
+- [x] T036 [Polish] Final QA review + governance sign-off.  
+- [x] T037 [Polish] Reminder lifecycle QA (unit + UI tests) covering scheduling, cancelation, completion flows.  

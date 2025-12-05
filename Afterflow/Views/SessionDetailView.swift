@@ -141,7 +141,7 @@ struct SessionDetailView: View {
                         MoodBeforePill(value: self.session.moodBefore)
                     }
                 }
-                .padding(.top, 4)
+                .padding(.top, 2)
 
                 if self.session.status == .needsReflection,
                    let reminderLabel = self.session.reminderRelativeDescription {
@@ -159,7 +159,7 @@ struct SessionDetailView: View {
             )
         }
         .listRowBackground(Color.clear)
-        .listRowInsets(.init(top: 8, leading: 0, bottom: 0, trailing: 0))
+        .listRowInsets(.init(top: 2, leading: 0, bottom: 0, trailing: 0))
     }
 
     private func moodRow(title: String, value: Int, placeholder: String = "") -> some View {
@@ -270,7 +270,7 @@ private struct StatusPill: View {
             Image(systemName: self.status.symbolName)
             Text(self.labelText)
         }
-        .font(.caption)
+        .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(self.status.accentColor.opacity(0.15))
@@ -295,7 +295,7 @@ private struct MoodDeltaPill: View {
             Image(systemName: self.iconName)
             Text("Mood \(self.before) → \(self.after)")
         }
-        .font(.caption)
+        .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(self.tintColor.opacity(0.15))
@@ -320,7 +320,7 @@ private struct MoodBeforePill: View {
             Image(systemName: "face.smiling")
             Text("Mood \(self.value)")
         }
-        .font(.caption)
+        .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(Color.teal.opacity(0.15))
@@ -338,7 +338,7 @@ private struct ReminderPill: View {
             Image(systemName: "bell")
             Text(self.text)
         }
-        .font(.caption)
+        .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(tint.opacity(0.15))

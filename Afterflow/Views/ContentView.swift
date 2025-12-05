@@ -1,145 +1,102 @@
 import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(SessionStore.self) private var sessionStore
 
+    // UI State
     @State private var showingSessionForm = false
     @State private var listViewModel = SessionListViewModel()
+
+    // Undo State
     @State private var recentlyDeleted: (session: TherapeuticSession, index: Int)?
     @State private var showUndoBanner = false
     @State private var undoTask: Task<Void, Never>?
 
+    // Export State
+    @State private var showingExportSheet = false
+    @State private var isExporting = false
+    @State private var exportTask: Task<Void, Never>?
+    @State private var exportDocument: BinaryFileDocument?
+    @State private var exportContentType: UTType = .commaSeparatedText
+    @State private var exportFilename: String = "Afterflow-Export"
+    @State private var showingFileExporter = false
+    @State private var exportError: String?
+
     var body: some View {
         NavigationSplitView {
-            List {
-                ForEach(self.filteredSessions) { session in
-                    NavigationLink {
-                        SessionDetailView(session: session)
-                    } label: {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(session.displayTitle)
-                                .font(.headline)
-                            if session.status == .needsReflection {
-                                HStack(spacing: 8) {
-                                    HStack(spacing: 3) {
-                                        Image(systemName: "hourglass")
-                                        Text("Reflect")
-                                    }
-                                    .font(.caption)
-                                    .foregroundColor(.orange)
-
-                                    if let reminderLabel = session.reminderRelativeDescription {
-                                        HStack(spacing: 3) {
-                                            Image(systemName: "bell")
-                                            Text(reminderLabel)
-                                        }
-                                        .font(.caption2)
-                                        .foregroundColor(Color(.systemRed).opacity(0.7))
-                                        .accessibilityIdentifier("needsReflectionReminderLabel")
-                                    }
-                                }
-                            } else if session.status == .complete {
-                                HStack(spacing: 3) {
-                                    Image(systemName: "checkmark.circle")
-                                    Text("Complete")
-                                }
-                                .font(.caption)
-                                .foregroundColor(.green)
-                            }
-                            if !session.intention.isEmpty {
-                                Text(session.intention)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(2)
-                            }
-                        }
-                        .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
-                    }
-                }
-                .onDelete(perform: self.deleteSessions)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    self.filterMenu
-                }
-                ToolbarItem {
-                    Button(action: { self.showingSessionForm = true }) {
-                        Label("Add Session", systemImage: "plus")
-                    }
-                    .accessibilityIdentifier("addSessionButton")
-                    .accessibilityLabel("Add Session")
-                }
-            }
-            .navigationTitle("Sessions")
-            .searchable(
-                text: self.$listViewModel.searchText,
-                placement: .toolbar,
-                prompt: "Search sessions"
+            SessionListSection(
+                sessions: self.filteredSessions,
+                listViewModel: self.$listViewModel,
+                onDelete: self.deleteSessions,
+                onAdd: { self.showingSessionForm = true },
+                onExport: { self.showingExportSheet = true },
+                relativeDateText: relativeDateText(for:)
             )
-            .listStyle(.insetGrouped)
-            .toolbarBackground(.visible, for: .automatic)
-            .scrollDismissesKeyboard(.immediately)
         } detail: {
             Text("Select a session")
         }
+        // Add Session Sheet
         .sheet(isPresented: self.$showingSessionForm) {
-            NavigationStack {
-                SessionFormView()
-            }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(16)
-            .toolbarBackground(.visible, for: .automatic)
+            NavigationStack { SessionFormView() }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(16)
+                .toolbarBackground(.visible, for: .automatic)
         }
-        .overlay(alignment: .bottom) {
-            if self.showUndoBanner, let deletedSession = recentlyDeleted?.session {
-                UndoBannerView(
-                    message: "Deleted \(deletedSession.displayTitle)",
-                    actionTitle: "Undo",
-                    action: self.undoDelete
-                )
-                .padding()
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
+        // Export Options Sheet
+        .sheet(isPresented: self.$showingExportSheet) {
+            ExportSheetView(
+                availableTreatmentTypes: PsychedelicTreatmentType.allCases,
+                onCancel: { self.showingExportSheet = false },
+                onExport: { request in
+                    self.showingExportSheet = false
+                    self.startExport(with: request)
+                }
+            )
         }
+        // File Exporter
+        .fileExporter(
+            isPresented: self.$showingFileExporter,
+            document: self.exportDocument,
+            contentType: self.exportContentType,
+            defaultFilename: self.exportFilename
+        ) { result in
+            self.isExporting = false
+            self.exportTask = nil
+            if case let .failure(error) = result {
+                self.exportError = error.localizedDescription
+            }
+            self.exportDocument = nil
+        }
+        // Export Error Alert
+        .alert("Export Error", isPresented: Binding(
+            get: { self.exportError != nil },
+            set: { if !$0 { self.exportError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(self.exportError ?? "")
+        }
+        // Export Overlay
+        .overlay { ExportOverlay(isExporting: self.isExporting) { self.cancelExport() } }
     }
+
+    // MARK: - Derived Data
 
     private var filteredSessions: [TherapeuticSession] {
         self.listViewModel.applyFilters(to: self.sessionStore.sessions)
     }
 
-    private var filterMenu: some View {
-        Menu {
-            Picker("Sort", selection: self.$listViewModel.sortOption) {
-                ForEach(SessionListViewModel.SortOption.allCases) { option in
-                    Text(option.label).tag(option)
-                }
-            }
-
-            Menu("Type") {
-                Button("All Treatments") {
-                    self.listViewModel.treatmentFilter = nil
-                }
-                ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
-                    Button(type.displayName) {
-                        self.listViewModel.treatmentFilter = type
-                    }
-                }
-            }
-        } label: {
-            Label("Filters", systemImage: "line.3.horizontal.decrease.circle")
-        }
-        .accessibilityLabel("Filter Sessions")
-        .accessibilityHint("Change sort order or filter by treatment type")
-    }
+    // MARK: - Delete + Undo
 
     private func deleteSessions(offsets: IndexSet) {
         withAnimation {
             guard let index = offsets.first else { return }
             let session = self.filteredSessions[index]
-            let snapshot = self.clone(session)
+            let snapshot = clone(session)
             try? self.sessionStore.delete(session)
             self.scheduleUndo(for: snapshot, originalIndex: index)
         }
@@ -151,15 +108,18 @@ struct ContentView: View {
         self.showUndoBanner = true
 
         self.undoTask = Task {
-            try? await Task.sleep(for: .seconds(10))
-            await MainActor.run {
-                self.finalizeDeletion()
+            do {
+                try await Task.sleep(for: .seconds(10))
+                try Task.checkCancellation()
+                await MainActor.run { self.finalizeDeletion() }
+            } catch {
+                // Cancelled or failed sleep; do nothing so user can still undo if needed
             }
         }
     }
 
     private func undoDelete() {
-        guard let deleted = self.recentlyDeleted else { return }
+        guard let deleted = recentlyDeleted else { return }
         do {
             try self.sessionStore.create(deleted.session)
             self.recentlyDeleted = nil
@@ -177,8 +137,318 @@ struct ContentView: View {
         self.undoTask = nil
     }
 
-    /// Create a fresh, insertable copy of the session so undo isn't blocked by SwiftData object state.
-    private func clone(_ session: TherapeuticSession) -> TherapeuticSession {
+    // MARK: - Export
+
+    private func startExport(with request: ExportRequest) {
+        self.isExporting = true
+        self.exportError = nil
+        self.exportTask?.cancel()
+
+        let sessions = self.sessionStore.sessions
+        self.exportTask = Task {
+            do {
+                let result = try await performExport(for: sessions, request: request)
+                if ProcessInfo.processInfo.arguments.contains("-ui-testing") {
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                }
+                await MainActor.run {
+                    self.exportDocument = BinaryFileDocument(data: result.data, contentType: result.type)
+                    self.exportContentType = result.type
+                    self.exportFilename = result.filename
+                    self.isExporting = false
+                    self.showingFileExporter = true
+                }
+            } catch {
+                await MainActor.run {
+                    self.exportError = error.localizedDescription
+                    self.isExporting = false
+                }
+            }
+        }
+    }
+
+    private func cancelExport() {
+        self.exportTask?.cancel()
+        self.isExporting = false
+    }
+
+    private func performExport(
+        for sessions: [TherapeuticSession],
+        request: ExportRequest
+    ) async throws -> ExportResult {
+        try Task.checkCancellation()
+        switch request.format {
+        case .csv:
+            let url = try CSVExportService().export(
+                sessions: sessions,
+                dateRange: request.dateRange,
+                treatmentType: request.treatmentType
+            )
+            let data = try Data(contentsOf: url)
+            try? FileManager.default.removeItem(at: url)
+            try Task.checkCancellation()
+            return ExportResult(data: data, type: .commaSeparatedText, filename: "Afterflow-Export")
+
+        case .pdf:
+            let url = try PDFExportService().export(
+                sessions: sessions,
+                dateRange: request.dateRange,
+                treatmentType: request.treatmentType,
+                options: .init(includeCoverPage: true, showPrivacyNote: true)
+            )
+            let data = try Data(contentsOf: url)
+            try? FileManager.default.removeItem(at: url)
+            try Task.checkCancellation()
+            return ExportResult(data: data, type: .pdf, filename: "Afterflow-Export")
+        }
+    }
+}
+
+private struct ExportResult {
+    let data: Data
+    let type: UTType
+    let filename: String
+}
+
+// MARK: - Subviews
+
+private struct SessionListSection: View {
+    let sessions: [TherapeuticSession]
+    @Binding var listViewModel: SessionListViewModel
+    let onDelete: (IndexSet) -> Void
+    let onAdd: () -> Void
+    let onExport: () -> Void
+    let relativeDateText: (Date) -> String
+
+    @State private var showUndoBanner = false
+    @Environment(SessionStore.self) private var sessionStore
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            List {
+                ForEach(Array(self.sessions.enumerated()), id: \.element.id) { _, session in
+                    ZStack(alignment: .leading) {
+                        SessionRowView(session: session, dateText: self.relativeDateText(session.sessionDate))
+                            .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
+                        NavigationLink(destination: SessionDetailView(session: session)) {
+                            EmptyView()
+                        }
+                        .opacity(0.01)
+                        .buttonStyle(.plain)
+                        .accessibilityHidden(true)
+                    }
+                    .listRowSeparator(.hidden, edges: .top)
+                    .listRowSeparator(.visible, edges: .bottom)
+                }
+                .onDelete(perform: self.onDelete)
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemBackground))
+            .listRowInsets(.init(top: 8, leading: 16, bottom: 8, trailing: 16))
+            .listSectionSeparator(.hidden)
+            .toolbar { self.toolbarContent }
+            .navigationTitle("Sessions")
+            .listStyle(.plain)
+            .toolbarBackground(.visible, for: .automatic)
+            .scrollDismissesKeyboard(.immediately)
+
+            BottomControls(listViewModel: self.$listViewModel, onAdd: self.onAdd)
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) { FilterMenu(listViewModel: self.$listViewModel) }
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button(action: self.onExport) {
+                Label("Export", systemImage: "square.and.arrow.up")
+                    .glassCapsule(cornerRadius: 18)
+            }
+            .accessibilityIdentifier("exportSessionsButton")
+            .accessibilityLabel("Export Sessions")
+        }
+    }
+}
+
+private struct BottomControls: View {
+    @Binding var listViewModel: SessionListViewModel
+    let onAdd: () -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                SearchField(text: self.$listViewModel.searchText)
+                Button(action: self.onAdd) {
+                    Image(systemName: "plus")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.accentColor, in: Circle())
+                        .frame(height: 44)
+                }
+                .accessibilityIdentifier("addSessionButton")
+                .accessibilityLabel("Add Session")
+            }
+            .padding(.horizontal, 12)
+        }
+        .padding(.bottom, 2)
+        .padding(.horizontal, 12)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.clear, Color(.systemBackground)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea(edges: .bottom)
+        )
+    }
+}
+
+private struct SearchField: View {
+    @Binding var text: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+            TextField("Search", text: self.$text)
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+            if !self.text.isEmpty {
+                Button {
+                    self.text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(height: 44)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
+        )
+    }
+}
+
+private struct FilterMenu: View {
+    @Binding var listViewModel: SessionListViewModel
+
+    var body: some View {
+        Menu {
+            Picker("Sort", selection: self.$listViewModel.sortOption) {
+                ForEach(SessionListViewModel.SortOption.allCases) { option in
+                    Text(option.label).tag(option)
+                }
+            }
+
+            Menu("Type") {
+                Button("All Treatments") { self.listViewModel.treatmentFilter = nil }
+                ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
+                    Button(type.displayName) { self.listViewModel.treatmentFilter = type }
+                }
+            }
+        } label: {
+            Label("Filters", systemImage: "line.3.horizontal.decrease")
+                .glassCapsule(cornerRadius: 18)
+        }
+        .accessibilityLabel("Filter Sessions")
+        .accessibilityHint("Change sort order or filter by treatment type")
+    }
+}
+
+private struct ExportOverlay: View {
+    let isExporting: Bool
+    let onCancel: () -> Void
+
+    var body: some View {
+        Group {
+            if self.isExporting {
+                ZStack {
+                    Color.black.opacity(0.15).ignoresSafeArea()
+                    VStack(spacing: 12) {
+                        ProgressView("Preparing export…")
+                            .accessibilityIdentifier("exportProgressView")
+                            .accessibilityLabel("Preparing export")
+                        Button("Cancel", action: self.onCancel)
+                    }
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+            }
+        }
+    }
+}
+
+private struct SessionRowView: View {
+    let session: TherapeuticSession
+    let dateText: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(self.session.treatmentType.displayName)
+                    .font(.headline)
+                Spacer()
+                HStack(spacing: 4) {
+                    Text(self.dateText)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Color(.tertiaryLabel))
+                }
+            }
+
+            if self.session.status == .needsReflection {
+                HStack(spacing: 8) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "hourglass")
+                        Text("Reflect")
+                    }
+                    .font(.footnote)
+                    .foregroundColor(.orange)
+
+                    if let reminderLabel = session.reminderRelativeDescription {
+                        HStack(spacing: 3) {
+                            Image(systemName: "bell")
+                            Text(reminderLabel)
+                        }
+                        .font(.footnote)
+                        .foregroundColor(Color(.systemRed).opacity(0.7))
+                        .accessibilityIdentifier("needsReflectionReminderLabel")
+                    }
+                }
+            } else if self.session.status == .complete {
+                HStack(spacing: 3) {
+                    Image(systemName: "checkmark.circle")
+                    Text("Complete")
+                }
+                .font(.footnote)
+                .foregroundColor(.green)
+            }
+
+            if !self.session.intention.isEmpty {
+                Text(self.session.intention)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+        }
+    }
+}
+
+// MARK: - Helpers
+
+private extension ContentView {
+    func clone(_ session: TherapeuticSession) -> TherapeuticSession {
         let copy = TherapeuticSession(
             sessionDate: session.sessionDate,
             treatmentType: session.treatmentType,
@@ -201,6 +471,32 @@ struct ContentView: View {
         copy.musicLinkProvider = session.musicLinkProvider
         return copy
     }
+
+    func relativeDateText(for date: Date) -> String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "Today" }
+        if calendar.isDateInYesterday(date) { return "Yesterday" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yy"
+        return formatter.string(from: date)
+    }
+}
+
+private extension View {
+    func glassCapsule(cornerRadius: CGFloat = 18) -> some View {
+        self
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .opacity(1)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
+            )
+    }
 }
 
 #Preview {
@@ -214,6 +510,27 @@ struct ContentView: View {
         fatalError("Failed to create preview container: \(error)")
     }
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
+
+    // Seed varying sessions to fill the list
+    let now = Date()
+    let treatments = PsychedelicTreatmentType.allCases
+    for i in 0 ..< 20 {
+        let session = TherapeuticSession(
+            sessionDate: now.addingTimeInterval(TimeInterval(-i * 86400)), // daily offsets
+            treatmentType: treatments[i % treatments.count],
+            administration: .oral,
+            intention: "Preview Session \(i)",
+            moodBefore: (i % 10) + 1,
+            moodAfter: ((i + 3) % 10) + 1,
+            reflections: i % 2 == 0 ? "Short reflection \(i)" : "",
+            reminderDate: i % 4 == 0 ? now.addingTimeInterval(TimeInterval(900 * (i + 1))) : nil
+        )
+        session.musicLinkURL = i % 3 == 0 ? "https://open.spotify.com/playlist/preview-\(i)" : nil
+        session.musicLinkTitle = i % 3 == 0 ? "Mix \(i)" : nil
+        session.musicLinkProvider = i % 3 == 0 ? .spotify : .unknown
+        try? store.create(session)
+    }
+
     return ContentView()
         .modelContainer(container)
         .environment(store)
