@@ -3,7 +3,6 @@ import Foundation
 
 enum SessionFixtureFactory {
     static func makeSessions(count: Int) -> [TherapeuticSession] {
-        let calendar = Calendar.current
         return (0 ..< count).map { index in
             let now = Date()
             let moodBefore = (index % 10) + 1

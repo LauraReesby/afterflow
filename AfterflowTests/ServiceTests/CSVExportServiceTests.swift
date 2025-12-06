@@ -1,6 +1,7 @@
 @testable import Afterflow
 import XCTest
 
+@MainActor
 final class CSVExportServiceTests: XCTestCase {
     func testExportsExpectedColumnsAndData() async throws {
         let service = CSVExportService()
