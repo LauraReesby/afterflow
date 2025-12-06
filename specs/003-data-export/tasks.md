@@ -21,10 +21,10 @@
 - [x] T314 [US3] FileExporter integration (share sheet / Files).  
 - [x] T315 [US3] Temp file cleanup strategy on success/cancel/error.  
 - [x] T316 [US3] Accessibility labels; VoiceOver reads progress.  
-- [ ] T317 [US3] Constitutional QA verification: accessibility, performance profiling, privacy compliance.
+- [x] T317 [US3] Constitutional QA verification: accessibility, performance profiling, privacy compliance.
 
 ## Phase 4 – Polish & Governance
-- [ ] T318 [Polish] Localized PDF headings; locale‑aware formatting.  
-- [ ] T319 [Polish] Add tests for long text and emoji in CSV/PDF.  
-- [ ] T320 [Polish] Final privacy review: no network usage; neutral filenames.  
-- [ ] T321 [Polish] Final QA review + governance sign‑off.
+- [x] T318 [Polish] Localized PDF headings; locale‑aware formatting.  
+- [x] T319 [Polish] Add tests for long text and emoji in CSV/PDF.  
+- [x] T320 [Polish] Final privacy review: no network usage; neutral filenames.  
+- [x] T321 [Polish] Final QA review + governance sign‑off.

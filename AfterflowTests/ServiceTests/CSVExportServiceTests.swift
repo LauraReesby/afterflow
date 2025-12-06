@@ -3,7 +3,7 @@ import XCTest
 
 @MainActor
 final class CSVExportServiceTests: XCTestCase {
-    func testExportsExpectedColumnsAndData() async throws {
+    func testExportsExpectedColumnsAndData() throws {
         let service = CSVExportService()
         let session = TherapeuticSession(
             sessionDate: date("2024-12-01T10:30:00Z"),
@@ -17,7 +17,7 @@ final class CSVExportServiceTests: XCTestCase {
         )
         session.musicLinkURL = "https://open.spotify.com/playlist/abc"
 
-        let url = try await service.export(sessions: [session])
+        let url = try service.export(sessions: [session])
         let csv = try String(contentsOf: url, encoding: .utf8)
 
         let lines = csv.split(separator: "\n").map(String.init)
@@ -31,25 +31,25 @@ final class CSVExportServiceTests: XCTestCase {
         XCTAssertTrue(lines[1].contains("https://open.spotify.com/playlist/abc"))
     }
 
-    func testFiltersByDateRange() async throws {
+    func testFiltersByDateRange() throws {
         let service = CSVExportService()
         let inRange = TherapeuticSession(sessionDate: date("2024-12-01T00:00:00Z"))
         let outOfRange = TherapeuticSession(sessionDate: date("2024-10-01T00:00:00Z"))
 
         let range = self.date("2024-11-01T00:00:00Z") ... self.date("2024-12-31T00:00:00Z")
-        let url = try await service.export(sessions: [inRange, outOfRange], dateRange: range)
+        let url = try service.export(sessions: [inRange, outOfRange], dateRange: range)
         let csv = try String(contentsOf: url, encoding: .utf8)
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, 2)
         XCTAssertFalse(lines[1].contains("2024-10"))
     }
 
-    func testFiltersByTreatmentType() async throws {
+    func testFiltersByTreatmentType() throws {
         let service = CSVExportService()
         let match = TherapeuticSession(sessionDate: Date(), treatmentType: .psilocybin)
         let nonMatch = TherapeuticSession(sessionDate: Date(), treatmentType: .ketamine)
 
-        let url = try await service.export(sessions: [match, nonMatch], treatmentType: .psilocybin)
+        let url = try service.export(sessions: [match, nonMatch], treatmentType: .psilocybin)
         let csv = try String(contentsOf: url, encoding: .utf8)
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, 2)
@@ -57,7 +57,7 @@ final class CSVExportServiceTests: XCTestCase {
         XCTAssertFalse(csv.contains("Ketamine"))
     }
 
-    func testEscapesQuotesCommasNewlines() async throws {
+    func testEscapesQuotesCommasNewlines() throws {
         let service = CSVExportService()
         let session = TherapeuticSession(
             sessionDate: date("2024-12-01T00:00:00Z"),
@@ -70,13 +70,13 @@ final class CSVExportServiceTests: XCTestCase {
             reminderDate: nil
         )
 
-        let url = try await service.export(sessions: [session])
+        let url = try service.export(sessions: [session])
         let csv = try String(contentsOf: url, encoding: .utf8)
         XCTAssertTrue(csv.contains("\"Hello, \"\"World\"\"\""))
         XCTAssertTrue(csv.contains("\"Line1\nLine2\""))
     }
 
-    func testGuardsAgainstFormulaInjection() async throws {
+    func testGuardsAgainstFormulaInjection() throws {
         let service = CSVExportService()
         let session = TherapeuticSession(
             sessionDate: date("2024-12-01T00:00:00Z"),
@@ -89,13 +89,13 @@ final class CSVExportServiceTests: XCTestCase {
             reminderDate: nil
         )
 
-        let url = try await service.export(sessions: [session])
+        let url = try service.export(sessions: [session])
         let csv = try String(contentsOf: url, encoding: .utf8)
         XCTAssertTrue(csv.contains("'=HYPERLINK"))
         XCTAssertTrue(csv.contains("'@bad"))
     }
 
-    func testExportsOneThousandSessions() async throws {
+    func testExportsOneThousandSessions() throws {
         let service = CSVExportService()
         var sessions: [TherapeuticSession] = []
         for i in 0 ..< 1000 {
@@ -112,7 +112,7 @@ final class CSVExportServiceTests: XCTestCase {
             sessions.append(session)
         }
 
-        let url = try await service.export(sessions: sessions)
+        let url = try service.export(sessions: sessions)
         let csv = try String(contentsOf: url, encoding: .utf8)
         let lines = csv.split(separator: "\n")
         XCTAssertEqual(lines.count, 1001) // header + 1000 rows

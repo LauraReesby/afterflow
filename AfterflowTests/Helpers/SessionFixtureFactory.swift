@@ -2,24 +2,28 @@
 import Foundation
 
 enum SessionFixtureFactory {
-    static func makeSessions(count: Int) -> [TherapeuticSession] {
-        return (0 ..< count).map { index in
-            let now = Date()
-            let moodBefore = (index % 10) + 1
-            let moodAfter = ((index + 3) % 10) + 1
-            let treatment = PsychedelicTreatmentType.allCases[index % PsychedelicTreatmentType.allCases.count]
+    /// Returns deterministic session fixtures by reusing the shared seed factory.
+    static func makeSessions(count: Int, referenceDate: Date = Date()) -> [TherapeuticSession] {
+        var sessions = SeedDataFactory.makeSeedSessions(referenceDate: referenceDate)
+        guard count > sessions.count else { return Array(sessions.prefix(count)) }
 
+        let treatments = PsychedelicTreatmentType.allCases
+        for index in sessions.count ..< count {
+            let offset = index - sessions.count + 1
             let session = TherapeuticSession(
-                sessionDate: now.addingTimeInterval(TimeInterval(-index * 86400)),
-                treatmentType: treatment,
+                sessionDate: referenceDate.addingTimeInterval(TimeInterval(-offset * 86400)),
+                treatmentType: treatments[index % treatments.count],
                 administration: .oral,
                 intention: "Fixture Session \(index)",
-                moodBefore: moodBefore,
-                moodAfter: moodAfter,
-                reflections: index % 2 == 0 ? "Short reflection \(index)" : "",
-                reminderDate: index % 4 == 0 ? now.addingTimeInterval(TimeInterval(900 * (index + 1))) : nil
+                moodBefore: (index % 10) + 1,
+                moodAfter: ((index + 3) % 10) + 1,
+                reflections: index.isMultiple(of: 2) ? "Short reflection \(index)" : "",
+                reminderDate: index.isMultiple(of: 4) ? referenceDate
+                    .addingTimeInterval(TimeInterval(900 * (index + 1))) : nil
             )
-            return session
+            sessions.append(session)
         }
+
+        return sessions
     }
 }

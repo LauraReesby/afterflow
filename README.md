@@ -17,6 +17,7 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
 - **📚 History Filters + Undo**: Sort/search the session list, filter by treatment type, and undo deletes for up to 10 seconds
 - **⏰ Reflection Reminders**: Optional reminders to add post session mood and reflections
+- **📤 Data Export**: On-device CSV or PDF exports with date/treatment filters and progress feedback
 
 ### Therapeutic Value
 
@@ -229,10 +230,15 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI:
 - [x] Delete + Undo banner, VoiceOver-friendly filter menu
 - [x] Large dataset fixtures + performance tests (<200 ms scroll for 1k sessions)
 
-### 🎵 Phase 7+: Music Links & Data Export (Planned)
+### 🎵 Phase 7+: Music Links & Data Export
 - [x] Playlist link previews (Spotify/YouTube oEmbed, link-only fallback)
-- [ ] CSV/PDF export flows with filters
-- [ ] Additional polish: haptics, privacy manifest, governance sign-off
+- [x] CSV/PDF export flows with filters and offline file export
+- [x] Governance and privacy review for exports (on-device only)
+
+## Export Usage
+- Open the Sessions list, tap **Export**, choose CSV or PDF, and optionally filter by date range or treatment type.
+- Exports run locally and present the iOS file exporter/share sheet; temporary files are cleaned after completion.
+- CSVs use RFC‑4180 quoting and injection guards; PDFs include session summaries with optional cover pages.
 
 ## Contributing
 

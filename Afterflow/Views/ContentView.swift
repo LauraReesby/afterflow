@@ -3,7 +3,6 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
     @Environment(SessionStore.self) private var sessionStore
 
     // UI State
@@ -32,8 +31,7 @@ struct ContentView: View {
                 listViewModel: self.$listViewModel,
                 onDelete: self.deleteSessions,
                 onAdd: { self.showingSessionForm = true },
-                onExport: { self.showingExportSheet = true },
-                relativeDateText: relativeDateText(for:)
+                onExport: { self.showingExportSheet = true }
             )
         } detail: {
             Text("Select a session")
@@ -218,17 +216,13 @@ private struct SessionListSection: View {
     let onDelete: (IndexSet) -> Void
     let onAdd: () -> Void
     let onExport: () -> Void
-    let relativeDateText: (Date) -> String
-
-    @State private var showUndoBanner = false
-    @Environment(SessionStore.self) private var sessionStore
 
     var body: some View {
         ZStack(alignment: .bottom) {
             List {
-                ForEach(Array(self.sessions.enumerated()), id: \.element.id) { _, session in
+                ForEach(Array(self.sessions.enumerated()), id: \.element.id) { index, session in
                     ZStack(alignment: .leading) {
-                        SessionRowView(session: session, dateText: self.relativeDateText(session.sessionDate))
+                        SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
                             .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
                         NavigationLink(destination: SessionDetailView(session: session)) {
                             EmptyView()
@@ -237,7 +231,7 @@ private struct SessionListSection: View {
                         .buttonStyle(.plain)
                         .accessibilityHidden(true)
                     }
-                    .listRowSeparator(.hidden, edges: .top)
+                    .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
                     .listRowSeparator(.visible, edges: .bottom)
                 }
                 .onDelete(perform: self.onDelete)
@@ -282,10 +276,8 @@ private struct BottomControls: View {
                     Image(systemName: "plus")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
+                        .frame(width: 44, height: 44)
                         .background(Color.accentColor, in: Circle())
-                        .frame(height: 44)
                 }
                 .accessibilityIdentifier("addSessionButton")
                 .accessibilityLabel("Add Session")
@@ -471,15 +463,6 @@ private extension ContentView {
         copy.musicLinkProvider = session.musicLinkProvider
         return copy
     }
-
-    func relativeDateText(for date: Date) -> String {
-        let calendar = Calendar.current
-        if calendar.isDateInToday(date) { return "Today" }
-        if calendar.isDateInYesterday(date) { return "Yesterday" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd/yy"
-        return formatter.string(from: date)
-    }
 }
 
 private extension View {
@@ -500,38 +483,22 @@ private extension View {
 }
 
 #Preview {
-    let container: ModelContainer
+    let preview = makePreviewContainerAndStore()
+    ContentView()
+        .modelContainer(preview.container)
+        .environment(preview.store)
+}
+
+private func makePreviewContainerAndStore() -> (container: ModelContainer, store: SessionStore) {
     do {
-        container = try ModelContainer(
+        let container = try ModelContainer(
             for: TherapeuticSession.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
+        let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
+        SeedDataFactory.makeSeedSessions().forEach { try? store.create($0) }
+        return (container, store)
     } catch {
         fatalError("Failed to create preview container: \(error)")
     }
-    let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
-
-    // Seed varying sessions to fill the list
-    let now = Date()
-    let treatments = PsychedelicTreatmentType.allCases
-    for i in 0 ..< 20 {
-        let session = TherapeuticSession(
-            sessionDate: now.addingTimeInterval(TimeInterval(-i * 86400)), // daily offsets
-            treatmentType: treatments[i % treatments.count],
-            administration: .oral,
-            intention: "Preview Session \(i)",
-            moodBefore: (i % 10) + 1,
-            moodAfter: ((i + 3) % 10) + 1,
-            reflections: i % 2 == 0 ? "Short reflection \(i)" : "",
-            reminderDate: i % 4 == 0 ? now.addingTimeInterval(TimeInterval(900 * (i + 1))) : nil
-        )
-        session.musicLinkURL = i % 3 == 0 ? "https://open.spotify.com/playlist/preview-\(i)" : nil
-        session.musicLinkTitle = i % 3 == 0 ? "Mix \(i)" : nil
-        session.musicLinkProvider = i % 3 == 0 ? .spotify : .unknown
-        try? store.create(session)
-    }
-
-    return ContentView()
-        .modelContainer(container)
-        .environment(store)
 }

@@ -1,6 +1,6 @@
 # Feature Spec — Data Export (v2)
 **Feature ID:** 003  
-**Status:** Active  
+**Status:** Completed  
 **Depends On:** Core Session Logging (001)  
 **Constitution Reference:** v1.0.0  
 **Owner:** Engineering + Product
@@ -35,7 +35,7 @@ Users need a simple way to take their data with them (for backups, analysis, or 
 **Acceptance**
 1. Neutral headings and reflective tone (no diagnoses).  
 2. Includes intentions, playlist link title (if present), moods, reflections, and date/time.  
-3. Optional cover page with total sessions included, and a brief privacy note.  
+3. Optional cover page with total sessions included.  
 4. Pagination, selectable text, and legible in light/dark print.
 
 ### US3 — Export Management
@@ -69,7 +69,7 @@ Users need a simple way to take their data with them (for backups, analysis, or 
 | TR-302 | Core Data integration per shared `TherapeuticSession` model from Feature 001. |
 | TR-303 | CSV generation uses RFC 4180 conventions: comma delimiter, CRLF line endings, double‑quote escaping, UTF‑8 with BOM optional user toggle. |
 | TR-304 | Prevent CSV injection: prefix cells starting with `=`, `+`, `-`, `@` with an apostrophe `'`. |
-| TR-305 | PDF renderer with selectable text; A4/Letter support; auto pagination; margins ≥ 12pt; font scaling with Dynamic Type. |
+| TR-305 | PDF renderer with selectable text; A4/Letter support; auto pagination; margins ≥ 12pt; font scaling with Dynamic Type; optional cover page. |
 | TR-306 | Performance: CSV 1k sessions in < 2 s on target device; PDF 25 sessions in < 4 s. |
 | TR-307 | No network usage; works in airplane mode. |
 | TR-308 | Respect locale for display in PDF; use ISO‑8601 in CSV. |
@@ -107,4 +107,6 @@ Users need a simple way to take their data with them (for backups, analysis, or 
 ---
 
 ## Amendment Notes
-Feature changes require Constitution review and governance approval.
+Feature changes require Constitution review and governance approval.  
+- Implementation delivered via `CSVExportService` and `PDFExportService` with on-device processing, RFC‑4180 quoting and file naming `Afterflow-Export-YYYYMMDD-HHmm`.  
+- Privacy note removed from cover page per governance review; cover page remains optional.
