@@ -41,7 +41,9 @@ struct AfterflowApp: App {
 
     private func seedMusicLinkFixtures() {
         guard self.isUITesting else { return }
-        guard self.sessionStore.sessions.isEmpty else { return }
+        let descriptor = FetchDescriptor<TherapeuticSession>()
+        let existingSessions = (try? Self.sharedModelContainer.mainContext.fetch(descriptor)) ?? []
+        guard existingSessions.isEmpty else { return }
         SeedDataFactory.makeSeedSessions().forEach { try? self.sessionStore.create($0) }
     }
 }

@@ -2,7 +2,6 @@ import Foundation
 import Observation
 import SwiftData
 
-/// Observable store that manages session persistence and reminder scheduling.
 @MainActor
 @Observable
 final class SessionStore {
@@ -12,8 +11,6 @@ final class SessionStore {
     private let draftDefaults: UserDefaults
     private let draftPayloadKey = "session_draft_payload"
     private let draftTimestampKey = "session_draft_timestamp"
-
-    var sessions: [TherapeuticSession] = []
 
     init(
         modelContext: ModelContext,
@@ -25,51 +22,31 @@ final class SessionStore {
         self.owningContainer = owningContainer
         self.reminderScheduler = reminderScheduler ?? ReminderScheduler()
         self.draftDefaults = draftDefaults
-        self.reload()
-    }
-
-    func reload() {
-        let descriptor = FetchDescriptor<TherapeuticSession>(
-            sortBy: [SortDescriptor(\.sessionDate, order: .reverse)]
-        )
-        if let fetched = try? modelContext.fetch(descriptor) {
-            self.sessions = fetched
-        }
     }
 
     func create(_ session: TherapeuticSession) throws {
         self.modelContext.insert(session)
-        try self.saveAndRefresh()
+        try self.modelContext.save()
         self.scheduleReminderIfNeeded(for: session)
     }
 
     func update(_ session: TherapeuticSession) throws {
         session.markAsUpdated()
-        try self.saveAndRefresh()
+        try self.modelContext.save()
         self.scheduleReminderIfNeeded(for: session)
     }
 
     func delete(_ session: TherapeuticSession) throws {
         self.reminderScheduler.cancelReminder(for: session)
         self.modelContext.delete(session)
-        try self.saveAndRefresh()
+        try self.modelContext.save()
     }
 
     func setReminder(for session: TherapeuticSession, option: ReminderOption) async throws {
-        await self.reminderScheduler.setReminder(for: session, option: option)
+        try await self.reminderScheduler.setReminder(for: session, option: option)
         if self.modelContext.hasChanges {
             try self.modelContext.save()
         }
-        self.reload()
-    }
-
-    // MARK: - Helpers
-
-    private func saveAndRefresh() throws {
-        if self.modelContext.hasChanges {
-            try self.modelContext.save()
-        }
-        self.reload()
     }
 
     private func scheduleReminderIfNeeded(for session: TherapeuticSession) {
@@ -82,8 +59,6 @@ final class SessionStore {
             self.reminderScheduler.cancelReminder(for: session)
         }
     }
-
-    // MARK: - Draft Persistence (lightweight)
 
     func saveDraft(_ session: TherapeuticSession) {
         do {
@@ -101,7 +76,6 @@ final class SessionStore {
               let data = draftDefaults.data(forKey: draftPayloadKey)
         else { return nil }
 
-        // Only keep drafts for 24 hours
         let hoursSinceSave = Date().timeIntervalSince(timestamp) / 3600
         guard hoursSinceSave < 24 else {
             self.clearDraft()
@@ -123,8 +97,6 @@ final class SessionStore {
         self.draftDefaults.removeObject(forKey: self.draftTimestampKey)
     }
 }
-
-// MARK: - Draft DTO
 
 private struct SessionDraft: Codable {
     let sessionDate: Date

@@ -1,12 +1,10 @@
 import Foundation
 
 enum SeedDataFactory {
-    /// Creates a set of seeded sessions (including music fixtures) for previews and UI testing.
     static func makeSeedSessions(referenceDate: Date = Date()) -> [TherapeuticSession] {
         let now = referenceDate
         var seeds: [TherapeuticSession] = []
 
-        // Music fixtures
         let tier1 = TherapeuticSession(
             sessionDate: now,
             treatmentType: .psilocybin,
@@ -42,7 +40,6 @@ enum SeedDataFactory {
         linkOnly.musicLinkProvider = .appleMusic
         seeds.append(linkOnly)
 
-        // Additional sessions (daily offsets)
         let treatments = PsychedelicTreatmentType.allCases
         for i in 1 ... 18 {
             let session = TherapeuticSession(

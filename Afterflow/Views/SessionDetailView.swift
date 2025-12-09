@@ -1,5 +1,3 @@
-//  Constitutional Compliance: Privacy-First Reflections
-
 import SwiftData
 import SwiftUI
 #if canImport(UIKit)
@@ -13,74 +11,31 @@ struct SessionDetailView: View {
 
     let session: TherapeuticSession
 
+    private let metadataService = MusicLinkMetadataService()
+
     @State private var showingEdit = false
     @State private var linkErrorMessage: String?
+    @State private var isHydratingMusicLink = false
 
     var body: some View {
         List {
-            self.summarySection
+            SessionSummarySection(session: session, dateFormatter: dateFormatter)
 
-            Section("When") {
-                SessionDetailRow(title: "Date & Time", value: self.dateFormatter.string(from: self.session.sessionDate))
-            }
+            SessionMetadataSection(session: session, dateFormatter: dateFormatter)
 
-            Section("Treatment") {
-                SessionDetailRow(title: "Type", value: self.session.treatmentType.displayName)
-                SessionDetailRow(title: "Administration", value: self.session.administration.displayName)
-            }
+            SessionTreatmentSection(session: session)
 
-            Section("Intention") {
-                Text(self.session.intention.isEmpty ? "No intention captured." : self.session.intention)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            SessionIntentionSection(intention: session.intention)
 
-            Section("Mood") {
-                self.moodRow(title: "Before", value: self.session.moodBefore)
-                if self.hasAfterMood {
-                    self.moodRow(title: "After", value: self.session.moodAfter)
-                } else {
-                    SessionDetailRow(title: "After", value: "Not added yet")
-                }
-            }
+            SessionMoodSection(session: session)
 
-            Section("Music") {
-                if self.session.hasMusicLink {
-                    MusicLinkDetailCard(
-                        title: self.session.musicLinkTitle ?? "Playlist link",
-                        provider: self.session.musicLinkProvider,
-                        author: self.session.musicLinkAuthorName,
-                        urlDisplay: self.session.musicLinkWebURL ?? self.session.musicLinkURL ?? "",
-                        artworkURL: self.session.musicLinkArtworkURL.flatMap(URL.init(string:)),
-                        openAction: self.openMusicLink
-                    )
-                    .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
-                } else {
-                    Button {
-                        self.showingEdit = true
-                    } label: {
-                        Label("Attach music link", systemImage: "link.badge.plus")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.blue)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("attachMusicLinkFromDetail")
-                    .padding(.vertical, 2)
-                    .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
-                }
-            }
+            SessionMusicSection(
+                session: session,
+                onAttachMusic: { showingEdit = true },
+                onOpenLink: openMusicLink
+            )
 
-            Section("Reflection") {
-                if self.session.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text("You haven’t added reflections yet.")
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text(self.session.reflections)
-                        .font(.body)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
+            SessionReflectionSection(reflections: session.reflections)
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Session")
@@ -113,112 +68,11 @@ struct SessionDetailView: View {
         } message: {
             Text(self.linkErrorMessage ?? "")
         }
-    }
-
-    private var summarySection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(self.session.treatmentType.displayName)
-                            .font(.headline)
-                        Text(self.dateFormatter.string(from: self.session.sessionDate))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    if self.session.hasMusicLink {
-                        self.summaryBadge
-                            .accessibilityLabel("Music attached")
-                    }
-                }
-
-                HStack(spacing: 8) {
-                    StatusPill(status: self.session.status)
-                    if self.hasAfterMood {
-                        MoodDeltaPill(before: self.session.moodBefore, after: self.session.moodAfter)
-                    } else {
-                        MoodBeforePill(value: self.session.moodBefore)
-                    }
-                }
-                .padding(.top, 2)
-
-                if self.session.status == .needsReflection,
-                   let reminderLabel = self.session.reminderRelativeDescription {
-                    ReminderPill(text: reminderLabel)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 2)
-                        .accessibilityIdentifier("detailReminderLabel")
-                }
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
-            )
-        }
-        .listRowBackground(Color.clear)
-        .listRowInsets(.init(top: 2, leading: 0, bottom: 0, trailing: 0))
-    }
-
-    private func moodRow(title: String, value: Int, placeholder: String = "") -> some View {
-        let descriptor = MoodRatingScale.descriptor(for: value)
-        let emoji = MoodRatingScale.emoji(for: value)
-        return AnyView(SessionDetailRow(title: title, value: "\(value) (\(descriptor)) \(emoji)"))
-    }
-
-    private var summaryBadge: some View {
-        if let brand = brandImage(for: self.session.musicLinkProvider) {
-            return AnyView(
-                brand
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-            )
-        }
-        return AnyView(
-            Image(systemName: "music.note.list")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        )
-    }
-
-    private func brandImage(for provider: MusicLinkProvider) -> Image? {
-        let name: String
-        switch provider {
-        case .spotify: name = "spotify"
-        case .youtube: name = "youtube"
-        case .soundcloud: name = "soundcloud"
-        case .appleMusic: name = "appleMusic"
-        case .applePodcasts: name = "applePodcasts"
-        case .bandcamp: name = "bandcamp"
-        case .tidal: name = "tidal"
-        default: return nil
-        }
-
-        guard UIImage(named: name) != nil else { return nil }
-        return Image(name)
-    }
-
-    private var hasAfterMood: Bool {
-        let reflectionSet = !self.session.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return reflectionSet || self.session.moodAfter != 5
-    }
-
-    private var moodSummaryText: String {
-        let beforeDescriptor = MoodRatingScale.descriptor(for: self.session.moodBefore)
-        let afterDescriptor = MoodRatingScale.descriptor(for: self.session.moodAfter)
-        let before = "\(session.moodBefore) (\(beforeDescriptor))"
-
-        if self.hasAfterMood {
-            let after = "\(session.moodAfter) (\(afterDescriptor))"
-            return "Mood • \(before) → \(after)"
-        } else {
-            return "Mood • \(before) → —"
+        .task {
+            await self.hydrateMusicMetadataIfNeeded()
         }
     }
+
 
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -456,7 +310,200 @@ private struct MusicLinkDetailCard: View {
     }
 }
 
-// Shared brand loader for summary badge + detail card
+private struct SessionSummarySection: View {
+    let session: TherapeuticSession
+    let dateFormatter: DateFormatter
+
+    var body: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(session.treatmentType.displayName)
+                            .font(.headline)
+                        Text(dateFormatter.string(from: session.sessionDate))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if session.hasMusicLink {
+                        summaryBadge
+                            .accessibilityLabel("Music attached")
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    StatusPill(status: session.status)
+                    if hasAfterMood {
+                        MoodDeltaPill(before: session.moodBefore, after: session.moodAfter)
+                    } else {
+                        MoodBeforePill(value: session.moodBefore)
+                    }
+                }
+                .padding(.top, 2)
+
+                if session.status == .needsReflection,
+                   let reminderLabel = session.reminderRelativeDescription {
+                    ReminderPill(text: reminderLabel)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 2)
+                        .accessibilityIdentifier("detailReminderLabel")
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
+        }
+        .accessibilityElement(children: .contain)
+        .listRowBackground(Color.clear)
+        .listRowInsets(.init(top: 2, leading: 0, bottom: 0, trailing: 0))
+    }
+
+    private var hasAfterMood: Bool {
+        let reflectionSet = !session.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return reflectionSet || session.moodAfter != 5
+    }
+
+    private var summaryBadge: some View {
+        if let brand = brandImage(for: session.musicLinkProvider) {
+            return AnyView(
+                brand
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            )
+        }
+        return AnyView(
+            Image(systemName: "music.note.list")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        )
+    }
+}
+
+private struct SessionMetadataSection: View {
+    let session: TherapeuticSession
+    let dateFormatter: DateFormatter
+
+    var body: some View {
+        Section("When") {
+            SessionDetailRow(title: "Date & Time", value: dateFormatter.string(from: session.sessionDate))
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct SessionTreatmentSection: View {
+    let session: TherapeuticSession
+
+    var body: some View {
+        Section("Treatment") {
+            SessionDetailRow(title: "Type", value: session.treatmentType.displayName)
+            SessionDetailRow(title: "Administration", value: session.administration.displayName)
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct SessionIntentionSection: View {
+    let intention: String
+
+    var body: some View {
+        Section("Intention") {
+            Text(intention.isEmpty ? "No intention captured." : intention)
+                .font(.body)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct SessionMoodSection: View {
+    let session: TherapeuticSession
+
+    var body: some View {
+        Section("Mood") {
+            moodRow(title: "Before", value: session.moodBefore)
+            if hasAfterMood {
+                moodRow(title: "After", value: session.moodAfter)
+            } else {
+                SessionDetailRow(title: "After", value: "Not added yet")
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var hasAfterMood: Bool {
+        let reflectionSet = !session.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return reflectionSet || session.moodAfter != 5
+    }
+
+    private func moodRow(title: String, value: Int) -> some View {
+        let descriptor = MoodRatingScale.descriptor(for: value)
+        let emoji = MoodRatingScale.emoji(for: value)
+        return SessionDetailRow(title: title, value: "\(value) (\(descriptor)) \(emoji)")
+    }
+}
+
+private struct SessionMusicSection: View {
+    let session: TherapeuticSession
+    let onAttachMusic: () -> Void
+    let onOpenLink: () -> Void
+
+    var body: some View {
+        Section("Music") {
+            if session.hasMusicLink {
+                MusicLinkDetailCard(
+                    title: session.musicLinkTitle ?? "Playlist link",
+                    provider: session.musicLinkProvider,
+                    author: session.musicLinkAuthorName,
+                    urlDisplay: session.musicLinkWebURL ?? session.musicLinkURL ?? "",
+                    artworkURL: session.musicLinkArtworkURL.flatMap(URL.init(string:)),
+                    openAction: onOpenLink
+                )
+                .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
+            } else {
+                Button {
+                    onAttachMusic()
+                } label: {
+                    Label("Attach music link", systemImage: "link.badge.plus")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("attachMusicLinkFromDetail")
+                .padding(.vertical, 2)
+                .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct SessionReflectionSection: View {
+    let reflections: String
+
+    var body: some View {
+        Section("Reflection") {
+            if reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text("You haven't added reflections yet.")
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(MarkdownRenderer.render(reflections))
+                    .font(.body)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
 private func brandImage(for provider: MusicLinkProvider) -> Image? {
     let baseName: String
     switch provider {
@@ -501,6 +548,35 @@ extension SessionDetailView {
             self.linkErrorMessage = "Playlist link is missing."
         } else {
             self.linkErrorMessage = "Unable to open playlist link."
+        }
+    }
+
+    private func hydrateMusicMetadataIfNeeded() async {
+        guard self.session.hasMusicLink else { return }
+        let hasMetadata = !(self.session.musicLinkTitle?.isEmpty ?? true)
+            || self.session.musicLinkAuthorName != nil
+            || self.session.musicLinkArtworkURL != nil
+            || self.session.musicLinkDurationSeconds != nil
+        guard !hasMetadata else { return }
+        guard let link = self.session.musicLinkWebURL ?? self.session.musicLinkURL else { return }
+
+        await MainActor.run { self.isHydratingMusicLink = true }
+        defer { Task { @MainActor in self.isHydratingMusicLink = false } }
+
+        do {
+            let metadata = try await self.metadataService.fetchMetadata(for: link)
+            await MainActor.run {
+                self.session.musicLinkURL = metadata.originalURL.absoluteString
+                self.session.musicLinkWebURL = metadata.canonicalURL.absoluteString
+                self.session.musicLinkTitle = metadata.title
+                self.session.musicLinkAuthorName = metadata.authorName
+                self.session.musicLinkArtworkURL = metadata.thumbnailURL?.absoluteString
+                self.session.musicLinkDurationSeconds = metadata.durationSeconds
+                self.session.musicLinkProvider = metadata.provider
+                try? self.sessionStore.update(self.session)
+            }
+        } catch {
+            // Silent failure; UI continues with existing data.
         }
     }
 }

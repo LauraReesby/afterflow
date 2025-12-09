@@ -112,8 +112,8 @@ extension XCUIElement {
         }
     }
 
-    /// Some XCTest APIs surface "Invalid frame dimension" when acting on elements that report NaN/zero-sized frames.
-    /// This helper keeps those elements out of swipe/tap flows.
+    // Some XCTest APIs surface "Invalid frame dimension" when acting on elements that report NaN/zero-sized frames.
+    // This helper keeps those elements out of swipe/tap flows.
     fileprivate var hasUsableFrame: Bool {
         let frame = self.frame
         return frame.width.isFinite && frame.height.isFinite &&

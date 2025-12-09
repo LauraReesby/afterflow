@@ -30,8 +30,6 @@ final class MusicLinkDetailCardUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Apple Music"].waitForExistence(timeout: 4))
     }
 
-    // MARK: - Helpers
-
     private func openSession(named intention: String, in app: XCUIApplication) {
         let list = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch
         let sessionCell = app.cells.containing(.staticText, identifier: intention).firstMatch

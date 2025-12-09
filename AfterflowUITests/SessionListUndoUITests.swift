@@ -29,8 +29,6 @@ final class SessionListUndoUITests: XCTestCase {
         XCTAssertTrue(cell.waitForExistence(timeout: 6), "Session should reappear after undo")
     }
 
-    // MARK: - Helpers
-
     private func createSession(in app: XCUIApplication, intention: String) {
         let addSessionButton = app.buttons["addSessionButton"]
         XCTAssertTrue(addSessionButton.waitForExistence(timeout: 5))

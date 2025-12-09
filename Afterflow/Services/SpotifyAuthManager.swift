@@ -32,8 +32,6 @@ final class SpotifyAuthManager: NSObject {
         self.secureStore = secureStore ?? SecureStore()
     }
 
-    // MARK: - PKCE
-
     struct PKCEPair {
         let verifier: String
         let challenge: String
@@ -63,8 +61,6 @@ final class SpotifyAuthManager: NSObject {
             .replacingOccurrences(of: "=", with: "")
     }
 
-    // MARK: - Authorization URL
-
     func makeAuthorizationURL(state: String = UUID().uuidString, pkce: PKCEPair) -> URL {
         var components = URLComponents(url: configuration.authorizeURL, resolvingAgainstBaseURL: false)!
         components.queryItems = [
@@ -78,8 +74,6 @@ final class SpotifyAuthManager: NSObject {
         ]
         return components.url!
     }
-
-    // MARK: - Token Handling
 
     func exchangeCodeForTokens(code: String, pkce: PKCEPair) async throws -> SpotifyTokens {
         var request = URLRequest(url: configuration.tokenURL)

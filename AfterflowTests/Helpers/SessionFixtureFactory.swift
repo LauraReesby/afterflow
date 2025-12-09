@@ -2,16 +2,13 @@
 import Foundation
 
 enum SessionFixtureFactory {
-    /// Returns deterministic session fixtures by reusing the shared seed factory.
     static func makeSessions(count: Int, referenceDate: Date = Date()) -> [TherapeuticSession] {
-        var sessions = SeedDataFactory.makeSeedSessions(referenceDate: referenceDate)
-        guard count > sessions.count else { return Array(sessions.prefix(count)) }
-
+        var sessions: [TherapeuticSession] = []
         let treatments = PsychedelicTreatmentType.allCases
-        for index in sessions.count ..< count {
-            let offset = index - sessions.count + 1
+
+        for index in 0 ..< count {
             let session = TherapeuticSession(
-                sessionDate: referenceDate.addingTimeInterval(TimeInterval(-offset * 86400)),
+                sessionDate: referenceDate.addingTimeInterval(TimeInterval(-index * 86400)),
                 treatmentType: treatments[index % treatments.count],
                 administration: .oral,
                 intention: "Fixture Session \(index)",
@@ -25,5 +22,9 @@ enum SessionFixtureFactory {
         }
 
         return sessions
+    }
+
+    static func makeSeedSessions(referenceDate: Date = Date()) -> [TherapeuticSession] {
+        SeedDataFactory.makeSeedSessions(referenceDate: referenceDate)
     }
 }

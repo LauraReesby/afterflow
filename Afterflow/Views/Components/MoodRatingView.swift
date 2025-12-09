@@ -1,8 +1,5 @@
-//  Constitutional Compliance: Calming UI, Accessibility-First
-
 import SwiftUI
 
-/// Reusable mood slider with emoji feedback and accessibility labels.
 struct MoodRatingView: View {
     @Binding var value: Int
     let title: String

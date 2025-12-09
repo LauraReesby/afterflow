@@ -4,8 +4,6 @@ import Testing
 
 @MainActor
 struct TherapeuticSessionTests {
-    // MARK: - Initialization Tests
-
     @Test("TherapeuticSession initialization with default values")
     func therapeuticSessionDefaultInitialization() async throws {
         let session = TherapeuticSession()
@@ -25,7 +23,6 @@ struct TherapeuticSessionTests {
         #expect(session.musicLinkAuthorName == nil)
         #expect(session.musicLinkArtworkURL == nil)
 
-        // Dates should be recent (within 1 second)
         let now = Date()
         #expect(session.sessionDate.timeIntervalSince(now) < 1.0)
         #expect(session.createdAt.timeIntervalSince(now) < 1.0)
@@ -57,8 +54,6 @@ struct TherapeuticSessionTests {
         #expect(session.status == .complete)
         #expect(session.reminderDate == reminderDate)
     }
-
-    // MARK: - Computed Properties Tests
 
     @Test("Display title without treatment type") func displayTitleEmptyTreatmentType() async throws {
         let session = TherapeuticSession(treatmentType: .psilocybin)
@@ -97,8 +92,6 @@ struct TherapeuticSessionTests {
         sessionWithPlaylist.musicLinkURL = "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M"
         #expect(sessionWithPlaylist.hasMusicLink == true)
     }
-
-    // MARK: - Validation Tests
 
     @Test("Valid session validation") func validSessionValidation() async throws {
         let validSession = TherapeuticSession(
@@ -141,8 +134,6 @@ struct TherapeuticSessionTests {
         #expect(invalidMoodAfter.isValid == false)
     }
 
-    // MARK: - Data Management Tests
-
     @Test("Mark as updated changes timestamp") func testMarkAsUpdated() async throws {
         let session = TherapeuticSession()
         let originalUpdatedAt = session.updatedAt
@@ -178,8 +169,6 @@ struct TherapeuticSessionTests {
         #expect(session.updatedAt > originalUpdatedAt)
     }
 
-    // MARK: - Administration Method Tests
-
     @Test("Administration method enum values") func administrationMethodValues() async throws {
         let sessionIV = TherapeuticSession(treatmentType: .ketamine, administration: .intravenous)
         #expect(sessionIV.administration == .intravenous)
@@ -197,8 +186,6 @@ struct TherapeuticSessionTests {
         #expect(sessionOther.administration == .other)
     }
 
-    // MARK: - Edge Cases Tests
-
     @Test("Extreme mood values") func extremeMoodValues() async throws {
         let session = TherapeuticSession(moodBefore: 1, moodAfter: 10)
 
@@ -210,7 +197,7 @@ struct TherapeuticSessionTests {
     @Test("Long text fields") func longTextFields() async throws {
         let longText = String(repeating: "A", count: 1000)
         let session = TherapeuticSession(
-            treatmentType: .psilocybin, // Use valid psychedelic
+            treatmentType: .psilocybin,
             administration: .oral,
             intention: longText,
             reflections: longText

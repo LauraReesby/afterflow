@@ -39,8 +39,6 @@ final class SessionMoodRatingUITests: XCTestCase {
         add(attachment)
     }
 
-    // MARK: - Helpers
-
     @discardableResult private func presentSessionForm(_ app: XCUIApplication) -> XCUIElement {
         app.launch()
 

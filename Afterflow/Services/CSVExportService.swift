@@ -1,14 +1,7 @@
 import Foundation
 
-/// Exports TherapeuticSession data to CSV with safe defaults (RFC 4180 quoting, UTF-8, and CSV injection guard).
-struct CSVExportService {
-    /// Export the provided sessions to a CSV file at a temporary URL.
-    /// - Parameters:
-    ///   - sessions: Sessions to export.
-    ///   - dateRange: Optional date filter; only sessions whose `sessionDate` falls inside are included.
-    ///   - treatmentType: Optional treatment filter.
-    /// - Returns: File URL pointing to the generated CSV in a temporary directory.
-    @MainActor func export(
+struct CSVExportService: Sendable {
+    func export(
         sessions: [TherapeuticSession],
         dateRange: ClosedRange<Date>? = nil,
         treatmentType: PsychedelicTreatmentType? = nil
@@ -54,8 +47,6 @@ struct CSVExportService {
 
         return fileURL
     }
-
-    // MARK: - Helpers
 
     private static func escape(_ value: String) -> String {
         // Guard against formula injection by prefixing values starting with =,+,-,@ with a single quote.

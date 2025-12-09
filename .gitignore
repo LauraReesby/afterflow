@@ -74,6 +74,8 @@ Secrets.plist
 Config.plist
 *.p12
 *.mobileprovision
+.claude
+WARP.md
 
 ### Logs / temp ###
 *.log
@@ -85,5 +87,3 @@ Config.plist
 spec/**/__pycache__/
 spec/**/.DS_Store
 spec/**/.env
-
-WARP.md

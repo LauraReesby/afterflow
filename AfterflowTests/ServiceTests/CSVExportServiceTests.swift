@@ -118,8 +118,6 @@ final class CSVExportServiceTests: XCTestCase {
         XCTAssertEqual(lines.count, 1001) // header + 1000 rows
     }
 
-    // MARK: - Helpers
-
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }

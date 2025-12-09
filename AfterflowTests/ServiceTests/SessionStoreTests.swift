@@ -7,18 +7,20 @@ import UserNotifications
 @MainActor
 struct SessionStoreTests {
     @Test("Create and delete go through store and refresh list") func createAndDelete() async throws {
-        let (store, _) = try makeStore()
+        let (store, container, _) = try makeStore()
         let session = TherapeuticSession(intention: "Test", moodBefore: 5)
 
         try store.create(session)
-        #expect(store.sessions.count == 1)
+        let sessionsAfterCreate = try container.mainContext.fetch(FetchDescriptor<TherapeuticSession>())
+        #expect(sessionsAfterCreate.count == 1)
 
         try store.delete(session)
-        #expect(store.sessions.isEmpty)
+        let sessionsAfterDelete = try container.mainContext.fetch(FetchDescriptor<TherapeuticSession>())
+        #expect(sessionsAfterDelete.isEmpty)
     }
 
     @Test("Draft save, recover, and clear") func draftLifecycle() async throws {
-        let (store, _) = try makeStore()
+        let (store, _, _) = try makeStore()
         let draft = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -38,7 +40,7 @@ struct SessionStoreTests {
 
     @Test("Setting reminder applies date and schedules notification")
     func setReminderSchedulesNotification() async throws {
-        let (store, mockCenter) = try makeStore()
+        let (store, _, mockCenter) = try makeStore()
         let session = TherapeuticSession(intention: "Needs reflection", moodBefore: 5)
         try store.create(session)
 
@@ -49,7 +51,7 @@ struct SessionStoreTests {
 
     @Test("Updating a session cancels needs-reflection reminders when complete") func updateCancelsReminder(
     ) async throws {
-        let (store, mockCenter) = try makeStore()
+        let (store, _, mockCenter) = try makeStore()
         let session = TherapeuticSession(intention: "Reflection pending", moodBefore: 5)
         try store.create(session)
         session.reminderDate = Date().addingTimeInterval(3600)
@@ -61,7 +63,7 @@ struct SessionStoreTests {
     }
 
     @Test("Set reminder respects .none and clears pending request") func setReminderNoneClears() async throws {
-        let (store, mockCenter) = try makeStore()
+        let (store, _, mockCenter) = try makeStore()
         let session = TherapeuticSession(intention: "Reminder test", moodBefore: 7)
         try store.create(session)
 
@@ -73,9 +75,7 @@ struct SessionStoreTests {
         #expect(session.reminderDate == nil)
     }
 
-    // MARK: - Helpers
-
-    private func makeStore() throws -> (SessionStore, MockNotificationCenter) {
+    private func makeStore() throws -> (SessionStore, ModelContainer, MockNotificationCenter) {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let mockCenter = MockNotificationCenter()
@@ -88,7 +88,7 @@ struct SessionStoreTests {
             reminderScheduler: scheduler,
             draftDefaults: defaults
         )
-        return (store, mockCenter)
+        return (store, container, mockCenter)
     }
 }
 

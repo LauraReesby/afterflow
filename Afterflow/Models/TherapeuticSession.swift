@@ -1,9 +1,6 @@
-//  Constitutional Compliance: Privacy-First, SwiftData Native, Offline-First
-
 import Foundation
 import SwiftData
 
-/// Supported psychedelic treatment types for therapeutic sessions
 enum PsychedelicTreatmentType: String, CaseIterable {
     case psilocybin = "Psilocybin"
     case lsd = "LSD"
@@ -13,14 +10,13 @@ enum PsychedelicTreatmentType: String, CaseIterable {
     case ayahuasca = "Ayahuasca"
     case mescaline = "Mescaline"
     case cannabis = "Cannabis"
+    case other = "Other"
 
-    /// Display name for UI
     var displayName: String {
         rawValue
     }
 }
 
-/// Supported administration methods for psychedelic treatments
 enum AdministrationMethod: String, CaseIterable {
     case intravenous = "Intravenous (IV)"
     case intramuscular = "Intramuscular (IM)"
@@ -28,7 +24,6 @@ enum AdministrationMethod: String, CaseIterable {
     case nasal = "Nasal"
     case other = "Other"
 
-    /// Display name for UI
     var displayName: String {
         rawValue
     }
@@ -127,24 +122,14 @@ enum MusicLinkProvider: String, Codable, CaseIterable {
     }
 }
 
-/// Core therapeutic session data model following constitutional principles:
-/// - Privacy-First: All data stored locally, no cloud sync
-/// - Therapeutic Value-First: Designed for reflection and growth
-/// - Offline-First: Works completely without network
 @Model
 final class TherapeuticSession {
-    // MARK: - Core Session Properties
-
-    /// Unique identifier for the session
     var id: UUID
 
-    /// When this session occurred
     var sessionDate: Date
 
-    /// Type of psychedelic therapeutic experience (stored as String)
     var treatmentTypeRawValue: String
 
-    /// Type of psychedelic therapeutic experience (computed from enum)
     var treatmentType: PsychedelicTreatmentType {
         get {
             PsychedelicTreatmentType(rawValue: self.treatmentTypeRawValue) ?? .psilocybin
@@ -154,10 +139,8 @@ final class TherapeuticSession {
         }
     }
 
-    /// Administration method (stored as String)
     var administrationRawValue: String
 
-    /// Administration method (computed from enum)
     var administration: AdministrationMethod {
         get {
             AdministrationMethod(rawValue: self.administrationRawValue) ?? .oral
@@ -167,57 +150,33 @@ final class TherapeuticSession {
         }
     }
 
-    /// User's intention going into the session
     var intention: String
 
-    /// When this record was created
     var createdAt: Date
 
-    /// When this record was last modified
     var updatedAt: Date
 
-    // MARK: - Environment & Setting
-
-    // MARK: - Mood Tracking
-
-    /// Mood rating before session (1-10 scale)
     var moodBefore: Int
 
-    /// Mood rating after session (1-10 scale)
     var moodAfter: Int
 
-    // MARK: - Reflection
-
-    /// Post-session reflections and insights
     var reflections: String
 
-    /// Reminder date for revisiting reflections
     var reminderDate: Date?
 
-    // MARK: - Music Link Integration (Optional)
-
-    /// Original playlist URL supplied by the user (could be app-specific scheme)
     var musicLinkURL: String?
 
-    /// Canonical HTTPS URL used for previews/fallbacks
     var musicLinkWebURL: String?
 
-    /// Playlist title returned by metadata service
     var musicLinkTitle: String?
 
-    /// Playlist author/curator name (optional)
     var musicLinkAuthorName: String?
 
-    /// Playlist artwork/thumbnail URL
     var musicLinkArtworkURL: String?
 
-    /// Link duration (seconds) when available from oEmbed
     var musicLinkDurationSeconds: Int?
 
-    /// Underlying provider raw value
     var musicLinkProviderRawValue: String?
-
-    // MARK: - Initialization
 
     init(
         sessionDate: Date = Date(),
@@ -251,20 +210,18 @@ final class TherapeuticSession {
     }
 }
 
-// MARK: - Computed Properties
-
 extension TherapeuticSession {
-    /// Human-readable session title for UI display
+    // Human-readable session title for UI display
     var displayTitle: String {
         "\(self.treatmentType.displayName) • \(self.sessionDate.formatted(date: .abbreviated, time: .omitted))"
     }
 
-    /// Mood change from before to after session
+    // Mood change from before to after session
     var moodChange: Int {
         self.moodAfter - self.moodBefore
     }
 
-    /// Whether this session has a stored playlist link
+    // Whether this session has a stored playlist link
     var hasMusicLink: Bool {
         guard let url = self.musicLinkURL ?? self.musicLinkWebURL else { return false }
         return !url.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -290,7 +247,7 @@ extension TherapeuticSession {
         return nil
     }
 
-    /// Display string for reminder timestamp
+    // Display string for reminder timestamp
     var reminderDisplayText: String? {
         guard let reminderDate else { return nil }
         if reminderDate < Date() {
@@ -315,14 +272,14 @@ extension TherapeuticSession {
         return reminderDate.formatted(date: .abbreviated, time: .shortened)
     }
 
-    /// Validation for required fields and psychedelic treatment types
+    // Validation for required fields and psychedelic treatment types
     var isValid: Bool {
         !self.intention.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
             self.moodBefore >= 1 && self.moodBefore <= 10 &&
             self.moodAfter >= 1 && self.moodAfter <= 10
     }
 
-    /// Derived lifecycle status based on required fields and reflections
+    // Derived lifecycle status based on required fields and reflections
     var status: SessionLifecycleStatus {
         let hasCoreFields = !self.intention.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
             (1 ... 10).contains(self.moodBefore)
@@ -333,15 +290,11 @@ extension TherapeuticSession {
     }
 }
 
-// MARK: - Data Management
-
 extension TherapeuticSession {
-    /// Update the modification timestamp
     func markAsUpdated() {
         self.updatedAt = Date()
     }
 
-    /// Clear all music link metadata
     func clearMusicLinkData() {
         self.musicLinkURL = nil
         self.musicLinkWebURL = nil

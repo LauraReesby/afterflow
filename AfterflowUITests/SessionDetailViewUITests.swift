@@ -63,8 +63,6 @@ final class SessionDetailViewUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["detailReminderLabel"].waitForExistence(timeout: 4))
     }
 
-    // MARK: - Helpers
-
     private func createSession(
         in app: XCUIApplication,
         intention: String,

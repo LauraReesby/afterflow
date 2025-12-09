@@ -78,8 +78,6 @@ final class PDFExportServiceTests: XCTestCase {
         #endif
     }
 
-    // MARK: - Helpers
-
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }

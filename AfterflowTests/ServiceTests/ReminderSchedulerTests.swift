@@ -12,10 +12,24 @@ struct ReminderSchedulerTests {
 
         let session = TherapeuticSession(intention: "Test", moodBefore: 5)
         let now = Date(timeIntervalSince1970: 0)
-        await scheduler.setReminder(for: session, option: .threeHours, now: now)
+        try await scheduler.setReminder(for: session, option: .threeHours, now: now)
         #expect(mockCenter.addedRequests.count == 1)
         #expect(mockCenter.addedRequests.first?.identifier == "reminder_\(session.id.uuidString)")
         #expect(session.reminderDate == now.addingTimeInterval(10800))
+    }
+
+    @Test("Scheduler throws when permission denied") func throwsWhenPermissionDenied() async throws {
+        let mockCenter = MockNotificationCenter()
+        mockCenter.authorizationStatus = .denied
+        let scheduler = ReminderScheduler(notificationCenter: mockCenter)
+
+        let session = TherapeuticSession(intention: "Test", moodBefore: 5)
+        let now = Date(timeIntervalSince1970: 0)
+
+        await #expect(throws: ReminderScheduler.ReminderError.self) {
+            try await scheduler.setReminder(for: session, option: .threeHours, now: now)
+        }
+        #expect(session.reminderDate == nil)
     }
 
     @Test("Scheduler cancels request when reminder removed") func cancelReminderRemovesRequest() {

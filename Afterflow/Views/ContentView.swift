@@ -3,6 +3,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
+    @Query(sort: \TherapeuticSession.sessionDate, order: .reverse)
+    private var allSessions: [TherapeuticSession]
+
     @Environment(SessionStore.self) private var sessionStore
 
     // UI State
@@ -82,13 +85,9 @@ struct ContentView: View {
         .overlay { ExportOverlay(isExporting: self.isExporting) { self.cancelExport() } }
     }
 
-    // MARK: - Derived Data
-
     private var filteredSessions: [TherapeuticSession] {
-        self.listViewModel.applyFilters(to: self.sessionStore.sessions)
+        self.listViewModel.applyFilters(to: self.allSessions)
     }
-
-    // MARK: - Delete + Undo
 
     private func deleteSessions(offsets: IndexSet) {
         withAnimation {
@@ -135,14 +134,12 @@ struct ContentView: View {
         self.undoTask = nil
     }
 
-    // MARK: - Export
-
     private func startExport(with request: ExportRequest) {
         self.isExporting = true
         self.exportError = nil
         self.exportTask?.cancel()
 
-        let sessions = self.sessionStore.sessions
+        let sessions = self.allSessions
         self.exportTask = Task {
             do {
                 let result = try await performExport(for: sessions, request: request)
@@ -207,8 +204,6 @@ private struct ExportResult {
     let type: UTType
     let filename: String
 }
-
-// MARK: - Subviews
 
 private struct SessionListSection: View {
     let sessions: [TherapeuticSession]
@@ -436,8 +431,6 @@ private struct SessionRowView: View {
         }
     }
 }
-
-// MARK: - Helpers
 
 private extension ContentView {
     func clone(_ session: TherapeuticSession) -> TherapeuticSession {

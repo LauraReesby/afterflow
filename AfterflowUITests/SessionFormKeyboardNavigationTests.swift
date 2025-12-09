@@ -1,5 +1,3 @@
-//  Constitutional Compliance: Test-Driven Quality, Accessibility-First
-
 import XCTest
 
 @MainActor
@@ -10,7 +8,6 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
 
     override func tearDownWithError() throws {}
 
-    /// Navigate to the session form for testing
     private func navigateToSessionForm(_ app: XCUIApplication) {
         app.launch()
 
@@ -106,10 +103,6 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
         // Type some text
         intentionField.typeText("Test intention")
 
-        // The main test: verify we can interact with the field successfully
-        // We don't need to test keyboard dismissal extensively - that's OS behavior
-        // We just need to verify the field accepts input and works as expected
-
         // Simple verification that the text was entered
         let fieldValue = intentionField.value as? String ?? ""
         XCTAssertTrue(fieldValue.contains("Test intention"), "Intention field should contain the typed text")
@@ -165,8 +158,6 @@ final class SessionFormKeyboardNavigationTests: XCTestCase {
         XCTAssertTrue(cancelButton.exists, "Cancel button should exist")
         XCTAssertTrue(saveButton.exists, "Save button should exist")
     }
-
-    // MARK: - Helpers
 
     @discardableResult
     private func waitForKeyboard(_ keyboard: XCUIElement, appears: Bool, timeout: TimeInterval = 3) -> Bool {

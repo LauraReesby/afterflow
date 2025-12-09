@@ -61,8 +61,6 @@ final class SessionFormValidationUITests: XCTestCase {
         XCTAssertFalse(preview.waitForExistence(timeout: 1), "Preview should disappear after removing link")
     }
 
-    // MARK: - Helpers
-
     private func presentSessionForm(_ app: XCUIApplication) {
         app.launch()
 

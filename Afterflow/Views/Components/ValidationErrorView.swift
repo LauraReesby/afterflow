@@ -1,8 +1,6 @@
 import Foundation
 import SwiftUI
 
-/// A reusable SwiftUI view for displaying therapeutic validation errors
-/// with accessibility support and calming design
 struct ValidationErrorView: View {
     let message: String?
 
@@ -12,7 +10,7 @@ struct ValidationErrorView: View {
                 Image(systemName: "info.circle")
                     .foregroundColor(.orange)
                     .font(.caption)
-                    .accessibilityHidden(true) // Screen reader will read the text
+                    .accessibilityHidden(true)
 
                 Text(message)
                     .font(.caption)
@@ -37,7 +35,6 @@ struct ValidationErrorView: View {
     }
 }
 
-/// A modifier that adds inline validation highlighting to form fields
 struct InlineValidationModifier: ViewModifier {
     let isValid: Bool?
 
@@ -55,7 +52,6 @@ struct InlineValidationModifier: ViewModifier {
 }
 
 extension View {
-    /// Adds inline validation highlight to any view
     func inlineValidation(_ validationResult: FieldValidationState?) -> some View {
         self.modifier(InlineValidationModifier(isValid: validationResult?.isValid))
     }

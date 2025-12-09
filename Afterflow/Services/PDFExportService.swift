@@ -3,20 +3,12 @@ import Foundation
     import UIKit
 #endif
 
-/// Exports TherapeuticSession data to a selectable-text PDF with simple pagination and an optional cover page.
-struct PDFExportService {
-    struct Options {
+struct PDFExportService: Sendable {
+    struct Options: Sendable {
         var includeCoverPage: Bool = true
         var showPrivacyNote: Bool = true
     }
 
-    /// Export sessions to a PDF in a temporary file.
-    /// - Parameters:
-    ///   - sessions: Sessions to export.
-    ///   - dateRange: Optional date filter.
-    ///   - treatmentType: Optional treatment filter.
-    ///   - options: PDF export options (cover page, privacy note).
-    /// - Returns: URL to the generated PDF file.
     func export(
         sessions: [TherapeuticSession],
         dateRange: ClosedRange<Date>? = nil,
@@ -67,8 +59,6 @@ struct PDFExportService {
     enum PDFExportError: Error {
         case platformUnavailable
     }
-
-    // MARK: - Drawing helpers
 
     #if canImport(UIKit)
         private func drawCoverPage(cursor: inout PDFCursor, options: Options) {
@@ -156,8 +146,6 @@ struct PDFExportService {
         }
     #endif
 
-    // MARK: - Formatters
-
     private static let dateTimeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -166,8 +154,6 @@ struct PDFExportService {
         return formatter
     }()
 }
-
-// MARK: - PDF Layout Helper
 
 #if canImport(UIKit)
     private struct PDFCursor {

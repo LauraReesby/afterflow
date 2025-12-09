@@ -1,10 +1,11 @@
 @testable import Afterflow
 import Foundation
+import SwiftData
 import Testing
 
 @MainActor
 struct MusicLinkMetadataServiceTests {
-    private final class MockSession: URLSessioning {
+    private final class MockSession: URLSessioning, @unchecked Sendable {
         enum Step {
             case response(Data, Int)
             case error(Error)
@@ -185,5 +186,55 @@ struct MusicLinkMetadataServiceTests {
         // second fetch should hit cache even though the mock has no steps left
         let second = try await service.fetchMetadata(for: "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M")
         #expect(second.title == "Deep Focus")
+    }
+
+    @Test("Hydrates missing session metadata and persists to store") func hydratesSessionMetadata() async throws {
+        let payload = Data("""
+        {
+          "title": "Lo-Fi Focus",
+          "author_name": "Lo-Fi Collective",
+          "thumbnail_url": "https://i.scdn.co/image/lofi.jpg",
+          "duration": 3600
+        }
+        """.utf8)
+
+        let service = MusicLinkMetadataService(
+            urlSession: MockSession(steps: [.response(payload, 200)])
+        )
+
+        let container = try ModelContainer(
+            for: TherapeuticSession.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
+
+        let session = TherapeuticSession(
+            sessionDate: Date(),
+            treatmentType: .psilocybin,
+            administration: .oral,
+            intention: "Hydrate music link",
+            moodBefore: 5,
+            moodAfter: 6
+        )
+        session.musicLinkURL = "https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6"
+        session.musicLinkWebURL = "https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6"
+        try store.create(session)
+
+        let metadata = try await service.fetchMetadata(for: session.musicLinkWebURL ?? "")
+        session.musicLinkURL = metadata.originalURL.absoluteString
+        session.musicLinkWebURL = metadata.canonicalURL.absoluteString
+        session.musicLinkTitle = metadata.title
+        session.musicLinkAuthorName = metadata.authorName
+        session.musicLinkArtworkURL = metadata.thumbnailURL?.absoluteString
+        session.musicLinkDurationSeconds = metadata.durationSeconds
+        session.musicLinkProvider = metadata.provider
+        try store.update(session)
+
+        let refreshed = try container.mainContext.fetch(FetchDescriptor<TherapeuticSession>()).first
+        #expect(refreshed?.musicLinkTitle == "Lo-Fi Focus")
+        #expect(refreshed?.musicLinkAuthorName == "Lo-Fi Collective")
+        #expect(refreshed?.musicLinkArtworkURL == "https://i.scdn.co/image/lofi.jpg")
+        #expect(refreshed?.musicLinkDurationSeconds == 3600)
+        #expect(refreshed?.musicLinkProvider == .spotify)
     }
 }

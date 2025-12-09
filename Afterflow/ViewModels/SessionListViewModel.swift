@@ -1,5 +1,3 @@
-//  Constitutional Compliance: Offline-First List Filters
-
 import Foundation
 
 struct SessionListViewModel {

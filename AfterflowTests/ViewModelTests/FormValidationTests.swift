@@ -4,8 +4,6 @@ import Testing
 
 @MainActor
 struct FormValidationTests {
-    // MARK: - Basic Validation Tests
-
     @Test("Valid intention passes validation") func validIntentionValidation() async throws {
         let validation = FormValidation()
 
@@ -109,8 +107,6 @@ struct FormValidationTests {
         // Should not provide message for dates that don't change significantly
         #expect(message == nil)
     }
-
-    // MARK: - Form Data Tests
 
     @Test("Valid complete form passes validation") func completeFormValidation() async throws {
         let validation = FormValidation()

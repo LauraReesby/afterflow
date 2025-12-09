@@ -1,5 +1,3 @@
-//  Constitutional Compliance: Privacy-First, SwiftUI Native, Therapeutic Value-First
-
 import SwiftData
 import SwiftUI
 #if canImport(UIKit)
@@ -31,8 +29,6 @@ struct SessionFormView: View {
 
     private let mode: Mode
 
-    // MARK: - Form State
-
     @State private var sessionDate: Date
     @State private var selectedTreatmentType: PsychedelicTreatmentType
     @State private var selectedAdministration: AdministrationMethod
@@ -48,8 +44,6 @@ struct SessionFormView: View {
     @State private var pendingMetadataRequest: UUID?
     @State private var metadataFetchTask: Task<Void, Never>?
 
-    // MARK: - Focus Management
-
     @FocusState private var focusedField: FormField?
 
     enum FormField: CaseIterable {
@@ -57,15 +51,11 @@ struct SessionFormView: View {
         case reflection
     }
 
-    // MARK: - Validation
-
     @State private var validator = FormValidation()
     @State private var intentionValidation: FieldValidationState?
     @State private var dateValidation: FieldValidationState?
     @State private var validationTask: Task<Void, Never>?
     @State private var draftSaveTask: Task<Void, Never>?
-
-    // MARK: - UI State
 
     @State private var isLoading = false
     @State private var showError = false
@@ -75,8 +65,6 @@ struct SessionFormView: View {
     @State private var showReminderPrompt = false
     @State private var pendingSessionForReminder: TherapeuticSession?
     private let metadataService = MusicLinkMetadataService()
-
-    // MARK: - Init
 
     init(session: TherapeuticSession? = nil) {
         if let session {
@@ -112,8 +100,6 @@ struct SessionFormView: View {
         }
     }
 
-    // MARK: - Computed Properties
-
     private var isFormValid: Bool {
         let formData = SessionFormData(
             sessionDate: sessionDate,
@@ -144,22 +130,6 @@ struct SessionFormView: View {
     }
 
     private var editingSession: TherapeuticSession? { self.mode.session }
-
-    private var statusBanner: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(self.statusTitle)
-                .font(.headline)
-            Text(self.statusSubtitle)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
-        )
-    }
 
     @ViewBuilder
     private var moodSection: some View {
@@ -204,11 +174,16 @@ struct SessionFormView: View {
     private var reflectionSection: some View {
         if self.mode.isEditing {
             Section("Reflection") {
-                TextEditor(text: self.$reflectionText)
-                    .frame(minHeight: 140)
-                    .focused(self.$focusedField, equals: .reflection)
-                    .accessibilityIdentifier("reflectionEditor")
-                Text("Capture integration notes, insights, or any memories you'd like to revisit later.")
+                RichTextEditor(
+                    text: self.$reflectionText,
+                    isFocused: Binding(
+                        get: { self.focusedField == .reflection },
+                        set: { if $0 { self.focusedField = .reflection } else if self.focusedField == .reflection { self.focusedField = nil } }
+                    ),
+                    accessibilityIdentifier: "reflectionEditor"
+                )
+
+                Text("Use formatting to emphasize key insights or organize your thoughts.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -229,140 +204,56 @@ struct SessionFormView: View {
         }
     }
 
-    // MARK: - Body
-
     var body: some View {
         List {
-            Section {
-                self.statusBanner
-            }
-            .listRowBackground(Color.clear)
-            .listRowInsets(.init(top: 8, leading: 0, bottom: 0, trailing: 0))
+            FormStatusBanner(
+                statusTitle: statusTitle,
+                statusSubtitle: statusSubtitle
+            )
 
-            Section("When is this session?") {
-                DatePicker(
-                    "Date & Time",
-                    selection: self.$sessionDate,
-                    displayedComponents: [.date, .hourAndMinute]
-                )
-                .datePickerStyle(.compact)
-                .onChange(of: self.sessionDate) { oldValue, newValue in
-                    self.handleDateChange(from: oldValue, to: newValue)
-                }
-                .inlineValidation(self.dateValidation)
+            FormDateSection(
+                sessionDate: $sessionDate,
+                dateValidation: dateValidation,
+                showNormalizationHint: showDateNormalizationHint,
+                normalizationMessage: dateNormalizationMessage,
+                onDateChange: handleDateChange
+            )
 
-                if self.showDateNormalizationHint, !self.dateNormalizationMessage.isEmpty {
-                    Text(self.dateNormalizationMessage)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            FormTreatmentSection(
+                treatmentType: $selectedTreatmentType,
+                administration: $selectedAdministration,
+                onTreatmentChange: scheduleDraftSave,
+                onAdministrationChange: scheduleDraftSave
+            )
 
-            Section("Treatment") {
-                Picker("Treatment Type", selection: self.$selectedTreatmentType) {
-                    ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
-                        Text(type.displayName).tag(type)
-                    }
+            FormIntentionSection(
+                intention: $intention,
+                focusedField: $focusedField,
+                validation: intentionValidation,
+                isFormValid: isFormValid,
+                onSubmit: saveSession,
+                onChange: {
+                    debounceValidation()
+                    scheduleDraftSave()
                 }
-                .pickerStyle(.menu)
-                .onChange(of: self.selectedTreatmentType) { _, _ in
-                    self.scheduleDraftSave()
-                }
-
-                Picker("Administration", selection: self.$selectedAdministration) {
-                    ForEach(AdministrationMethod.allCases, id: \.self) { method in
-                        Text(method.displayName).tag(method)
-                    }
-                }
-                .pickerStyle(.menu)
-                .onChange(of: self.selectedAdministration) { _, _ in
-                    self.scheduleDraftSave()
-                }
-            }
-
-            Section("Intention") {
-                TextField(
-                    "What do you hope to explore or heal?",
-                    text: self.$intention,
-                    axis: .vertical
-                )
-                .lineLimit(3 ... 6)
-                .focused(self.$focusedField, equals: .intention)
-                .submitLabel(.done)
-                .textInputAutocapitalization(.sentences)
-                .onSubmit {
-                    if self.isFormValid {
-                        self.saveSession()
-                    }
-                }
-                .onChange(of: self.intention) { _, _ in
-                    self.debounceValidation()
-                    self.scheduleDraftSave()
-                }
-                .inlineValidation(self.intentionValidation)
-                .accessibilityIdentifier("intentionField")
-            }
+            )
 
             self.moodSection
 
-            Section("Music") {
-                VStack(alignment: .leading, spacing: 8) {
-                    if self.shouldShowMusicLinkHelper {
-                        Text("Paste a link from Spotify, YouTube, or SoundCloud.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-
-                        #if canImport(UIKit)
-                            Button {
-                                self.pasteMusicLinkFromClipboard()
-                            } label: {
-                                Label("Paste from clipboard", systemImage: "doc.on.clipboard")
-                            }
-                            .buttonStyle(.bordered)
-                        #endif
-                    }
-
-                    HStack(alignment: .center, spacing: 8) {
-                        TextField(
-                            "Playlist URL",
-                            text: self.$musicLinkInput
-                        )
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                        .keyboardType(.URL)
-                        .accessibilityIdentifier("musicLinkField")
-                        .onChange(of: self.musicLinkInput) { _, _ in
-                            self.handleMusicLinkInputChange()
-                        }
-
-                        if self.isFetchingMusicLink {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                        }
-                    }
-
-                    if let musicLinkError {
-                        Text(musicLinkError)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                    }
-
-                    if let metadata = self.musicLinkMetadata {
-                        MusicLinkMetadataPreview(metadata: metadata)
-                    } else if self.hasExistingSessionMusicLink, let session = self.editingSession {
-                        MusicLinkSummaryCard(session: session)
-                    } else if !self.trimmedMusicLinkInput.isEmpty {
-                        MusicLinkRawPreview(urlString: self.trimmedMusicLinkInput)
-                    }
-
-                    if self.hasAnyMusicLink {
-                        Button("Remove link", role: .destructive) {
-                            self.removeMusicLink()
-                        }
-                        .accessibilityIdentifier("removeMusicLinkButton")
-                    }
-                }
-            }
+            FormMusicSection(
+                musicLinkInput: $musicLinkInput,
+                isFetching: isFetchingMusicLink,
+                error: musicLinkError,
+                metadata: musicLinkMetadata,
+                shouldShowHelper: shouldShowMusicLinkHelper,
+                hasAnyLink: hasAnyMusicLink,
+                editingSession: editingSession,
+                hasExistingLink: hasExistingSessionMusicLink,
+                trimmedInput: trimmedMusicLinkInput,
+                onInputChange: handleMusicLinkInputChange,
+                onPasteFromClipboard: pasteMusicLinkFromClipboard,
+                onRemoveLink: removeMusicLink
+            )
 
             self.reflectionSection
         }
@@ -429,8 +320,6 @@ struct SessionFormView: View {
 }
 
 extension SessionFormView {
-    // MARK: - Music Logic
-
     private var trimmedMusicLinkInput: String {
         self.musicLinkInput.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -497,6 +386,7 @@ extension SessionFormView {
                     self.musicLinkMetadata = metadata
                     self.didClearMusicLink = false
                     self.isFetchingMusicLink = false
+                    self.persistFetchedMetadata(metadata)
                 }
             } catch is CancellationError {
                 return
@@ -550,6 +440,16 @@ extension SessionFormView {
         session.musicLinkProvider = metadata.provider
     }
 
+    private func persistFetchedMetadata(_ metadata: MusicLinkMetadata) {
+        guard case let .edit(session) = self.mode else { return }
+        self.assign(metadata, to: session)
+        do {
+            try self.sessionStore.update(session)
+        } catch {
+            // If persistence fails, keep in-memory state; user can retry saving.
+        }
+    }
+
     static func metadata(from session: TherapeuticSession) -> MusicLinkMetadata? {
         guard session.hasMusicLink else { return nil }
         guard let originalString = session.musicLinkURL ?? session.musicLinkWebURL,
@@ -570,8 +470,6 @@ extension SessionFormView {
 }
 
 private extension SessionFormView {
-    // MARK: - Validation Methods
-
     func handleDateChange(from oldDate: Date, to newDate: Date) {
         let normalizedDate = self.validator.normalizeSessionDate(newDate)
         if let message = validator.getDateNormalizationMessage(originalDate: newDate, normalizedDate: normalizedDate) {
@@ -607,8 +505,6 @@ private extension SessionFormView {
         self.dateValidation = self.validator.validateSessionDate(normalizedDate)
     }
 
-    // MARK: - Lifecycle
-
     func setupInitialState() {
         guard !self.mode.isEditing else { return }
         if let draft = self.sessionStore.recoverDraft() {
@@ -620,8 +516,6 @@ private extension SessionFormView {
             self.performValidation()
         }
     }
-
-    // MARK: - Actions
 
     func cancel() {
         if !self.mode.isEditing {
@@ -752,6 +646,205 @@ private extension SessionFormView {
                 self.dismiss()
             }
         }
+    }
+}
+
+private struct FormStatusBanner: View {
+    let statusTitle: String
+    let statusSubtitle: String
+
+    var body: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(statusTitle)
+                    .font(.headline)
+                Text(statusSubtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
+        }
+        .accessibilityElement(children: .contain)
+        .listRowBackground(Color.clear)
+        .listRowInsets(.init(top: 8, leading: 0, bottom: 0, trailing: 0))
+    }
+}
+
+private struct FormDateSection: View {
+    @Binding var sessionDate: Date
+    let dateValidation: FieldValidationState?
+    let showNormalizationHint: Bool
+    let normalizationMessage: String
+    let onDateChange: (Date, Date) -> Void
+
+    var body: some View {
+        Section("When is this session?") {
+            DatePicker(
+                "Date & Time",
+                selection: $sessionDate,
+                displayedComponents: [.date, .hourAndMinute]
+            )
+            .datePickerStyle(.compact)
+            .onChange(of: sessionDate) { oldValue, newValue in
+                onDateChange(oldValue, newValue)
+            }
+            .inlineValidation(dateValidation)
+
+            if showNormalizationHint, !normalizationMessage.isEmpty {
+                Text(normalizationMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct FormTreatmentSection: View {
+    @Binding var treatmentType: PsychedelicTreatmentType
+    @Binding var administration: AdministrationMethod
+    let onTreatmentChange: () -> Void
+    let onAdministrationChange: () -> Void
+
+    var body: some View {
+        Section("Treatment") {
+            Picker("Treatment Type", selection: $treatmentType) {
+                ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
+                    Text(type.displayName).tag(type)
+                }
+            }
+            .pickerStyle(.menu)
+            .onChange(of: treatmentType) { _, _ in
+                onTreatmentChange()
+            }
+
+            Picker("Administration", selection: $administration) {
+                ForEach(AdministrationMethod.allCases, id: \.self) { method in
+                    Text(method.displayName).tag(method)
+                }
+            }
+            .pickerStyle(.menu)
+            .onChange(of: administration) { _, _ in
+                onAdministrationChange()
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct FormIntentionSection: View {
+    @Binding var intention: String
+    @FocusState.Binding var focusedField: SessionFormView.FormField?
+    let validation: FieldValidationState?
+    let isFormValid: Bool
+    let onSubmit: () -> Void
+    let onChange: () -> Void
+
+    var body: some View {
+        Section("Intention") {
+            TextField(
+                "What do you hope to explore or heal?",
+                text: $intention,
+                axis: .vertical
+            )
+            .lineLimit(3 ... 6)
+            .focused($focusedField, equals: .intention)
+            .submitLabel(.done)
+            .textInputAutocapitalization(.sentences)
+            .onSubmit {
+                if isFormValid {
+                    onSubmit()
+                }
+            }
+            .onChange(of: intention) { _, _ in
+                onChange()
+            }
+            .inlineValidation(validation)
+            .accessibilityIdentifier("intentionField")
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct FormMusicSection: View {
+    @Binding var musicLinkInput: String
+    let isFetching: Bool
+    let error: String?
+    let metadata: MusicLinkMetadata?
+    let shouldShowHelper: Bool
+    let hasAnyLink: Bool
+    let editingSession: TherapeuticSession?
+    let hasExistingLink: Bool
+    let trimmedInput: String
+    let onInputChange: () -> Void
+    let onPasteFromClipboard: () -> Void
+    let onRemoveLink: () -> Void
+
+    var body: some View {
+        Section("Music") {
+            VStack(alignment: .leading, spacing: 8) {
+                if shouldShowHelper {
+                    Text("Paste a link from Spotify, YouTube, or SoundCloud.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+
+                    #if canImport(UIKit)
+                        Button {
+                            onPasteFromClipboard()
+                        } label: {
+                            Label("Paste from clipboard", systemImage: "doc.on.clipboard")
+                        }
+                        .buttonStyle(.bordered)
+                    #endif
+                }
+
+                HStack(alignment: .center, spacing: 8) {
+                    TextField(
+                        "Playlist URL",
+                        text: $musicLinkInput
+                    )
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .keyboardType(.URL)
+                    .accessibilityIdentifier("musicLinkField")
+                    .onChange(of: musicLinkInput) { _, _ in
+                        onInputChange()
+                    }
+
+                    if isFetching {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    }
+                }
+
+                if let error {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+
+                if let metadata {
+                    MusicLinkMetadataPreview(metadata: metadata)
+                } else if hasExistingLink, let session = editingSession {
+                    MusicLinkSummaryCard(session: session)
+                } else if !trimmedInput.isEmpty {
+                    MusicLinkRawPreview(urlString: trimmedInput)
+                }
+
+                if hasAnyLink {
+                    Button("Remove link", role: .destructive) {
+                        onRemoveLink()
+                    }
+                    .accessibilityIdentifier("removeMusicLinkButton")
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
     }
 }
 

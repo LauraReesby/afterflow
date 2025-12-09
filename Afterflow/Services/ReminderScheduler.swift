@@ -15,7 +15,22 @@ extension UNUserNotificationCenter: NotificationCentering {
     }
 }
 
-final class ReminderScheduler {
+@MainActor
+final class ReminderScheduler: Sendable {
+    enum ReminderError: Error, LocalizedError {
+        case permissionDenied
+        case schedulingFailed(Error)
+
+        var errorDescription: String? {
+            switch self {
+            case .permissionDenied:
+                "Notification permission denied. Enable in Settings to receive reminders."
+            case .schedulingFailed(let error):
+                "Failed to schedule reminder: \(error.localizedDescription)"
+            }
+        }
+    }
+
     private let notificationCenter: NotificationCentering
 
     init(notificationCenter: NotificationCentering = UNUserNotificationCenter.current()) {
@@ -26,7 +41,7 @@ final class ReminderScheduler {
         for session: TherapeuticSession,
         option: ReminderOption,
         now: Date = Date()
-    ) async {
+    ) async throws {
         let identifier = self.identifier(for: session)
         self.notificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier])
 
@@ -44,7 +59,7 @@ final class ReminderScheduler {
             let authStatus = await notificationCenter.authorizationStatus()
             guard authStatus == .authorized || authStatus == .provisional else {
                 session.reminderDate = nil
-                return
+                throw ReminderError.permissionDenied
             }
 
             session.reminderDate = targetDate
@@ -68,6 +83,7 @@ final class ReminderScheduler {
                 try await self.notificationCenter.add(request)
             } catch {
                 session.reminderDate = nil
+                throw ReminderError.schedulingFailed(error)
             }
         }
     }

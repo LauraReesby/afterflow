@@ -1,12 +1,13 @@
 import Foundation
+import os
 
-protocol URLSessioning {
+protocol URLSessioning: Sendable {
     func data(for request: URLRequest) async throws -> (Data, URLResponse)
 }
 
 extension URLSession: URLSessioning {}
 
-struct MusicLinkMetadata: Equatable {
+struct MusicLinkMetadata: Equatable, Sendable {
     let provider: MusicLinkProvider
     let originalURL: URL
     let canonicalURL: URL
@@ -16,14 +17,15 @@ struct MusicLinkMetadata: Equatable {
     let durationSeconds: Int?
 }
 
-final class MusicLinkMetadataService {
+@MainActor
+final class MusicLinkMetadataService: Sendable {
     enum ServiceError: Error {
         case invalidURL
         case requestFailed
         case decodingFailed
     }
 
-    struct ClassificationResult {
+    struct ClassificationResult: Sendable {
         let provider: MusicLinkProvider
         let originalURL: URL
         let canonicalURL: URL
@@ -31,7 +33,7 @@ final class MusicLinkMetadataService {
 
     private let urlSession: URLSessioning
     private let timeout: TimeInterval
-    private var cache: [String: MusicLinkMetadata] = [:]
+    private let cache: OSAllocatedUnfairLock<[String: MusicLinkMetadata]>
 
     init(
         urlSession: URLSessioning = URLSession.shared,
@@ -39,6 +41,7 @@ final class MusicLinkMetadataService {
     ) {
         self.urlSession = urlSession
         self.timeout = timeout
+        self.cache = OSAllocatedUnfairLock(initialState: [:])
     }
 
     func classify(urlString: String) -> ClassificationResult? {
@@ -54,7 +57,9 @@ final class MusicLinkMetadataService {
         }
 
         let cacheKey = classification.canonicalURL.absoluteString.lowercased()
-        if let cached = self.cache[cacheKey] {
+
+        // Thread-safe cache read
+        if let cached = cache.withLock({ $0[cacheKey] }) {
             return cached
         }
 
@@ -80,7 +85,8 @@ final class MusicLinkMetadataService {
             metadata = self.fallbackMetadata(for: classification)
         }
 
-        self.cache[cacheKey] = metadata
+        // Thread-safe cache write
+        cache.withLock { $0[cacheKey] = metadata }
         return metadata
     }
 
@@ -112,8 +118,6 @@ final class MusicLinkMetadataService {
             durationSeconds: nil
         )
     }
-
-    // MARK: - Helpers
 
     private static func normalize(urlString: String) -> URL? {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
