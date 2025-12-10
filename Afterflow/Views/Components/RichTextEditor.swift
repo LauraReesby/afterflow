@@ -67,6 +67,7 @@ struct RichTextEditor: View {
                         showFormatting ? "Hide Formatting" : "Show Formatting",
                         systemImage: "textformat"
                     )
+                    .labelStyle(.titleOnly)
                     .font(.caption)
                 }
                 .buttonStyle(.borderless)
