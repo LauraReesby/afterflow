@@ -40,12 +40,16 @@ final class ReflectionQueue: ObservableObject {
     }
 
     static let maxQueueSize = 100
+    static let queueWarningThreshold = 90
+    static let confirmationDisplayDuration: Duration = .seconds(3)
 
     private static let queueStorageKey = "afterflow.reflection.queue"
 
     @Published private(set) var queuedCount: Int = 0
 
     @Published var recentConfirmations: [String] = []
+
+    @Published var queueNearingCapacity: Bool = false
 
     private let modelContext: ModelContext
 
@@ -94,6 +98,7 @@ final class ReflectionQueue: ObservableObject {
 
         self.saveQueueToStorage(queue)
         self.queuedCount = queue.count
+        self.queueNearingCapacity = queue.count >= Self.queueWarningThreshold
     }
 
     func replayQueuedReflections() async {
@@ -119,6 +124,7 @@ final class ReflectionQueue: ObservableObject {
         let remainingQueue = queue.filter { !successfullyReplayed.contains($0.id) }
         self.saveQueueToStorage(remainingQueue)
         self.queuedCount = remainingQueue.count
+        self.queueNearingCapacity = remainingQueue.count >= Self.queueWarningThreshold
 
         let replayedCount = successfullyReplayed.count
         if replayedCount > 0 {
@@ -136,6 +142,7 @@ final class ReflectionQueue: ObservableObject {
     private func loadQueue() {
         let queue = self.loadQueueFromStorage()
         self.queuedCount = queue.count
+        self.queueNearingCapacity = queue.count >= Self.queueWarningThreshold
     }
 
     private func loadQueueFromStorage() -> [QueuedReflection] {
@@ -163,7 +170,7 @@ final class ReflectionQueue: ObservableObject {
     private func addConfirmation(_ message: String) async {
         self.recentConfirmations.append(message)
 
-        try? await Task.sleep(for: .seconds(3))
+        try? await Task.sleep(for: Self.confirmationDisplayDuration)
         if let index = self.recentConfirmations.firstIndex(of: message) {
             self.recentConfirmations.remove(at: index)
         }
@@ -172,6 +179,7 @@ final class ReflectionQueue: ObservableObject {
     func clearQueue() {
         UserDefaults.standard.removeObject(forKey: Self.queueStorageKey)
         self.queuedCount = 0
+        self.queueNearingCapacity = false
     }
 
     var currentQueueSize: Int {

@@ -300,10 +300,25 @@ extension TherapeuticSession {
         self.markAsUpdated()
     }
 
+    /// Adds a timestamped reflection entry to the session.
+    ///
+    /// Reflections are prepended with a timestamp in the format `[HH:MM AM/PM]` and appended to existing
+    /// reflections with double line breaks for readability. Empty or whitespace-only reflections are ignored.
+    ///
+    /// - Parameters:
+    ///   - reflection: The reflection text to add
+    ///   - timestamp: The timestamp for this reflection (defaults to current time)
+    ///
+    /// - Example:
+    ///   ```
+    ///   session.addReflection("Felt calm and centered", timestamp: Date())
+    ///   // Result: "[2:30 PM] Felt calm and centered"
+    ///   ```
     func addReflection(_ reflection: String, timestamp: Date = Date()) {
         let trimmedReflection = reflection.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedReflection.isEmpty else { return }
 
+        // Format: [HH:MM AM/PM] Reflection text
         let timestampedEntry = "[\(timestamp.formatted(date: .omitted, time: .shortened))] \(trimmedReflection)"
 
         if self.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
