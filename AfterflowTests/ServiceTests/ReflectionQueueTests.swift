@@ -7,11 +7,11 @@ final class ReflectionQueueTests: XCTestCase {
     private let queueKey = "afterflow.reflection.queue"
 
     override func setUp() async throws {
-        UserDefaults.standard.removeObject(forKey: queueKey)
+        UserDefaults.standard.removeObject(forKey: self.queueKey)
     }
 
     override func tearDown() async throws {
-        UserDefaults.standard.removeObject(forKey: queueKey)
+        UserDefaults.standard.removeObject(forKey: self.queueKey)
     }
 
     func testAddReflectionPersistsWhenSessionExists() async throws {

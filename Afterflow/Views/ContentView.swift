@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 struct ContentView: View {

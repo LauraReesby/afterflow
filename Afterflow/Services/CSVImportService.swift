@@ -4,8 +4,6 @@ import SwiftData
 // swiftlint:disable file_length
 
 struct CSVImportService: Sendable {
-    nonisolated init() {}
-
     enum CSVImportError: Error, LocalizedError {
         case invalidHeader
         case invalidRow(Int)
@@ -14,15 +12,16 @@ struct CSVImportService: Sendable {
         var errorDescription: String? {
             switch self {
             case .invalidHeader:
-                return "CSV header does not match expected export format."
+                "CSV header does not match expected export format."
             case let .invalidRow(index):
-                return "Row \(index + 1) is invalid or incomplete."
+                "Row \(index + 1) is invalid or incomplete."
             case let .parseFailure(reason):
-                return "Failed to parse CSV: \(reason)"
+                "Failed to parse CSV: \(reason)"
             }
         }
     }
 
+    // swiftlint:disable function_body_length
     func `import`(from url: URL) throws -> [TherapeuticSession] {
         let data = try Data(contentsOf: url)
         return try self.import(from: data)
@@ -63,11 +62,13 @@ struct CSVImportService: Sendable {
                 throw CSVImportError.invalidRow(index + 1)
             }
 
-            guard let treatment = PsychedelicTreatmentType.allCases.first(where: { $0.displayName == treatmentString }) else {
+            guard let treatment = PsychedelicTreatmentType.allCases.first(where: { $0.displayName == treatmentString })
+            else {
                 throw CSVImportError.invalidRow(index + 1)
             }
 
-            guard let administration = AdministrationMethod.allCases.first(where: { $0.displayName == administrationString }) else {
+            guard let administration = AdministrationMethod.allCases
+                .first(where: { $0.displayName == administrationString }) else {
                 throw CSVImportError.invalidRow(index + 1)
             }
 
@@ -104,7 +105,8 @@ struct CSVImportService: Sendable {
         return sessions
     }
 
-    // swiftlint:disable function_body_length
+    // swiftlint:enable function_body_length
+
     private static func parseCSV(_ csv: String) throws -> [[String]] {
         let normalized = csv.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
         var rows: [[String]] = []
@@ -127,14 +129,14 @@ struct CSVImportService: Sendable {
                 continue
             }
 
-            if char == "," && !insideQuotes {
+            if char == ",", !insideQuotes {
                 row.append(field)
                 field = ""
                 index += 1
                 continue
             }
 
-            if char == "\n" && !insideQuotes {
+            if char == "\n", !insideQuotes {
                 row.append(field)
                 rows.append(row)
                 row = []
@@ -154,18 +156,23 @@ struct CSVImportService: Sendable {
 
         return rows
     }
-    // swiftlint:enable function_body_length
 
     private static func stripInjectionGuard(_ value: String) -> String {
         guard let first = value.first, first == "'" else { return value }
         return String(value.dropFirst())
     }
 
-    private static func classifyLink(_ urlString: String) -> (provider: MusicLinkProvider, originalURL: URL, canonicalURL: URL)? {
-        guard let original = Self.normalize(urlString: urlString) else { return nil }
+    private struct LinkClassification {
+        let provider: MusicLinkProvider
+        let originalURL: URL
+        let canonicalURL: URL
+    }
+
+    private static func classifyLink(_ urlString: String) -> LinkClassification? {
+        guard let original = normalize(urlString: urlString) else { return nil }
         let provider = Self.provider(for: original)
         let canonical = provider.fallbackWebURL(for: original) ?? original
-        return (provider, original, canonical)
+        return LinkClassification(provider: provider, originalURL: original, canonicalURL: canonical)
     }
 
     private static func normalize(urlString: String) -> URL? {
@@ -191,11 +198,13 @@ struct CSVImportService: Sendable {
         guard var host = url.host?.lowercased() else { return .linkOnly }
         if host.hasPrefix("www.") { host.removeFirst(4) }
 
-        if host.contains("podcasts.apple.com") || (host.contains("itunes.apple.com") && url.path.contains("/podcast/")) {
+        if host
+            .contains("podcasts.apple.com") || (host.contains("itunes.apple.com") && url.path.contains("/podcast/")) {
             return .applePodcasts
         }
         if host.contains("spotify.com") { return .spotify }
-        if host.contains("youtube.com") || host == "youtu.be" || host.contains("youtube-nocookie.com") { return .youtube }
+        if host.contains("youtube.com") || host == "youtu.be" || host
+            .contains("youtube-nocookie.com") { return .youtube }
         if host.contains("soundcloud.com") { return .soundcloud }
         if host.contains("music.apple.com") || host.contains("itunes.apple.com") { return .appleMusic }
         if host.contains("tidal.com") { return .tidal }
@@ -203,7 +212,7 @@ struct CSVImportService: Sendable {
         return .linkOnly
     }
 
-    nonisolated private static func trimmedHeader(_ value: String) -> String {
+    private nonisolated static func trimmedHeader(_ value: String) -> String {
         value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 

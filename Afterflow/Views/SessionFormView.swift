@@ -589,6 +589,7 @@ private extension SessionFormView {
             }
         }
     }
+
     // swiftlint:enable function_body_length
 
     func showError(message: String) {

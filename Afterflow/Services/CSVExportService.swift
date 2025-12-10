@@ -1,8 +1,6 @@
 import Foundation
 
 struct CSVExportService: Sendable {
-    nonisolated init() {}
-
     func export(
         sessions: [TherapeuticSession],
         dateRange: ClosedRange<Date>? = nil,
@@ -50,7 +48,7 @@ struct CSVExportService: Sendable {
         return fileURL
     }
 
-    nonisolated private static func escape(_ value: String) -> String {
+    private nonisolated static func escape(_ value: String) -> String {
         // Guard against formula injection by prefixing values starting with =,+,-,@ with a single quote.
         let injectionGuarded: String = if let first = value.first, ["=", "+", "-", "@"].contains(first) {
             "'" + value
