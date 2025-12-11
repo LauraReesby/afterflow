@@ -1,5 +1,9 @@
 # Afterflow
 
+[![CI](https://github.com/LauraReesby/afterflow/actions/workflows/ci.yml/badge.svg)](https://github.com/LauraReesby/afterflow/actions/workflows/ci.yml)
+[![SwiftLint](https://github.com/LauraReesby/afterflow/actions/workflows/swiftlint.yml/badge.svg)](https://github.com/LauraReesby/afterflow/actions/workflows/swiftlint.yml)
+[![SwiftFormat](https://github.com/LauraReesby/afterflow/actions/workflows/swiftformat.yml/badge.svg)](https://github.com/LauraReesby/afterflow/actions/workflows/swiftformat.yml)
+
 A private, offline-first iOS app for logging psychedelic-assisted therapy sessions
 
 ## Overview
@@ -15,7 +19,7 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 - **📊 Mood Tracking**: Before and after session mood ratings with visual feedback
 - **📝 Comprehensive Logging**: Capture treatment type, intentions, and reflections (editable later in Session Detail)
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
-- **📚 History Filters + Undo**: Sort/search the session list, filter by treatment type, and undo deletes for up to 10 seconds
+- **📚 History Filters**: Sort/search the session list, filter by treatment type
 - **⏰ Reflection Reminders**: Optional reminders to add post session mood and reflections
 - **📤 Data Export**: On-device CSV or PDF exports with date/treatment filters and progress feedback
 
@@ -119,7 +123,7 @@ Current test coverage includes:
   - ReminderScheduler: Notification scheduling and cancellation
   - ReflectionQueue: Queued reflection persistence and replay
   - NotificationHandler: Deep link routing, session validation, reflection processing
-- **UI Tests**: Session form validation, keyboard navigation, mood sliders (VoiceOver + Dynamic Type), reflections editing, delete + undo workflow
+- **UI Tests**: Session form validation, keyboard navigation, mood sliders (VoiceOver + Dynamic Type), reflections editing, delete
 - **Performance Tests**: Large dataset filtering/fetching (1k+ sessions) and app launch instrumentation
 
 **Coverage Target**: 80% minimum (currently achieved)
@@ -172,7 +176,6 @@ Afterflow/
 │   └── Components/
 │       ├── MoodRatingView.swift
 │       ├── MusicLinkSummaryCard.swift
-│       ├── UndoBannerView.swift
 │       └── ValidationErrorView.swift
 └── Resources/
     ├── Assets.xcassets/
@@ -254,7 +257,7 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI:
 
 ### ✅ Phase 6: History List
 - [x] SessionListViewModel (sort/filter/search)
-- [x] Delete + Undo banner, VoiceOver-friendly filter menu
+- [x] Delete, VoiceOver-friendly filter menu
 - [x] Large dataset fixtures + performance tests (<200 ms scroll for 1k sessions)
 
 ### 🎵 Phase 7+: Music Links & Data Export
