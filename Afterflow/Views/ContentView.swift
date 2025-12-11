@@ -19,10 +19,6 @@ struct ContentView: View {
     @State private var navigationPath = NavigationPath()
     @State private var deepLinkAlert: (title: String, message: String)?
 
-    @State private var recentlyDeleted: (session: TherapeuticSession, index: Int)?
-    @State private var showUndoBanner = false
-    @State private var undoTask: Task<Void, Never>?
-
     @State private var sessionPendingDeletion: (session: TherapeuticSession, index: Int)?
     @State private var showingDeleteConfirmation = false
 
@@ -88,7 +84,12 @@ struct ContentView: View {
             .accessibilityIdentifier("cancelDeleteButton")
         } message: {
             if let pending = sessionPendingDeletion {
-                Text("Are you sure you want to delete this \(pending.session.treatmentType.displayName) session from \(pending.session.sessionDate.formatted(date: .abbreviated, time: .omitted))? This action can be undone within 10 seconds.")
+                let treatmentName = pending.session.treatmentType.displayName
+                let sessionDateFormatted = pending.session.sessionDate.formatted(date: .abbreviated, time: .omitted)
+                Text(
+                    "Are you sure you want to delete this \(treatmentName) session from \(sessionDateFormatted)? " +
+                    "This action cannot be undone."
+                )
             }
         }
         .sheet(isPresented: self.$showingSessionForm) {
@@ -170,28 +171,28 @@ struct ContentView: View {
         .overlay(alignment: .top) {
             VStack(spacing: 8) {
                 #if DEBUG
-                if self.debugNotificationScheduled {
-                    HStack(spacing: 8) {
-                        Image(systemName: "bell.badge.fill")
-                            .foregroundColor(.orange)
-                        Text("Test notification scheduled (5 seconds)")
-                            .font(.footnote)
-                            .fontWeight(.medium)
+                    if self.debugNotificationScheduled {
+                        HStack(spacing: 8) {
+                            Image(systemName: "bell.badge.fill")
+                                .foregroundColor(.orange)
+                            Text("Test notification scheduled (5 seconds)")
+                                .font(.footnote)
+                                .fontWeight(.medium)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(.regularMaterial)
+                                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .strokeBorder(Color.orange.opacity(0.3), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(.regularMaterial)
-                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Color.orange.opacity(0.3), lineWidth: 1)
-                    )
-                    .padding(.horizontal, 16)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
                 #endif
 
                 if !self.notificationHandler.confirmations.recentConfirmations.isEmpty {
@@ -219,43 +220,8 @@ struct ContentView: View {
 
     private func confirmDelete() {
         guard let pending = sessionPendingDeletion else { return }
-        withAnimation {
-            let snapshot = clone(pending.session)
-            try? self.sessionStore.delete(pending.session)
-            self.scheduleUndo(for: snapshot, originalIndex: pending.index)
-        }
+        try? self.sessionStore.delete(pending.session)
         self.sessionPendingDeletion = nil
-    }
-
-    private func scheduleUndo(for session: TherapeuticSession, originalIndex: Int) {
-        self.undoTask?.cancel()
-        self.recentlyDeleted = (session, originalIndex)
-        self.showUndoBanner = true
-
-        self.undoTask = Task {
-            do {
-                try await Task.sleep(for: .seconds(10))
-                try Task.checkCancellation()
-                await MainActor.run { self.finalizeDeletion() }
-            } catch {}
-        }
-    }
-
-    private func undoDelete() {
-        guard let deleted = recentlyDeleted else { return }
-        do {
-            try self.sessionStore.create(deleted.session)
-            self.recentlyDeleted = nil
-            self.showUndoBanner = false
-        } catch {}
-        self.undoTask?.cancel()
-        self.undoTask = nil
-    }
-
-    private func finalizeDeletion() {
-        self.recentlyDeleted = nil
-        self.showUndoBanner = false
-        self.undoTask = nil
     }
 
     private func startExport(with request: ExportRequest) {
@@ -375,46 +341,46 @@ private struct SessionListSection: View {
         ZStack(alignment: .bottom) {
             NavigationStack(path: self.$navigationPath) {
                 List {
-                ForEach(Array(self.sessions.enumerated()), id: \.element.id) { index, session in
-                    ZStack(alignment: .leading) {
-                        SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
-                            .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
-                        NavigationLink(value: session.id) {
-                            EmptyView()
+                    ForEach(Array(self.sessions.enumerated()), id: \.element.id) { index, session in
+                        ZStack(alignment: .leading) {
+                            SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
+                                .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
+                            NavigationLink(value: session.id) {
+                                EmptyView()
+                            }
+                            .opacity(0)
                         }
-                        .opacity(0)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                self.onDelete(IndexSet(integer: index))
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        } preview: {
+                            SessionDetailView(session: session)
+                                .frame(width: 350, height: 600)
+                                .environment(self.sessionStore)
+                        }
+                        .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
+                        .listRowSeparator(.visible, edges: .bottom)
                     }
-                    .contextMenu {
-                        Button(role: .destructive) {
-                            self.onDelete(IndexSet(integer: index))
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    } preview: {
+                    .onDelete(perform: self.onDelete)
+                }
+                .scrollContentBackground(.hidden)
+                .background(Color(.systemBackground))
+                .listRowInsets(.init(top: 8, leading: 16, bottom: 8, trailing: 16))
+                .listSectionSeparator(.hidden)
+                .toolbar { self.toolbarContent }
+                .navigationTitle("Sessions")
+                .listStyle(.plain)
+                .toolbarBackground(.visible, for: .automatic)
+                .scrollDismissesKeyboard(.immediately)
+                .navigationDestination(for: UUID.self) { sessionID in
+                    if let session = self.sessions.first(where: { $0.id == sessionID }) {
                         SessionDetailView(session: session)
-                            .frame(width: 350, height: 600)
                             .environment(self.sessionStore)
                     }
-                    .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
-                    .listRowSeparator(.visible, edges: .bottom)
                 }
-                .onDelete(perform: self.onDelete)
-            }
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
-            .listRowInsets(.init(top: 8, leading: 16, bottom: 8, trailing: 16))
-            .listSectionSeparator(.hidden)
-            .toolbar { self.toolbarContent }
-            .navigationTitle("Sessions")
-            .listStyle(.plain)
-            .toolbarBackground(.visible, for: .automatic)
-            .scrollDismissesKeyboard(.immediately)
-            .navigationDestination(for: UUID.self) { sessionID in
-                if let session = self.sessions.first(where: { $0.id == sessionID }) {
-                    SessionDetailView(session: session)
-                        .environment(self.sessionStore)
-                }
-            }
             }
 
             BottomControls(listViewModel: self.$listViewModel, onAdd: self.onAdd)
@@ -450,13 +416,13 @@ private struct SessionListSection: View {
                     Label("Help", systemImage: "questionmark.circle")
                 }
                 #if DEBUG
-                Divider()
-                Button {
-                    self.onDebugNotification()
-                } label: {
-                    Label("Test Notification (5s)", systemImage: "bell.badge")
-                }
-                .disabled(self.sessions.isEmpty)
+                    Divider()
+                    Button {
+                        self.onDebugNotification()
+                    } label: {
+                        Label("Test Notification (5s)", systemImage: "bell.badge")
+                    }
+                    .disabled(self.sessions.isEmpty)
                 #endif
             } label: {
                 Image(systemName: "ellipsis")
@@ -647,16 +613,16 @@ private struct SessionRowView: View {
 private extension ContentView {
     func scheduleDebugNotification() async {
         #if DEBUG
-        guard let session = allSessions.first else { return }
+            guard let session = allSessions.first else { return }
 
-        let scheduler = ReminderScheduler()
-        do {
-            _ = try await scheduler.scheduleImmediateTestNotification(for: session)
-            self.debugNotificationScheduled = true
+            let scheduler = ReminderScheduler()
+            do {
+                _ = try await scheduler.scheduleImmediateTestNotification(for: session)
+                self.debugNotificationScheduled = true
 
-            try? await Task.sleep(for: .seconds(6))
-            self.debugNotificationScheduled = false
-        } catch {}
+                try? await Task.sleep(for: .seconds(6))
+                self.debugNotificationScheduled = false
+            } catch {}
         #endif
     }
 
@@ -730,30 +696,6 @@ private extension ContentView {
         } catch {
             self.exportError = error.localizedDescription
         }
-    }
-
-    func clone(_ session: TherapeuticSession) -> TherapeuticSession {
-        let copy = TherapeuticSession(
-            sessionDate: session.sessionDate,
-            treatmentType: session.treatmentType,
-            administration: session.administration,
-            intention: session.intention,
-            moodBefore: session.moodBefore,
-            moodAfter: session.moodAfter,
-            reflections: session.reflections,
-            reminderDate: session.reminderDate
-        )
-        copy.id = session.id
-        copy.createdAt = session.createdAt
-        copy.updatedAt = session.updatedAt
-        copy.musicLinkURL = session.musicLinkURL
-        copy.musicLinkWebURL = session.musicLinkWebURL
-        copy.musicLinkTitle = session.musicLinkTitle
-        copy.musicLinkAuthorName = session.musicLinkAuthorName
-        copy.musicLinkArtworkURL = session.musicLinkArtworkURL
-        copy.musicLinkDurationSeconds = session.musicLinkDurationSeconds
-        copy.musicLinkProvider = session.musicLinkProvider
-        return copy
     }
 }
 

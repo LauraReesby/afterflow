@@ -160,33 +160,45 @@ final class MusicLinkMetadataService {
     private func inferredTitle(for provider: MusicLinkProvider, url: URL) -> String? {
         switch provider {
         case .appleMusic, .applePodcasts:
-            let components = url.pathComponents.filter { $0 != "/" }
-            let ignored = Set(["us", "podcast", "album", "playlist"])
-            let candidate = components.reversed().first(where: { component in
-                guard !component.isEmpty else { return false }
-                let lower = component.lowercased()
-                if ignored.contains(lower) { return false }
-                if lower.hasPrefix("id") { return false }
-                if lower.hasPrefix("pl.") { return false }
-                if lower.count <= 2 { return false }
-                return true
-            })
-
-            guard let slug = candidate else { return nil }
-            return Self.normalizedTitle(from: slug)
+            return self.inferredTitleFromAppleMusic(url: url)
         case .bandcamp, .tidal, .linkOnly, .unknown:
-            let components = url.pathComponents.filter { $0 != "/" }
-            if let slug = components.reversed().first(where: { !$0.isEmpty }) {
-                return Self.normalizedTitle(from: slug)
-            }
-            if var host = url.host {
-                if host.hasPrefix("www.") { host.removeFirst(4) }
-                return host.localizedCapitalized
-            }
-            return nil
+            return self.inferredTitleFromGenericURL(url: url)
         default:
             return nil
         }
+    }
+
+    private func inferredTitleFromAppleMusic(url: URL) -> String? {
+        let components = url.pathComponents.filter { $0 != "/" }
+        let ignored = Set(["us", "podcast", "album", "playlist"])
+        let candidate = components.reversed().first(where: { component in
+            Self.isValidAppleMusicComponent(component, ignoredSet: ignored)
+        })
+
+        guard let slug = candidate else { return nil }
+        return Self.normalizedTitle(from: slug)
+    }
+
+    private static func isValidAppleMusicComponent(_ component: String, ignoredSet: Set<String>) -> Bool {
+        guard !component.isEmpty else { return false }
+        let lower = component.lowercased()
+        guard !ignoredSet.contains(lower) else { return false }
+        guard !lower.hasPrefix("id") else { return false }
+        guard !lower.hasPrefix("pl.") else { return false }
+        guard lower.count > 2 else { return false }
+        return true
+    }
+
+    private func inferredTitleFromGenericURL(url: URL) -> String? {
+        let components = url.pathComponents.filter { $0 != "/" }
+        if let slug = components.reversed().first(where: { !$0.isEmpty }) {
+            return Self.normalizedTitle(from: slug)
+        }
+        if var host = url.host {
+            if host.hasPrefix("www.") { host.removeFirst(4) }
+            return host.localizedCapitalized
+        }
+        return nil
     }
 
     private static func normalizedTitle(from slug: String) -> String {

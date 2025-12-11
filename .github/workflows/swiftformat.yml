@@ -1,0 +1,24 @@
+name: SwiftFormat
+
+on:
+  pull_request:
+    paths:
+      - '**.swift'
+  push:
+    branches: [ main ]
+    paths:
+      - '**.swift'
+
+jobs:
+  swiftformat:
+    runs-on: macos-14
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install SwiftFormat
+      run: brew install swiftformat
+
+    - name: Check formatting
+      run: swiftformat --lint .

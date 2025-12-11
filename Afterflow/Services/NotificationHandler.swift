@@ -31,17 +31,16 @@ final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationC
 
     private let modelContext: ModelContext
     private let reflectionQueue: ReflectionQueue
-    private let performanceMonitor = NotificationPerformanceMonitor()
 
-    init(modelContext: ModelContext) {
+    init(modelContext: ModelContext, skipQueueReplay: Bool = false) {
         self.modelContext = modelContext
         self.reflectionQueue = ReflectionQueue(modelContext: modelContext)
         super.init()
 
+        guard !skipQueueReplay else { return }
+
         Task {
-            await self.performanceMonitor.measureQueueReplay {
-                await self.reflectionQueue.replayQueuedReflections()
-            }
+            await self.reflectionQueue.replayQueuedReflections()
         }
     }
 
@@ -81,18 +80,13 @@ final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationC
     }
 
     var confirmations: ReflectionQueue { self.reflectionQueue }
-    var performance: NotificationPerformanceMonitor { self.performanceMonitor }
 
     func processDeepLink(_ action: DeepLinkAction) async throws {
-        try await self.performanceMonitor.measureDeepLinkProcessing {
-            switch action {
-            case let .openSession(sessionID):
-                _ = try self.validateSession(sessionID)
-            case let .addReflection(sessionID, text):
-                try await self.performanceMonitor.measureReflectionSave {
-                    try await self.reflectionQueue.addReflection(sessionID: sessionID, text: text)
-                }
-            }
+        switch action {
+        case let .openSession(sessionID):
+            _ = try self.validateSession(sessionID)
+        case let .addReflection(sessionID, text):
+            try await self.reflectionQueue.addReflection(sessionID: sessionID, text: text)
         }
     }
 

@@ -52,10 +52,17 @@ final class ReflectionQueue: ObservableObject {
     @Published var queueNearingCapacity: Bool = false
 
     private let modelContext: ModelContext
+    private var confirmationTasks: [Task<Void, Never>] = []
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         self.loadQueue()
+    }
+
+    deinit {
+        for task in confirmationTasks {
+            task.cancel()
+        }
     }
 
     func addReflection(sessionID: UUID, text: String, timestamp: Date = Date()) async throws {
@@ -116,9 +123,7 @@ final class ReflectionQueue: ObservableObject {
                     timestamp: queuedReflection.timestamp
                 )
                 successfullyReplayed.append(queuedReflection.id)
-            } catch {
-                print("⚠️ Failed to replay reflection for session \(queuedReflection.sessionID): \(error)")
-            }
+            } catch {}
         }
 
         let remainingQueue = queue.filter { !successfullyReplayed.contains($0.id) }
@@ -153,7 +158,6 @@ final class ReflectionQueue: ObservableObject {
         do {
             return try JSONDecoder().decode([QueuedReflection].self, from: data)
         } catch {
-            print("⚠️ Failed to decode reflection queue: \(error)")
             return []
         }
     }
@@ -162,18 +166,24 @@ final class ReflectionQueue: ObservableObject {
         do {
             let data = try JSONEncoder().encode(queue)
             UserDefaults.standard.set(data, forKey: Self.queueStorageKey)
-        } catch {
-            print("⚠️ Failed to encode reflection queue: \(error)")
-        }
+        } catch {}
     }
 
     private func addConfirmation(_ message: String) async {
         self.recentConfirmations.append(message)
 
-        try? await Task.sleep(for: Self.confirmationDisplayDuration)
-        if let index = self.recentConfirmations.firstIndex(of: message) {
-            self.recentConfirmations.remove(at: index)
+        let task = Task {
+            try? await Task.sleep(for: Self.confirmationDisplayDuration)
+            if !Task.isCancelled, let index = self.recentConfirmations.firstIndex(of: message) {
+                self.recentConfirmations.remove(at: index)
+            }
         }
+        self.confirmationTasks.append(task)
+
+        await task.value
+
+        // Clean up completed tasks (remove this one since it's done)
+        self.confirmationTasks.removeAll { $0.isCancelled }
     }
 
     func clearQueue() {

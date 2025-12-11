@@ -24,7 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		82D472CE2EEA496600221BE2 /* Afterflow.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = Afterflow.xctestplan; sourceTree = "<group>"; };
+		82D472CE2EEA496600221BE2 /* Afterflow.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Afterflow.xctestplan; sourceTree = "<group>"; };
 		82DA2AAC2EC7F89A00A0CAE9 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		82DA2AAD2EC7F89A00A0CAE9 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		82DA2AB92EC7F89A00A0CAE9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };

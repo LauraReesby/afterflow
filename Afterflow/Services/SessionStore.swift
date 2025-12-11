@@ -66,9 +66,7 @@ final class SessionStore {
             let data = try JSONEncoder().encode(draft)
             self.draftDefaults.set(data, forKey: self.draftPayloadKey)
             self.draftDefaults.set(Date(), forKey: self.draftTimestampKey)
-        } catch {
-            print("Failed to save draft: \(error.localizedDescription)")
-        }
+        } catch {}
     }
 
     func recoverDraft() -> TherapeuticSession? {
@@ -86,7 +84,6 @@ final class SessionStore {
             let draft = try JSONDecoder().decode(SessionDraft.self, from: data)
             return draft.makeSession()
         } catch {
-            print("Failed to recover draft: \(error.localizedDescription)")
             self.clearDraft()
             return nil
         }

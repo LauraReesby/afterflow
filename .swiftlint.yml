@@ -1,39 +1,77 @@
+# SwiftLint Configuration for Afterflow
+
+included:
+  - Afterflow
+
 excluded:
-  - build
-  - specs
-  - .specify
-  - ai
-  - .github
-  - README.md
-  - WARP.md
+  - Pods
+  - .build
+  - DerivedData
 
+# Opt-in rules
+opt_in_rules:
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - empty_count
+  - explicit_init
+  - fatal_error_message
+  - sorted_imports
+  - vertical_whitespace_closing_braces
+  - vertical_whitespace_opening_braces
+
+# Disabled rules (SwiftFormat handles these)
 disabled_rules:
-  - todo
-  - type_name
-  - nesting
-  - cyclomatic_complexity
-  - file_length
-  - force_cast
-  - multiple_closures_with_trailing_closure
+  - trailing_comma # SwiftFormat handles this
+  - vertical_whitespace # SwiftFormat handles this
+  - opening_brace # SwiftFormat handles this
+  - closing_brace # SwiftFormat handles this
+  - colon # SwiftFormat handles this
+  - comma # SwiftFormat handles this
+  - function_name_whitespace # SwiftFormat handles this (renamed from operator_whitespace)
 
+# Rule configurations
 line_length:
-  warning: 160
+  warning: 120
   error: 200
-
-function_parameter_count:
-  warning: 6
-  error: 8
-
-type_body_length:
-  warning: 350
-  error: 400
-
-trailing_whitespace:
-  ignores_empty_lines: true
+  ignores_comments: true
+  ignores_urls: true
 
 identifier_name:
-  min_length: 2
-  allowed_symbols: ["_"]
-  excluded: ["id", "i", "j", "x", "y"]
+  min_length:
+    warning: 2
+  excluded:
+    - id
+    - db
+    - to
+    - at
+    - on
+    - in
+    - up
+    - i  # Loop counters
+    - x  # Coordinates
+    - y  # Coordinates
 
+file_length:
+  warning: 500
+  error: 1000
+
+function_body_length:
+  warning: 50
+  error: 100
+
+type_body_length:
+  warning: 300
+  error: 500
+
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+nesting:
+  type_level:
+    warning: 2
+  function_level:
+    warning: 5
+
+# Custom reporter
 reporter: "xcode"

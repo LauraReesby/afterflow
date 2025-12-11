@@ -1,8 +1,6 @@
 import Foundation
 import SwiftData
 
-// swiftlint:disable file_length
-
 struct CSVImportService: Sendable {
     enum CSVImportError: Error, LocalizedError {
         case invalidHeader

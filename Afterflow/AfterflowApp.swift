@@ -5,6 +5,7 @@ import UserNotifications
 
 @MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
+    // swiftlint:disable:next implicitly_unwrapped_optional
     static var shared: AppDelegate!
 
     lazy var sharedModelContainer: ModelContainer = {
@@ -23,13 +24,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }()
 
-    lazy var sessionStore: SessionStore = {
-        SessionStore(modelContext: self.sharedModelContainer.mainContext, owningContainer: self.sharedModelContainer)
-    }()
+    lazy var sessionStore: SessionStore = .init(
+        modelContext: self.sharedModelContainer.mainContext,
+        owningContainer: self.sharedModelContainer
+    )
 
-    lazy var notificationHandler: NotificationHandler = {
-        NotificationHandler(modelContext: self.sharedModelContainer.mainContext)
-    }()
+    lazy var notificationHandler: NotificationHandler = .init(modelContext: self.sharedModelContainer.mainContext)
 
     override init() {
         super.init()
