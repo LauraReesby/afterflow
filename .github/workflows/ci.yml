@@ -36,32 +36,31 @@ jobs:
         echo "== Available devices (iOS) =="
         xcrun simctl list devices available
 
-        SIM_JSON="$(xcrun simctl list --json devices available)"
-
-        # Prefer first available iOS 26.x runtime key; fallback to first available iOS runtime key.
-        RUNTIME_KEY="$(echo "$SIM_JSON" | jq -r '.devices | keys[] | select(test("iOS-26-"))' | sort | head -n1)"
-        if [ -z "$RUNTIME_KEY" ]; then
-          RUNTIME_KEY="$(echo "$SIM_JSON" | jq -r '.devices | keys[] | select(test("iOS-"))' | sort | head -n1)"
-        fi
-        if [ -z "$RUNTIME_KEY" ] || [ "$RUNTIME_KEY" = "null" ]; then
-          echo "No iOS runtime keys found in available devices"; exit 1
-        fi
-
-        RUNTIME_VERSION="$(echo "$RUNTIME_KEY" | sed 's/.*iOS-//; s/-/./g')"
-        RUNTIME_ID="$(xcrun simctl list runtimes --json | jq -r --arg key "$RUNTIME_KEY" '.runtimes[] | select(.identifier == $key) | .identifier')"
+        # Select iOS 26 runtime (prefers 26.1, then 26.0).
+        RUNTIME_ID="$(xcrun simctl list runtimes --json | jq -r '.runtimes[] | select(.identifier == "com.apple.CoreSimulator.SimRuntime.iOS-26-1" and (.isAvailable == true or .availability == "(available)")) | .identifier' | head -n1)"
         if [ -z "$RUNTIME_ID" ] || [ "$RUNTIME_ID" = "null" ]; then
-          echo "Runtime $RUNTIME_KEY not found among runtimes"; exit 1
+          RUNTIME_ID="$(xcrun simctl list runtimes --json | jq -r '.runtimes[] | select(.identifier == "com.apple.CoreSimulator.SimRuntime.iOS-26-0" and (.isAvailable == true or .availability == "(available)")) | .identifier' | head -n1)"
         fi
+        if [ -z "$RUNTIME_ID" ] || [ "$RUNTIME_ID" = "null" ]; then
+          echo "No iOS 26 runtimes available"; exit 1
+        fi
+        RUNTIME_VERSION="$(echo "$RUNTIME_ID" | sed 's/.*iOS-//; s/-/./g')"
         echo "Selected runtime: $RUNTIME_ID ($RUNTIME_VERSION)"
 
-        DEVICE_UDID="$(echo "$SIM_JSON" | jq -r --arg rt "$RUNTIME_KEY" '.devices[$rt][] | select(.isAvailable == true and (.name | startswith("iPhone 17"))) | .udid' | head -n1)"
+        # Prefer iPhone 17 Pro; else first iPhone 17; else any iPhone for the runtime.
+        DEVICE_UDID="$(xcrun simctl list --json devices "$RUNTIME_ID" | jq -r '.devices[]? | map(select(.isAvailable == true and .name == "iPhone 17 Pro")) | .[0].udid')"
         if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
-          DEVICE_UDID="$(echo "$SIM_JSON" | jq -r --arg rt "$RUNTIME_KEY" '.devices[$rt][] | select(.isAvailable == true and (.name | startswith("iPhone"))) | .udid' | head -n1)"
+          DEVICE_UDID="$(xcrun simctl list --json devices "$RUNTIME_ID" | jq -r '.devices[]? | map(select(.isAvailable == true and (.name | startswith("iPhone 17")))) | .[0].udid')"
+        fi
+        if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
+          DEVICE_UDID="$(xcrun simctl list --json devices "$RUNTIME_ID" | jq -r '.devices[]? | map(select(.isAvailable == true and (.name | startswith("iPhone")))) | .[0].udid')"
         fi
 
         if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
-          # Create one if none are available for that runtime.
-          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone 17")) | .identifier' | head -n1)"
+          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name == "iPhone 17 Pro") | .identifier' | head -n1)"
+          if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
+            DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone 17")) | .identifier' | head -n1)"
+          fi
           if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
             DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
           fi
