@@ -31,39 +31,40 @@ jobs:
         echo "== Available devices (iOS) =="
         xcrun simctl list devices available
 
-        # Pick an available iOS 18.x runtime (prefer the lowest 18.x), fallback to first available iOS runtime.
-        RUNTIME="$(xcrun simctl list runtimes --json | jq -r '
-          [.runtimes[] | select((.platform? // .platformName) == "iOS" and (.isAvailable == true or .availability == "(available)") and (.version | startswith("18."))) | {id: .identifier, version: .version}]
-          | sort_by(.version | split(".") | map(tonumber))
-          | .[0] // empty')"
-        if [ -z "$RUNTIME" ] || [ "$RUNTIME" = "null" ]; then
-          RUNTIME="$(xcrun simctl list runtimes --json | jq -r '
-            [.runtimes[] | select((.platform? // .platformName) == "iOS" and (.isAvailable == true or .availability == "(available)")) | {id: .identifier, version: .version}]
-            | sort_by(.version | split(".") | map(tonumber))
-            | .[0]')"
+        SIM_JSON="$(xcrun simctl list --json devices available)"
+
+        # Prefer first available iOS 18.x runtime key; fallback to first available iOS runtime key.
+        RUNTIME_KEY="$(echo "$SIM_JSON" | jq -r '.devices | keys[] | select(test("iOS-18-"))' | sort | head -n1)"
+        if [ -z "$RUNTIME_KEY" ]; then
+          RUNTIME_KEY="$(echo "$SIM_JSON" | jq -r '.devices | keys[] | select(test("iOS-"))' | sort | head -n1)"
         fi
-        RUNTIME_ID="$(echo "$RUNTIME" | jq -r '.id')"
-        RUNTIME_VERSION="$(echo "$RUNTIME" | jq -r '.version')"
+        if [ -z "$RUNTIME_KEY" ] || [ "$RUNTIME_KEY" = "null" ]; then
+          echo "No iOS runtime keys found in available devices"; exit 1
+        fi
+
+        RUNTIME_VERSION="$(echo "$RUNTIME_KEY" | sed 's/.*iOS-//; s/-/./g')"
+        RUNTIME_ID="$(xcrun simctl list runtimes --json | jq -r --arg key "$RUNTIME_KEY" '.runtimes[] | select(.identifier == $key) | .identifier')"
         if [ -z "$RUNTIME_ID" ] || [ "$RUNTIME_ID" = "null" ]; then
-          echo "No available iOS runtimes found"; exit 1
+          echo "Runtime $RUNTIME_KEY not found among runtimes"; exit 1
         fi
         echo "Selected runtime: $RUNTIME_ID ($RUNTIME_VERSION)"
 
-        # Choose an iPhone device type (prefer iPhone 16*, else first iPhone).
-        DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone 16") or .name == "iPhone 16" or .name == "iPhone 16 Pro") | .identifier' | head -n1)"
-        if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
-          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
-        fi
-        if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
-          echo "No iPhone device types found"; exit 1
-        fi
-        echo "Selected device type: $DEVICE_TYPE"
+        DEVICE_UDID="$(echo "$SIM_JSON" | jq -r --arg rt "$RUNTIME_KEY" '.devices[$rt][] | select(.isAvailable == true and (.name | startswith("iPhone"))) | .udid' | head -n1)"
 
-        DEVICE_UDID="$(xcrun simctl create "CI-iPhone" "$DEVICE_TYPE" "$RUNTIME_ID")"
         if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
-          echo "Failed to create simulator for runtime $RUNTIME_ID"; exit 1
+          # Create one if none are available for that runtime.
+          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
+          if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
+            echo "No iPhone device types found"; exit 1
+          fi
+          DEVICE_UDID="$(xcrun simctl create "CI-iPhone" "$DEVICE_TYPE" "$RUNTIME_ID")"
+          if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
+            echo "Failed to create simulator for runtime $RUNTIME_ID"; exit 1
+          fi
+          echo "Created simulator: $DEVICE_UDID ($DEVICE_TYPE)"
+        else
+          echo "Using existing simulator: $DEVICE_UDID"
         fi
-        echo "Created simulator: $DEVICE_UDID ($DEVICE_TYPE)"
 
         DESTINATION="platform=iOS Simulator,id=${DEVICE_UDID}"
         echo "Using runtime ${RUNTIME_VERSION} and destination $DESTINATION"
