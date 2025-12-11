@@ -16,7 +16,14 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app
+      run: |
+        if [ -d /Applications/Xcode_16.4.app ]; then
+          sudo xcode-select -s /Applications/Xcode_16.4.app
+        elif [ -d /Applications/Xcode_16.2.app ]; then
+          sudo xcode-select -s /Applications/Xcode_16.2.app
+        else
+          echo "No known Xcode path found"; exit 1
+        fi
 
     - name: Show Xcode version
       run: xcodebuild -version
