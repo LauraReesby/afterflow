@@ -19,10 +19,8 @@ jobs:
       run: |
         if [ -d /Applications/Xcode_16.4.app ]; then
           sudo xcode-select -s /Applications/Xcode_16.4.app
-        elif [ -d /Applications/Xcode_16.2.app ]; then
-          sudo xcode-select -s /Applications/Xcode_16.2.app
         else
-          echo "No known Xcode path found"; exit 1
+          echo "Xcode 16.4 not found on runner"; exit 1
         fi
 
     - name: Show Xcode version
@@ -40,8 +38,8 @@ jobs:
 
         SIM_JSON="$(xcrun simctl list --json devices available)"
 
-        # Prefer first available iOS 18.x runtime key; fallback to first available iOS runtime key.
-        RUNTIME_KEY="$(echo "$SIM_JSON" | jq -r '.devices | keys[] | select(test("iOS-18-"))' | sort | head -n1)"
+        # Prefer first available iOS 26.x runtime key; fallback to first available iOS runtime key.
+        RUNTIME_KEY="$(echo "$SIM_JSON" | jq -r '.devices | keys[] | select(test("iOS-26-"))' | sort | head -n1)"
         if [ -z "$RUNTIME_KEY" ]; then
           RUNTIME_KEY="$(echo "$SIM_JSON" | jq -r '.devices | keys[] | select(test("iOS-"))' | sort | head -n1)"
         fi
@@ -56,11 +54,17 @@ jobs:
         fi
         echo "Selected runtime: $RUNTIME_ID ($RUNTIME_VERSION)"
 
-        DEVICE_UDID="$(echo "$SIM_JSON" | jq -r --arg rt "$RUNTIME_KEY" '.devices[$rt][] | select(.isAvailable == true and (.name | startswith("iPhone"))) | .udid' | head -n1)"
+        DEVICE_UDID="$(echo "$SIM_JSON" | jq -r --arg rt "$RUNTIME_KEY" '.devices[$rt][] | select(.isAvailable == true and (.name | startswith("iPhone 17"))) | .udid' | head -n1)"
+        if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
+          DEVICE_UDID="$(echo "$SIM_JSON" | jq -r --arg rt "$RUNTIME_KEY" '.devices[$rt][] | select(.isAvailable == true and (.name | startswith("iPhone"))) | .udid' | head -n1)"
+        fi
 
         if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
           # Create one if none are available for that runtime.
-          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
+          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone 17")) | .identifier' | head -n1)"
+          if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
+            DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
+          fi
           if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
             echo "No iPhone device types found"; exit 1
           fi
