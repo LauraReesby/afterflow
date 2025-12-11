@@ -38,8 +38,11 @@ jobs:
           | head -n1)"
 
         if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
-          # Pick the latest available iOS runtime
-          RUNTIME="$(xcrun simctl list runtimes --json | jq -r '[.runtimes[] | select((.platform? // .platformName) == "iOS" and (.isAvailable == true or .availability == "(available)")) | {id: .identifier, version: .version}] | sort_by(.version | split(".") | map(tonumber)) | last')"
+          # Pick the latest available iOS 18.x runtime, fallback to latest iOS runtime
+          RUNTIME="$(xcrun simctl list runtimes --json | jq -r '[.runtimes[] | select((.platform? // .platformName) == "iOS" and (.isAvailable == true or .availability == "(available)") and (.version | startswith("18."))) | {id: .identifier, version: .version}] | sort_by(.version | split(".") | map(tonumber)) | last // empty')"
+          if [ -z "$RUNTIME" ]; then
+            RUNTIME="$(xcrun simctl list runtimes --json | jq -r '[.runtimes[] | select((.platform? // .platformName) == "iOS" and (.isAvailable == true or .availability == "(available)")) | {id: .identifier, version: .version}] | sort_by(.version | split(".") | map(tonumber)) | last')"
+          fi
           RUNTIME_ID="$(echo "$RUNTIME" | jq -r '.id')"
           RUNTIME_VERSION="$(echo "$RUNTIME" | jq -r '.version')"
           echo "Selected runtime: $RUNTIME_ID ($RUNTIME_VERSION)"
@@ -47,7 +50,10 @@ jobs:
             echo "No available iOS runtimes found"; exit 1
           fi
 
-          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
+          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone 16") or .name == "iPhone 16" or .name == "iPhone 16 Pro") | .identifier' | head -n1)"
+          if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
+            DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
+          fi
           if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
             echo "No iPhone device types found"; exit 1
           fi
@@ -68,7 +74,21 @@ jobs:
 
         echo "Booting simulator $DEVICE_UDID..."
         xcrun simctl boot "$DEVICE_UDID" || true
-        xcrun simctl bootstatus "$DEVICE_UDID" -b -t 120
+        BOOT_TIMEOUT=240
+        START_TIME="$(date +%s)"
+        while true; do
+          STATE="$(xcrun simctl list --json devices "$RUNTIME_ID" | jq -r '.devices[]? | map(select(.udid=="'"$DEVICE_UDID"'")) | .[0].state')"
+          if [ "$STATE" = "Booted" ]; then
+            echo "Simulator $DEVICE_UDID booted."
+            break
+          fi
+          NOW="$(date +%s)"
+          if [ $((NOW - START_TIME)) -ge $BOOT_TIMEOUT ]; then
+            echo "Simulator $DEVICE_UDID failed to boot within ${BOOT_TIMEOUT}s (last state: ${STATE:-unknown})"
+            exit 1
+          fi
+          sleep 5
+        done
 
         DESTINATION="platform=iOS Simulator,id=${DEVICE_UDID}"
         echo "Using runtime ${RUNTIME_VERSION:-unknown} and destination $DESTINATION"
