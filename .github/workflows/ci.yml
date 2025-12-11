@@ -66,6 +66,10 @@ jobs:
           echo "No simulator UDID resolved"; exit 1
         fi
 
+        echo "Booting simulator $DEVICE_UDID..."
+        xcrun simctl boot "$DEVICE_UDID" || true
+        xcrun simctl bootstatus "$DEVICE_UDID" -b -t 120
+
         DESTINATION="platform=iOS Simulator,id=${DEVICE_UDID}"
         echo "Using runtime ${RUNTIME_VERSION:-unknown} and destination $DESTINATION"
         echo "destination=$DESTINATION" >> "$GITHUB_OUTPUT"
