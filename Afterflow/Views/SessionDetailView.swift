@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import SwiftData
 import SwiftUI
 #if canImport(UIKit)
