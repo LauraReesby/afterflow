@@ -53,16 +53,23 @@ jobs:
         fi
         echo "Selected runtime: $TARGET_RUNTIME ($TARGET_OS)"
 
-        # Find an existing device with the requested name under the target runtime.
-        DEVICE_UDID="$(xcrun simctl list --json devices "$TARGET_RUNTIME" | jq -r --arg name "$TARGET_NAME" '.devices[]? | map(select(.isAvailable == true and .name == $name)) | .[0].udid')"
-        if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
-          DEVICE_UDID="$(xcrun simctl list --json devices "$TARGET_RUNTIME" | jq -r '.devices[]? | map(select(.isAvailable == true and (.name | startswith("iPhone")))) | .[0].udid')"
+        # Create a fresh simulator for the target runtime to avoid null/duplicate issues.
+        DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r --arg name "$TARGET_NAME" '.devicetypes[] | select(.name == $name) | .identifier' | head -n1)"
+        if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
+          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone 17")) | .identifier' | head -n1)"
+        fi
+        if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
+          DEVICE_TYPE="$(xcrun simctl list devicetypes --json | jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' | head -n1)"
+        fi
+        if [ -z "$DEVICE_TYPE" ] || [ "$DEVICE_TYPE" = "null" ]; then
+          echo "No iPhone device types found"; exit 1
         fi
 
+        DEVICE_UDID="$(xcrun simctl create "CI-iPhone" "$DEVICE_TYPE" "$TARGET_RUNTIME")"
         if [ -z "$DEVICE_UDID" ] || [ "$DEVICE_UDID" = "null" ]; then
-          echo "No available simulators found for $TARGET_RUNTIME"; exit 1
+          echo "Failed to create simulator for runtime $TARGET_RUNTIME"; exit 1
         fi
-        echo "Using simulator UDID: $DEVICE_UDID"
+        echo "Created simulator: $DEVICE_UDID ($DEVICE_TYPE)"
 
         echo "Booting simulator $DEVICE_UDID..."
         xcrun simctl boot "$DEVICE_UDID" || true
