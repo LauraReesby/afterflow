@@ -160,11 +160,11 @@ final class MusicLinkMetadataService {
     private func inferredTitle(for provider: MusicLinkProvider, url: URL) -> String? {
         switch provider {
         case .appleMusic, .applePodcasts:
-            return self.inferredTitleFromAppleMusic(url: url)
+            self.inferredTitleFromAppleMusic(url: url)
         case .bandcamp, .tidal, .linkOnly, .unknown:
-            return self.inferredTitleFromGenericURL(url: url)
+            self.inferredTitleFromGenericURL(url: url)
         default:
-            return nil
+            nil
         }
     }
 
