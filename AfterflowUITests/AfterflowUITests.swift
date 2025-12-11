@@ -40,6 +40,9 @@ final class AfterflowUITests: XCTestCase {
         XCTAssertTrue(sessionCell.waitForExistence(timeout: 5))
         sessionCell.forceTap()
 
-        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 3), "Detail view should show after tapping session")
+        XCTAssertTrue(
+            app.navigationBars["Session"].waitForExistence(timeout: 3),
+            "Detail view should show after tapping session"
+        )
     }
 }

@@ -40,7 +40,6 @@ struct SessionDetailView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Session")
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Edit") {
@@ -48,6 +47,7 @@ struct SessionDetailView: View {
                 }
             }
         }
+        .navigationBarTitleDisplayMode(.inline)
         .background(Color(uiColor: .systemGroupedBackground))
         .sheet(isPresented: self.$showingEdit) {
             NavigationStack {

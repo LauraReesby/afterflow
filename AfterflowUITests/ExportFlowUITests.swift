@@ -13,12 +13,14 @@ final class ExportFlowUITests: XCTestCase {
         let navBar = app.navigationBars.firstMatch
         XCTAssertTrue(navBar.waitForExistence(timeout: 5))
 
-        let menuPredicate = NSPredicate(format: "label IN {'More','ellipsis','Menu'} OR identifier IN {'More','ellipsis','Menu'}")
+        let menuPredicate =
+            NSPredicate(format: "label IN {'More','ellipsis','Menu'} OR identifier IN {'More','ellipsis','Menu'}")
         var menuButton = navBar.buttons.matching(menuPredicate).firstMatch
         if !menuButton.exists {
             let candidates = navBar.buttons.allElementsBoundByIndex
             // Prefer a trailing button that is not the Filters button.
-            menuButton = candidates.last(where: { !$0.label.localizedCaseInsensitiveContains("filter") }) ?? navBar.buttons.element(boundBy: 0)
+            menuButton = candidates.last(where: { !$0.label.localizedCaseInsensitiveContains("filter") }) ?? navBar
+                .buttons.element(boundBy: 0)
         }
         XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "Toolbar menu button should exist")
         menuButton.tap()
@@ -48,9 +50,13 @@ final class ExportFlowUITests: XCTestCase {
         let progress = app.otherElements["exportProgressView"]
         let progressAppeared = progress.waitForExistence(timeout: 2)
         let fileExporter = app.sheets.firstMatch
-        let exporterAppeared = fileExporter.waitForExistence(timeout: 6) || app.buttons["Save"].waitForExistence(timeout: 6)
+        let exporterAppeared = fileExporter.waitForExistence(timeout: 6) || app.buttons["Save"]
+            .waitForExistence(timeout: 6)
 
-        XCTAssertTrue(progressAppeared || exporterAppeared, "Either progress overlay should appear or file exporter should present")
+        XCTAssertTrue(
+            progressAppeared || exporterAppeared,
+            "Either progress overlay should appear or file exporter should present"
+        )
 
         if fileExporter.exists {
             let saveButton = app.buttons["Save"]
@@ -69,7 +75,7 @@ final class ExportFlowUITests: XCTestCase {
             // If the sheet did not appear yet, wait a bit more for slow export flows.
             XCTAssertTrue(fileExporter.waitForExistence(timeout: 6), "File exporter should appear for exports")
             let saveButton = app.buttons["Save"]
-            if saveButton.waitForExistence(timeout: 2) && saveButton.isEnabled {
+            if saveButton.waitForExistence(timeout: 2), saveButton.isEnabled {
                 saveButton.tap()
             }
         }

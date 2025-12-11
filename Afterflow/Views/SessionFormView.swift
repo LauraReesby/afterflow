@@ -279,14 +279,7 @@ struct SessionFormView: View {
                 }
                 .disabled(self.isLoading || !self.isFormValid)
             }
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Hide Keyboard") {
-                    self.focusedField = nil
-                }
-                .accessibilityIdentifier("keyboardAccessoryHide")
-                .disabled(self.focusedField == nil)
-            }
+            ToolbarItemGroup(placement: .keyboard) {}
         }
         .disabled(self.isLoading)
         .scrollContentBackground(.hidden)

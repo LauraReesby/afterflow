@@ -82,7 +82,11 @@ final class SessionFormValidationUITests: XCTestCase {
         XCTAssertTrue(saveButton.waitForExistence(timeout: 2), "Save button should exist")
         let enabledPredicate = NSPredicate(format: "isEnabled == true")
         let enabledExpectation = XCTNSPredicateExpectation(predicate: enabledPredicate, object: saveButton)
-        XCTAssertEqual(XCTWaiter.wait(for: [enabledExpectation], timeout: 3), .completed, "Save should enable after valid input")
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [enabledExpectation], timeout: 3),
+            .completed,
+            "Save should enable after valid input"
+        )
     }
 
     private func presentSessionForm(_ app: XCUIApplication) {

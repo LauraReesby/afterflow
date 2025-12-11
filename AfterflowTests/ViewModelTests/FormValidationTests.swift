@@ -55,7 +55,8 @@ struct FormValidationTests {
         #expect(result.isValid == false)
     }
 
-    @Test("Date comfortably within 10-year minimum passes validation") func earliestAllowedDateValidation() async throws {
+    @Test("Date comfortably within 10-year minimum passes validation") func earliestAllowedDateValidation(
+    ) async throws {
         let validation = FormValidation()
         let withinRange = Date().addingTimeInterval(-9 * 365 * 24 * 60 * 60) // ~9 years ago
 
