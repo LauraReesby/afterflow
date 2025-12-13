@@ -39,8 +39,21 @@ struct SessionDetailView: View {
             SessionReflectionSection(reflections: self.session.reflections)
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("Session")
+        .navigationTitle("")
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                VStack(spacing: 2) {
+                    TreatmentAvatar(type: self.session.treatmentType)
+                        .frame(width: 36, height: 36)
+                        .clipShape(Circle())
+                        .accessibilityHidden(true)
+                    Text("Session")
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                        .accessibilityLabel("Session: \(self.session.treatmentType.displayName)")
+                }
+            }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Edit") {
                     self.showingEdit = true
@@ -48,6 +61,7 @@ struct SessionDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.visible, for: .navigationBar)
         .background(Color(uiColor: .systemGroupedBackground))
         .sheet(isPresented: self.$showingEdit) {
             NavigationStack {
@@ -601,3 +615,4 @@ extension SessionDetailView {
     .modelContainer(container)
     .environment(store)
 }
+

@@ -557,50 +557,6 @@ private struct SessionRowView: View {
     }
 }
 
-private struct TreatmentAvatar: View {
-    let type: PsychedelicTreatmentType
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(self.backgroundColor)
-            Text(self.initials)
-                .font(.system(size: 14, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-        }
-        .frame(width: 36, height: 36)
-        .accessibilityIdentifier("treatmentAvatar")
-    }
-
-    private var backgroundColor: Color {
-        switch self.type {
-        case .ketamine: Color.cyan
-        case .psilocybin: Color.purple
-        case .lsd: Color.indigo
-        case .mdma: Color.orange
-        case .dmt: Color.teal
-        case .ayahuasca: Color.brown
-        case .mescaline: Color.green
-        case .cannabis: Color.mint
-        case .other: Color.gray
-        }
-    }
-
-    private var initials: String {
-        switch self.type {
-        case .ketamine: "K"
-        case .psilocybin: "P"
-        case .lsd: "L"
-        case .mdma: "MD"
-        case .dmt: "D"
-        case .ayahuasca: "A"
-        case .mescaline: "ME"
-        case .cannabis: "C"
-        case .other: "O"
-        }
-    }
-}
-
 private extension ContentView {
     func scheduleDebugNotification() async {
         #if DEBUG
@@ -908,3 +864,4 @@ private func makePreviewContainerAndStore() -> (container: ModelContainer, store
         fatalError("Failed to create preview container: \(error)")
     }
 }
+
