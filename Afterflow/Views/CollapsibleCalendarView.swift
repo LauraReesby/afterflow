@@ -182,10 +182,26 @@ public struct CollapsibleCalendarView: View {
     private var pullGesture: some Gesture {
         DragGesture(minimumDistance: 10)
             .onEnded { value in
-                if value.translation.height > 20 {
-                    self.mode = .month
-                } else if value.translation.height < -20 {
-                    self.mode = .twoWeeks
+                let horizontalDistance = abs(value.translation.x)
+                let verticalDistance = abs(value.translation.y)
+                
+                // Prioritize horizontal swipes for month navigation
+                if horizontalDistance > verticalDistance && horizontalDistance > 30 {
+                    if value.translation.x > 0 {
+                        // Swiped right - go to previous month
+                        self.shiftMonth(-1)
+                    } else {
+                        // Swiped left - go to next month
+                        self.shiftMonth(1)
+                    }
+                }
+                // Vertical swipes for mode toggling
+                else if verticalDistance > 20 {
+                    if value.translation.y > 0 {
+                        self.mode = .month
+                    } else {
+                        self.mode = .twoWeeks
+                    }
                 }
             }
     }

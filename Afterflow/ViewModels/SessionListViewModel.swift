@@ -34,8 +34,10 @@ struct SessionListViewModel {
 
         let trimmedQuery = self.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmedQuery.isEmpty {
+            let normalizedQuery = trimmedQuery.lowercased()
             filtered = filtered.filter { session in
-                session.intention.lowercased().contains(trimmedQuery.lowercased())
+                session.intention.lowercased().contains(normalizedQuery) ||
+                    session.reflections.lowercased().contains(normalizedQuery)
             }
         }
 

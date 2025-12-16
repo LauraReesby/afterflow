@@ -330,11 +330,15 @@ private struct SessionListSection: View {
     }
 
     private func focusCalendar(on date: Date) {
+        let monthStart = Calendar.current.startOfMonth(for: date)
+        self.calendarMonth = monthStart
+
         if let idx = self.listViewModel.indexOfFirstSession(on: date, in: self.sessions) {
             let session = self.sessions[idx]
-            self.calendarMonth = Calendar.current.startOfMonth(for: session.sessionDate)
-            self.pendingCalendarMonth = self.calendarMonth
+            self.pendingCalendarMonth = monthStart
             self.scrollTarget = session.id
+        } else {
+            self.pendingCalendarMonth = nil
         }
     }
 
