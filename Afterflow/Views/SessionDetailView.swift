@@ -42,17 +42,11 @@ struct SessionDetailView: View {
         .navigationTitle("")
         .toolbar {
             ToolbarItem(placement: .principal) {
-                VStack(spacing: 2) {
-                    TreatmentAvatar(type: self.session.treatmentType)
-                        .frame(width: 36, height: 36)
-                        .clipShape(Circle())
-                        .accessibilityHidden(true)
-                    Text("Session")
-                        .font(.headline)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-                        .accessibilityLabel("Session: \(self.session.treatmentType.displayName)")
-                }
+                Text("Session")
+                    .font(.headline)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .accessibilityLabel("Session: \(self.session.treatmentType.displayName)")
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Edit") {
@@ -62,6 +56,7 @@ struct SessionDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(.visible, for: .automatic)
         .background(Color(uiColor: .systemGroupedBackground))
         .sheet(isPresented: self.$showingEdit) {
             NavigationStack {
@@ -330,9 +325,9 @@ private struct SessionSummarySection: View {
 
     var body: some View {
         Section {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(self.session.treatmentType.displayName)
                             .font(.headline)
                         Text(self.dateFormatter.string(from: self.session.sessionDate))
@@ -354,7 +349,7 @@ private struct SessionSummarySection: View {
                         MoodBeforePill(value: self.session.moodBefore)
                     }
                 }
-                .padding(.top, 2)
+                .padding(.top, 0)
 
                 if self.session.status == .needsReflection,
                    let reminderLabel = session.reminderRelativeDescription {
@@ -364,7 +359,8 @@ private struct SessionSummarySection: View {
                         .accessibilityIdentifier("detailReminderLabel")
                 }
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -373,7 +369,7 @@ private struct SessionSummarySection: View {
         }
         .accessibilityElement(children: .contain)
         .listRowBackground(Color.clear)
-        .listRowInsets(.init(top: 2, leading: 0, bottom: 0, trailing: 0))
+        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
     }
 
     private var hasAfterMood: Bool {

@@ -260,10 +260,10 @@ extension TherapeuticSession {
         let calendar = Calendar.current
         let timeString = reminderDate.formatted(date: .omitted, time: .shortened)
         if calendar.isDateInToday(reminderDate) {
-            return "Today \(timeString)"
+            return timeString
         }
         if calendar.isDateInTomorrow(reminderDate) {
-            return "Tomorrow \(timeString)"
+            return timeString
         }
         return reminderDate.formatted(date: .abbreviated, time: .shortened)
     }

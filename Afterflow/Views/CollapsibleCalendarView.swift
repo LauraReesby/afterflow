@@ -10,6 +10,9 @@ public struct CollapsibleCalendarView: View {
     @Binding private var currentMonthStart: Date
     @Binding private var mode: DisplayMode
 
+    @State private var lockedAxis: Axis?
+    private enum Axis { case horizontal, vertical }
+
     private let markedDates: [Date: Color]
     private let calendar: Calendar
     private let onSelect: (Date) -> Void
@@ -55,6 +58,7 @@ public struct CollapsibleCalendarView: View {
             .onTapGesture { self.toggleMode() }
             .accessibilityLabel("Toggle calendar size")
             .accessibilityHint("Tap to expand or collapse the calendar")
+            .accessibilityValue(self.mode == .month ? "Month view" : "Two-week view")
     }
 
     private var header: some View {
@@ -63,6 +67,7 @@ public struct CollapsibleCalendarView: View {
             Spacer()
             Text(self.monthTitle(self.currentMonthStart))
                 .font(.headline)
+                .accessibilityValue(self.mode == .month ? "Month view" : "Two-week view")
             Spacer()
             Button { self.shiftMonth(1) } label: { Image(systemName: "chevron.right") }
         }
@@ -103,8 +108,9 @@ public struct CollapsibleCalendarView: View {
         let isCurrentMonth = self.calendar.isDate(day, equalTo: self.currentMonthStart, toGranularity: .month)
         let isSelected = self.selectedDate.map { self.calendar.isDate($0, inSameDayAs: day) } ?? false
         let normalizedDay = self.calendar.startOfDay(for: day)
-        let markerColor = self.markedDates[normalizedDay]
-        let isMarked = markerColor != nil
+        let originalMarkerColor = self.markedDates[normalizedDay]
+        let markerColor = originalMarkerColor ?? Color.accentColor.opacity(0.7)
+        let isMarked = originalMarkerColor != nil
 
         return Button {
             self.selectedDate = day
@@ -116,7 +122,7 @@ public struct CollapsibleCalendarView: View {
                     .foregroundStyle(isCurrentMonth ? .primary : .secondary)
                     .frame(maxWidth: .infinity)
                 Circle()
-                    .fill(markerColor ?? .clear)
+                    .fill(markerColor)
                     .frame(width: 6, height: 6)
                     .opacity(isMarked ? 1 : 0)
             }
@@ -181,27 +187,39 @@ public struct CollapsibleCalendarView: View {
 
     private var pullGesture: some Gesture {
         DragGesture(minimumDistance: 10)
-            .onEnded { value in
-                let horizontalDistance = abs(value.translation.x)
-                let verticalDistance = abs(value.translation.y)
-                
-                // Prioritize horizontal swipes for month navigation
-                if horizontalDistance > verticalDistance && horizontalDistance > 30 {
-                    if value.translation.x > 0 {
-                        // Swiped right - go to previous month
-                        self.shiftMonth(-1)
-                    } else {
-                        // Swiped left - go to next month
-                        self.shiftMonth(1)
+            .onChanged { value in
+                if self.lockedAxis == nil {
+                    let dx = abs(value.translation.width)
+                    let dy = abs(value.translation.height)
+                    if max(dx, dy) > 12 {
+                        self.lockedAxis = dx > dy ? .horizontal : .vertical
                     }
                 }
-                // Vertical swipes for mode toggling
-                else if verticalDistance > 20 {
-                    if value.translation.y > 0 {
-                        self.mode = .month
-                    } else {
-                        self.mode = .twoWeeks
+            }
+            .onEnded { value in
+                defer { lockedAxis = nil }
+
+                let dx = value.translation.width
+                let dy = value.translation.height
+                switch self.lockedAxis {
+                case .horizontal?:
+                    if abs(dx) > 30 {
+                        if dx > 0 {
+                            self.shiftMonth(-1)
+                        } else {
+                            self.shiftMonth(1)
+                        }
                     }
+                case .vertical?:
+                    if abs(dy) > 20 {
+                        if dy > 0 {
+                            self.mode = .month
+                        } else {
+                            self.mode = .twoWeeks
+                        }
+                    }
+                case nil:
+                    break
                 }
             }
     }
