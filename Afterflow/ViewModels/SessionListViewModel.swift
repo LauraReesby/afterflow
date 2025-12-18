@@ -1,7 +1,6 @@
-import Combine
 import Foundation
 
-final class SessionListViewModel: ObservableObject {
+struct SessionListViewModel {
     enum SortOption: String, CaseIterable, Identifiable {
         case newestFirst
         case oldestFirst
@@ -21,22 +20,10 @@ final class SessionListViewModel: ObservableObject {
         }
     }
 
-    @Published var sortOption: SortOption = .newestFirst
-    @Published var treatmentFilter: PsychedelicTreatmentType?
-    @Published var searchText: String = ""
-    @Published var selectedDate: Date?
-
-    init(
-        sortOption: SortOption = .newestFirst,
-        treatmentFilter: PsychedelicTreatmentType? = nil,
-        searchText: String = "",
-        selectedDate: Date? = nil
-    ) {
-        self.sortOption = sortOption
-        self.treatmentFilter = treatmentFilter
-        self.searchText = searchText
-        self.selectedDate = selectedDate
-    }
+    var sortOption: SortOption = .newestFirst
+    var treatmentFilter: PsychedelicTreatmentType?
+    var searchText: String = ""
+    var selectedDate: Date?
 
     func applyFilters(to sessions: [TherapeuticSession]) -> [TherapeuticSession] {
         var filtered = sessions
@@ -88,7 +75,7 @@ final class SessionListViewModel: ObservableObject {
         return self.sortOption.label
     }
 
-    func clearFilters() {
+    mutating func clearFilters() {
         self.treatmentFilter = nil
         self.searchText = ""
     }

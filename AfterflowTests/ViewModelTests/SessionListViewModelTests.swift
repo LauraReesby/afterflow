@@ -5,7 +5,7 @@ import Testing
 struct SessionListViewModelTests {
     @Test("Applies treatment filter and sorts newest first") func treatmentFilterAndSort() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 5)
-        let viewModel = SessionListViewModel()
+        var viewModel = SessionListViewModel()
         viewModel.treatmentFilter = .psilocybin
         viewModel.sortOption = .newestFirst
 
@@ -21,7 +21,7 @@ struct SessionListViewModelTests {
         sessions[1].moodBefore = 7
         sessions[1].moodAfter = 6
 
-        let viewModel = SessionListViewModel()
+        var viewModel = SessionListViewModel()
         viewModel.sortOption = .moodChange
 
         let sorted = viewModel.applyFilters(to: sessions)
@@ -30,7 +30,7 @@ struct SessionListViewModelTests {
 
     @Test("Search text filters intentions") func searchFiltering() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 6)
-        let viewModel = SessionListViewModel()
+        var viewModel = SessionListViewModel()
         viewModel.searchText = "Fixture Session 3"
 
         let filtered = viewModel.applyFilters(to: sessions)
