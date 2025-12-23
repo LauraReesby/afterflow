@@ -103,7 +103,7 @@ enum SeedDataFactory {
             let reflection = hasReflection ? reflectionTemplates[i % reflectionTemplates.count] : ""
 
             let session = TherapeuticSession(
-                sessionDate: now.addingTimeInterval(TimeInterval(-i * 86400)),
+                sessionDate: now.addingTimeInterval(TimeInterval(-i * (60 * 60 * 24 * 14))),
                 treatmentType: treatments[i % treatments.count],
                 administration: .oral,
                 intention: "Seeded Session \(i)",
