@@ -133,13 +133,11 @@ final class ReminderScheduler {
         self.notificationCenter.removePendingNotificationRequests(withIdentifiers: [self.identifier(for: session)])
     }
 
-    // MARK: - Debug Helpers
-
-    /// Schedules an immediate test notification for debugging purposes.
-    /// The notification will fire 5 seconds after calling this method.
-    ///
-    /// - Parameter session: The session to associate with the test notification
-    /// - Returns: The scheduled notification date
+    // Schedules an immediate test notification for debugging purposes.
+    // The notification will fire 5 seconds after calling this method.
+    //
+    // - Parameter session: The session to associate with the test notification
+    // - Returns: The scheduled notification date
     func scheduleImmediateTestNotification(for session: TherapeuticSession) async throws -> Date {
         await self.requestPermissionIfNeeded()
         let authStatus = await notificationCenter.authorizationStatus()

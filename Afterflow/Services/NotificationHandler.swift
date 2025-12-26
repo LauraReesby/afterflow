@@ -44,8 +44,6 @@ final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationC
         }
     }
 
-    // MARK: - Notification Routing
-
     func handleNotificationResponse(_ response: UNNotificationResponse) {
         let userInfo = response.notification.request.content.userInfo
 
@@ -89,8 +87,6 @@ final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationC
             try await self.reflectionQueue.addReflection(sessionID: sessionID, text: text)
         }
     }
-
-    // MARK: - UNUserNotificationCenterDelegate
 
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,

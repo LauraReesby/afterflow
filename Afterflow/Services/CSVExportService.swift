@@ -85,8 +85,6 @@ struct CSVExportService: Sendable {
         return formatter
     }()
 
-    // MARK: - Example Generator
-
     func exportExampleImport() throws -> URL {
         let sessions = Self.exampleImportSessions()
         return try self.export(sessions: sessions)

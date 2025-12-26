@@ -524,8 +524,7 @@ private extension SessionFormView {
         self.dismiss()
     }
 
-    // swiftlint:disable function_body_length
-    func saveSession() {
+    func saveSession() { // swiftlint:disable:this function_body_length
         guard self.isFormValid else {
             self.performValidation()
             return
@@ -583,8 +582,6 @@ private extension SessionFormView {
             }
         }
     }
-
-    // swiftlint:enable function_body_length
 
     func showError(message: String) {
         self.errorMessage = message

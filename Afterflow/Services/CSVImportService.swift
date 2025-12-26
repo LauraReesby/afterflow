@@ -19,7 +19,6 @@ struct CSVImportService: Sendable {
         }
     }
 
-    // swiftlint:disable function_body_length
     func `import`(from url: URL) throws -> [TherapeuticSession] {
         let data = try Data(contentsOf: url)
         return try self.import(from: data)
@@ -32,6 +31,7 @@ struct CSVImportService: Sendable {
         return try self.import(from: csvString)
     }
 
+    // swiftlint:disable:next function_body_length
     func `import`(from csvString: String) throws -> [TherapeuticSession] {
         let rows = try Self.parseCSV(csvString)
         guard let header = rows.first else { return [] }
@@ -102,8 +102,6 @@ struct CSVImportService: Sendable {
 
         return sessions
     }
-
-    // swiftlint:enable function_body_length
 
     private static func parseCSV(_ csv: String) throws -> [[String]] {
         let normalized = csv.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")

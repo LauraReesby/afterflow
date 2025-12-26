@@ -1,5 +1,6 @@
 import SwiftUI
 
+// swiftlint:disable:next type_body_length
 public struct CollapsibleCalendarView: View {
     public enum DisplayMode {
         case twoWeeks
@@ -31,7 +32,7 @@ public struct CollapsibleCalendarView: View {
         // Approximate month block height: rows * estimatedRowHeight + vertical spacing between weeks and months
         // We already use `expandedRowCount` and `estimatedRowHeight` to size the ScrollView frame.
         // Add a conservative spacing buffer (e.g., 12 per month + 4 per week row spacing).
-        return (self.expandedRowCount * self.estimatedRowHeight)
+        self.expandedRowCount * self.estimatedRowHeight
     }
 
     public init(
@@ -84,7 +85,7 @@ public struct CollapsibleCalendarView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color(.systemGray6))
         )
         .gesture(self.pullGesture)
@@ -92,7 +93,9 @@ public struct CollapsibleCalendarView: View {
         .onChange(of: self.mode) { _, newMode in
             if newMode == .month {
                 // Decide authoritative month to center
-                let anchor = self.centerOnMonthRequest ?? (self.selectedDate.map { self.calendar.startOfMonth(for: $0) } ?? self.currentMonthStart)
+                let anchor = self
+                    .centerOnMonthRequest ??
+                    (self.selectedDate.map { self.calendar.startOfMonth(for: $0) } ?? self.currentMonthStart)
                 let normalized = self.clampMonth(self.calendar.startOfMonth(for: anchor))
 
                 // Make currentMonthStart authoritative
@@ -168,12 +171,20 @@ public struct CollapsibleCalendarView: View {
         Group {
             switch self.mode {
             case .twoWeeks:
-                let days = self.oneWeekDays()
+                let anchor = self.selectedDate ?? self.currentMonthStart
+                let startOfFirstWeek = self.calendar.startOfWeek(containing: anchor)
+                let twoWeekDays: [Date] = (0 ..< 14).compactMap { self.calendar.date(
+                    byAdding: .day,
+                    value: $0,
+                    to: startOfFirstWeek
+                ) }
+
                 VStack(spacing: 4) {
-                    HStack(spacing: 4) {
-                        ForEach(0 ..< 7, id: \.self) { col in
-                            if col < days.count {
-                                let day = days[col]
+                    ForEach(0 ..< 2, id: \.self) { row in
+                        HStack(spacing: 4) {
+                            ForEach(0 ..< 7, id: \.self) { col in
+                                let idx = row * 7 + col
+                                let day = twoWeekDays[idx]
                                 self.dayCell(day, monthStart: self.currentMonthStart)
                             }
                         }
@@ -284,6 +295,7 @@ public struct CollapsibleCalendarView: View {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func expandedMonthScroll() -> some View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
@@ -501,33 +513,5 @@ public struct CollapsibleCalendarView: View {
         return months
             .map { calendar.startOfMonth(for: $0) }
             .filter { $0 >= minMonth && $0 <= maxMonth }
-    }
-}
-
-extension Calendar {
-    func startOfMonth(for date: Date) -> Date {
-        let comps = dateComponents([.year, .month], from: date)
-        return self.date(from: comps) ?? date
-    }
-
-    func startOfWeek(containing date: Date) -> Date {
-        let comps = dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
-        return self.date(from: comps) ?? date
-    }
-
-    func firstGridDate(forMonthStartingAt monthStart: Date) -> Date {
-        let weekday = component(.weekday, from: monthStart)
-        let delta = (weekday - firstWeekday + 7) % 7
-        return date(byAdding: .day, value: -delta, to: monthStart) ?? monthStart
-    }
-}
-
-private enum AccessibilityLabelBuilder {
-    static func label(for date: Date, calendar: Calendar, marked: Bool) -> String {
-        let df = DateFormatter()
-        df.calendar = calendar
-        df.dateStyle = .full
-        let base = df.string(from: date)
-        return marked ? "\(base), has sessions" : base
     }
 }

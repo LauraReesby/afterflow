@@ -5,9 +5,6 @@ import UserNotifications
 
 @MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
-    // swiftlint:disable:next implicitly_unwrapped_optional
-    static var shared: AppDelegate!
-
     lazy var sharedModelContainer: ModelContainer = {
         let schema = Schema([TherapeuticSession.self])
         let isUITesting = ProcessInfo.processInfo.arguments.contains("-ui-testing")
@@ -33,7 +30,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     override init() {
         super.init()
-        AppDelegate.shared = self
     }
 
     func application(

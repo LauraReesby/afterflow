@@ -52,7 +52,7 @@ identifier_name:
     - y  # Coordinates
 
 file_length:
-  warning: 500
+  warning: 700
   error: 1000
 
 function_body_length:

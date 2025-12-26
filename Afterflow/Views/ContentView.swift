@@ -189,8 +189,6 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Subviews & Modifiers
-
 private extension ContentView {
     var navigationLayout: some View {
         NavigationSplitView {
@@ -283,27 +281,37 @@ private struct SessionListSection: View {
     @State private var suppressListSync = false
     @State private var calendarCenterOnMonth: Date?
     @State private var collapsedHeaderSyncEnabled = false
+    @State private var isSearchExpanded = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            NavigationStack(path: self.$navigationPath) {
-                VStack(spacing: 0) {
-                    self.buildCalendarView()
-                    self.sessionList()
-                }
-                .toolbar { self.toolbarContent }
-                .toolbarBackground(.visible, for: .automatic)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbarBackground(.visible, for: .navigationBar)
-                .navigationDestination(for: UUID.self) { sessionID in
-                    if let session = self.sessions.first(where: { $0.id == sessionID }) {
-                        SessionDetailView(session: session)
-                            .environment(self.sessionStore)
-                    }
+        NavigationStack(path: self.$navigationPath) {
+            VStack(spacing: 0) {
+                self.buildCalendarView()
+                self.sessionList()
+            }
+            .toolbar { self.toolbarContent }
+            .toolbarBackground(self.isSearchExpanded ? .hidden : .visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: UUID.self) { sessionID in
+                if let session = self.sessions.first(where: { $0.id == sessionID }) {
+                    SessionDetailView(session: session)
+                        .environment(self.sessionStore)
                 }
             }
-
-            BottomControls(listViewModel: self.$listViewModel, onAdd: self.onAdd)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if self.isSearchExpanded {
+                    FullWidthSearchBar(
+                        searchText: self.$listViewModel.searchText,
+                        isExpanded: self.$isSearchExpanded
+                    )
+                    .background(Color(.systemBackground))
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+                }
+            }
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: self.isSearchExpanded)
         }
     }
 
@@ -371,10 +379,6 @@ private struct SessionListSection: View {
             .listStyle(.plain)
             .scrollBounceBehavior(.basedOnSize)
             .coordinateSpace(name: "listScroll")
-            .safeAreaInset(edge: .bottom) {
-                // Spacer to avoid bottom controls overlaying the last row.
-                Color.clear.frame(height: 88)
-            }
             .simultaneousGesture(self.calendarCollapseGesture())
             .toolbarBackground(.visible, for: .automatic)
             .scrollDismissesKeyboard(.immediately)
@@ -385,38 +389,7 @@ private struct SessionListSection: View {
                 }
             }
             .onPreferenceChange(TopVisibleDatePreferenceKey.self) { date in
-                guard let date else { return }
-
-                // Update selected date to reflect the list's top-most visible day
-                let normalized = Calendar.current.startOfDay(for: date)
-                self.listViewModel.selectedDate = normalized
-
-                // Compute the month header value derived from the top visible date
-                let monthStart = Calendar.current.startOfMonth(for: normalized)
-                
-                // When collapsed and sync is enabled, let the list drive the calendar header month
-                if self.calendarMode == .twoWeeks, self.collapsedHeaderSyncEnabled, monthStart != self.calendarMonth {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        self.calendarMonth = monthStart
-                    }
-                }
-
-                // If we had a pending month change that matches the header, clear it and stop.
-                if let pending = self.pendingCalendarMonth,
-                   Calendar.current.isDate(monthStart, equalTo: pending, toGranularity: .month) {
-                    self.pendingCalendarMonth = nil
-                    return
-                }
-
-                // If we are in the middle of a transition to a specific month, don't override it.
-                if self.pendingCalendarMonth != nil { return }
-
-                // Smoothly update the header month only when it actually changes.
-                if monthStart != self.calendarMonth {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        self.calendarMonth = monthStart
-                    }
-                }
+                self.handleTopVisibleDateChange(date)
             }
             .onAppear {
                 if let firstSession = self.sessions.first {
@@ -430,35 +403,7 @@ private struct SessionListSection: View {
                 }
             }
             .onChange(of: self.calendarMode) { old, new in
-                guard old != new else { return }
-
-                // Disarm collapsed header sync when expanding; arm it after collapsing
-                if new == .month {
-                    self.collapsedHeaderSyncEnabled = false
-                } else if new == .twoWeeks {
-                    // Arm on next runloop to avoid interference from programmatic updates
-                    DispatchQueue.main.async {
-                        self.collapsedHeaderSyncEnabled = true
-                    }
-                }
-
-                // When expanding to month view, ensure the calendar centers on the selected date's month
-                if new == .month {
-                    if let selected = self.listViewModel.selectedDate {
-                        let normalized = Calendar.current.startOfDay(for: selected)
-                        let monthStart = Calendar.current.startOfMonth(for: normalized)
-                        // Keep list anchored and avoid feedback loop
-                        self.pendingCalendarMonth = monthStart
-                        self.suppressListSync = true
-                        self.calendarMonth = monthStart
-                        // Request the expanded calendar to center on this month (one-shot)
-                        self.calendarCenterOnMonth = monthStart
-                        if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
-                            let session = self.sessions[idx]
-                            self.scrollTarget = session.id
-                        }
-                    }
-                }
+                self.handleCalendarModeChange(old: old, new: new)
             }
         }
     }
@@ -479,6 +424,76 @@ private struct SessionListSection: View {
                     }
                 }
             }
+    }
+
+    private func handleTopVisibleDateChange(_ date: Date?) {
+        guard let date else { return }
+
+        // Update selected date to reflect the list's top-most visible day
+        let normalized = Calendar.current.startOfDay(for: date)
+        self.listViewModel.selectedDate = normalized
+
+        // Compute the month header value derived from the top visible date
+        let monthStart = Calendar.current.startOfMonth(for: normalized)
+
+        // When collapsed and sync is enabled, let the list drive the calendar header month
+        if self.calendarMode == .twoWeeks, self.collapsedHeaderSyncEnabled, monthStart != self.calendarMonth {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                self.calendarMonth = monthStart
+            }
+        }
+
+        // If we had a pending month change that matches the header, clear it and stop.
+        if let pending = self.pendingCalendarMonth,
+           Calendar.current.isDate(monthStart, equalTo: pending, toGranularity: .month) {
+            self.pendingCalendarMonth = nil
+            return
+        }
+
+        // If we are in the middle of a transition to a specific month, don't override it.
+        if self.pendingCalendarMonth != nil { return }
+
+        // Smoothly update the header month only when it actually changes.
+        if monthStart != self.calendarMonth {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                self.calendarMonth = monthStart
+            }
+        }
+    }
+
+    private func handleCalendarModeChange(
+        old: CollapsibleCalendarView.DisplayMode,
+        new: CollapsibleCalendarView.DisplayMode
+    ) {
+        guard old != new else { return }
+
+        // Disarm collapsed header sync when expanding; arm it after collapsing
+        if new == .month {
+            self.collapsedHeaderSyncEnabled = false
+        } else if new == .twoWeeks {
+            // Arm on next runloop to avoid interference from programmatic updates
+            DispatchQueue.main.async {
+                self.collapsedHeaderSyncEnabled = true
+            }
+        }
+
+        // When expanding to month view, ensure the calendar centers on the selected date's month
+        if new == .month {
+            if let selected = self.listViewModel.selectedDate {
+                let normalized = Calendar.current.startOfDay(for: selected)
+                let monthStart = Calendar.current.startOfMonth(for: normalized)
+                // Keep list anchored and avoid feedback loop
+                self.pendingCalendarMonth = monthStart
+                self.suppressListSync = true
+                self.calendarMonth = monthStart
+                // Request the expanded calendar to center on this month (one-shot)
+                self.calendarCenterOnMonth = monthStart
+                if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
+                    let session = self.sessions[idx]
+                    self.scrollTarget = session.id
+                }
+            }
+        }
     }
 
     private func buildSessionRow(session: TherapeuticSession, index: Int) -> some View {
@@ -519,116 +534,124 @@ private struct SessionListSection: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            Menu {
-                Button {
-                    self.onOpenSettings()
-                } label: {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                Button {
-                    self.onExport()
-                } label: {
-                    Label("Export", systemImage: "square.and.arrow.up")
-                }
-                Button {
-                    self.onImport()
-                } label: {
-                    Label("Import", systemImage: "square.and.arrow.down")
-                }
+        if !self.isSearchExpanded {
+            ToolbarItem(placement: .navigationBarLeading) {
                 Menu {
                     Button {
-                        self.onExampleImport()
+                        self.onOpenSettings()
                     } label: {
-                        Label("Example Import", systemImage: "doc.badge.plus")
+                        Label("Settings", systemImage: "gearshape")
                     }
-                } label: {
-                    Label("Help", systemImage: "questionmark.circle")
-                }
-                #if DEBUG
-                    Divider()
                     Button {
-                        self.onDebugNotification()
+                        self.onExport()
                     } label: {
-                        Label("Test Notification (5s)", systemImage: "bell.badge")
+                        Label("Export", systemImage: "square.and.arrow.up")
                     }
-                    .disabled(self.sessions.isEmpty)
-                #endif
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.title3)
-                    .padding(.horizontal, 2)
+                    Button {
+                        self.onImport()
+                    } label: {
+                        Label("Import", systemImage: "square.and.arrow.down")
+                    }
+                    Menu {
+                        Button {
+                            self.onExampleImport()
+                        } label: {
+                            Label("Example Import", systemImage: "doc.badge.plus")
+                        }
+                    } label: {
+                        Label("Help", systemImage: "questionmark.circle")
+                    }
+                    #if DEBUG
+                        Divider()
+                        Button {
+                            self.onDebugNotification()
+                        } label: {
+                            Label("Test Notification (5s)", systemImage: "bell.badge")
+                        }
+                        .disabled(self.sessions.isEmpty)
+                    #endif
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.title3)
+                        .padding(.horizontal, 2)
+                }
+                .accessibilityLabel("More options")
             }
-            .accessibilityLabel("More options")
-        }
-        ToolbarItem(placement: .navigationBarTrailing) {
-            FilterMenu(listViewModel: self.$listViewModel)
+            ToolbarItem(placement: .navigationBarTrailing) {
+                HStack(spacing: 12) {
+                    FilterMenu(listViewModel: self.$listViewModel)
+
+                    Button {
+                        self.isSearchExpanded.toggle()
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.title3)
+                    }
+                    .accessibilityLabel("Search")
+
+                    Button(action: self.onAdd) {
+                        Image(systemName: "plus")
+                            .font(.title3.weight(.semibold))
+                    }
+                    .accessibilityIdentifier("addSessionButton")
+                    .accessibilityLabel("Add Session")
+                }
+            }
         }
     }
 }
 
-private struct BottomControls: View {
-    @Binding var listViewModel: SessionListViewModel
-    let onAdd: () -> Void
+private struct FullWidthSearchBar: View {
+    @Binding var searchText: String
+    @Binding var isExpanded: Bool
+    @FocusState private var isSearchFieldFocused: Bool
 
     var body: some View {
-        VStack(spacing: 8) {
+        HStack(spacing: 12) {
             HStack(spacing: 8) {
-                SearchField(text: self.$listViewModel.searchText)
-                Button(action: self.onAdd) {
-                    Image(systemName: "plus")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.accentColor, in: Circle())
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                    .font(.body)
+
+                TextField("Search sessions", text: self.$searchText)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .focused(self.$isSearchFieldFocused)
+
+                if !self.searchText.isEmpty {
+                    Button {
+                        self.searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Clear search")
                 }
-                .accessibilityIdentifier("addSessionButton")
-                .accessibilityLabel("Add Session")
             }
             .padding(.horizontal, 12)
-        }
-        .padding(.bottom, 2)
-        .padding(.horizontal, 12)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [Color.clear, Color(.systemBackground)]),
-                startPoint: .top,
-                endPoint: .bottom
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(.systemGray6))
             )
-            .ignoresSafeArea(edges: .bottom)
-        )
-    }
-}
 
-private struct SearchField: View {
-    @Binding var text: String
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-            TextField("Search", text: self.$text)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-            if !self.text.isEmpty {
-                Button {
-                    self.text = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Clear search")
+            Button {
+                self.searchText = ""
+                self.isExpanded = false
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.title3)
             }
+            .tint(.primary)
+            .accessibilityLabel("Cancel search")
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .frame(height: 44)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
-        )
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .onAppear {
+            self.isSearchFieldFocused = true
+        }
     }
 }
 
@@ -650,8 +673,8 @@ private struct FilterMenu: View {
                 }
             }
         } label: {
-            Label("Filters", systemImage: "line.3.horizontal.decrease")
-                .glassCapsule(cornerRadius: 18)
+            Image(systemName: "line.3.horizontal.decrease")
+                .font(.title3)
         }
         .accessibilityLabel("Filter Sessions")
         .accessibilityHint("Change sort order or filter by treatment type")
@@ -1068,4 +1091,3 @@ private func makePreviewContainerAndStore() -> (container: ModelContainer, store
         fatalError("Failed to create preview container: \(error)")
     }
 }
-
