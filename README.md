@@ -165,18 +165,33 @@ Afterflow/
 │   ├── CSVExportService.swift
 │   └── PDFExportService.swift
 ├── ViewModels/
+│   ├── ExportState.swift                 # Centralized export state management
+│   ├── ImportState.swift                 # Centralized import state management
 │   ├── FormValidation.swift
 │   ├── MoodRatingScale.swift
 │   ├── ReminderOption.swift
-│   └── SessionListViewModel.swift
+│   └── SessionListViewModel.swift        # With performance optimization (memoization)
 ├── Views/
-│   ├── ContentView.swift
+│   ├── ContentView.swift                 # Main view (refactored from 1,077 to 403 lines)
+│   ├── ContentView/
+│   │   └── SessionListSection.swift     # Extracted session list component
 │   ├── SessionFormView.swift
 │   ├── SessionDetailView.swift
-│   └── Components/
-│       ├── MoodRatingView.swift
-│       ├── MusicLinkSummaryCard.swift
-│       └── ValidationErrorView.swift
+│   ├── Components/
+│   │   ├── FullWidthSearchBar.swift     # Search UI component
+│   │   ├── FilterMenu.swift             # Filter/sort menu
+│   │   ├── SessionRowView.swift         # Session list row
+│   │   ├── MoodRatingView.swift
+│   │   ├── MusicLinkSummaryCard.swift
+│   │   └── ValidationErrorView.swift
+│   └── Modifiers/
+│       ├── NavigationAlertsModifier.swift
+│       ├── ExportFlowsModifier.swift
+│       ├── ImportFlowsModifier.swift
+│       ├── SettingsAlertModifier.swift
+│       └── ErrorAlertModifier.swift     # Reusable error alert modifier
+├── Utilities/
+│   └── DesignConstants.swift            # Centralized design constants
 └── Resources/
     ├── Assets.xcassets/
     └── LaunchScreen.storyboard
@@ -207,17 +222,30 @@ AfterflowTests/
 specs/
 ├── 001-core-session-logging/
 ├── 002-music-links/
-└── 003-data-export/
+├── 003-data-export/
+└── 004-advanced-notifications/
 ```
 
 ## Architecture
 
-Afterflow follows a clean architecture pattern optimized for SwiftUI:
+Afterflow follows a clean architecture pattern optimized for SwiftUI with strong separation of concerns:
 
 - **Models**: SwiftData entities for local persistence
 - **Services**: Data access and business logic
-- **Views**: SwiftUI user interface components  
-- **ViewModels**: Observable state management (iOS 17+)
+- **ViewModels**: Observable state management with dedicated state objects
+- **Views**: Modular SwiftUI components organized by feature
+- **Utilities**: Shared constants and helper functions
+
+### Architectural Improvements (Dec 2024)
+
+Recent refactoring has significantly improved code quality and maintainability:
+
+- **State Management**: Centralized export/import state into dedicated `@Observable` managers
+- **Component Extraction**: Reduced ContentView from 1,077 to 403 lines by extracting reusable components
+- **Performance**: Added memoization to SessionListViewModel for efficient filtering/sorting
+- **Accessibility**: Comprehensive VoiceOver support with hints on all interactive elements
+- **Error Handling**: User-facing errors now display helpful alerts instead of failing silently
+- **Design System**: Centralized design constants (animations, spacing, shadows, etc.)
 
 ### Key Principles
 
@@ -227,6 +255,8 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI:
 4. **Careful Network Use**: Only oEmbed fetches for supported music providers; no playback, tracking, or analytics
 5. **Test-Driven**: 80% minimum test coverage
 6. **Therapeutic Value**: Every feature supports healing
+7. **Modular Design**: Single Responsibility Principle with focused, reusable components
+8. **Performance**: Memoization and optimization for large datasets
 
 ## Music Link Support
 

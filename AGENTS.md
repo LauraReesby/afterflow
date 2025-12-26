@@ -18,9 +18,14 @@ This guide captures the expectations for contributors extending Afterflow’s pr
 
 ## Coding Style & Naming Conventions
 - Follow Swift API Design Guidelines: types `PascalCase`, properties/functions `camelCase`, constants prefixed with context (e.g., `sessionFetchRequest`).
-- Use 4-space indentation and keep files under 300 lines; extract SwiftUI subviews into `Views/Components` when bodies exceed ~80 lines.
+- Use 4-space indentation and target files under ~300 lines (300-400 acceptable if cohesive; above 400 requires refactoring); extract SwiftUI subviews into `Views/Components` when bodies exceed ~80 lines.
+- Large feature sections can be extracted to `Views/<ParentView>/` subdirectories (e.g., `SessionListSection.swift` in `Views/ContentView/`).
 - Keep view models `Observable` structs/classes with clearly named `@Published` fields (`formState`, `validationErrors`); avoid single-letter abbreviations.
-- Run Xcode’s “Re-Indent” or `Editor > Structure > Reformat` before committing; SwiftFormat and SwiftLint enforce shared rules but manual cleanup keeps diffs readable.
+- **Follow established patterns** (see `ai/globals/style_guide.md` for details):
+  - Extract complex state to dedicated `@Observable` managers (e.g., `ExportState`, `ImportState`)
+  - Create reusable view modifiers for repeated UI patterns (e.g., `ErrorAlertModifier`)
+  - Use `DesignConstants` for all spacing, animation, and styling values
+- Run Xcode's "Re-Indent" or `Editor > Structure > Reformat` before committing; SwiftFormat and SwiftLint enforce shared rules but manual cleanup keeps diffs readable.
 - Enforce SwiftFormat and SwiftLint with `./Scripts/run-swiftformat.sh` followed by `./Scripts/run-swiftlint.sh`; both must pass cleanly before opening a pull request.
 
 ## Testing Guidelines

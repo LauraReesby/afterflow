@@ -5,10 +5,17 @@ Applies to every agent touching Swift, Markdown, or automation scripts. Suppleme
 ## Swift & SwiftUI
 - Use Swift API Design Guidelines: `PascalCase` types, `camelCase` members, descriptive argument labels.
 - Indent with **4 spaces**; avoid tabs.
-- Keep Swift files under ~300 lines—extract helpers or subviews when bodies exceed ~80 lines.
+- Keep Swift files under ~300 lines as a target—extract helpers or subviews when bodies exceed ~80 lines. Files between 300-400 lines are acceptable if they're cohesive and follow Single Responsibility Principle. Above 400 lines requires refactoring.
 - SwiftUI subviews live in `Afterflow/Views/Components` and adopt `PreviewProvider` stubs gated by `#if DEBUG` when useful.
+- Large feature sections can be extracted to `Afterflow/Views/<ParentView>/` (e.g., `Views/ContentView/SessionListSection.swift`).
 - View models must be `@Observable` or `ObservableObject` with clearly named `@Published` state.
 - Services throw strongly typed errors; prefer `Result` for async call sites.
+
+### Established Patterns (Dec 2024)
+- **State Management**: Extract complex state into dedicated `@Observable` classes (see `ExportState.swift`, `ImportState.swift`) rather than scattering `@State` variables across views.
+- **Reusable Modifiers**: Create view modifiers for repeated patterns (see `ErrorAlertModifier.swift`, `ExportFlowsModifier.swift`) to reduce duplication.
+- **Design Constants**: Centralize magic numbers in `DesignConstants.swift` with nested enums (`Animation`, `Spacing`, `Shadow`, etc.).
+- **Component Extraction**: When views exceed ~80 lines, extract to `Views/Components/` (e.g., `FullWidthSearchBar.swift`, `FilterMenu.swift`, `SessionRowView.swift`).
 
 ## SwiftFormat & SwiftLint
 - SwiftFormat config lives in `.swiftformat`; run `./Scripts/run-swiftformat.sh` before committing.

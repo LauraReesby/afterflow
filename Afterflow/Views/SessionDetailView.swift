@@ -1,3 +1,4 @@
+import Foundation
 import SwiftData
 import SwiftUI
 #if canImport(UIKit)
@@ -15,6 +16,7 @@ struct SessionDetailView: View {
 
     @State private var showingEdit = false
     @State private var linkErrorMessage: String?
+    @State private var updateError: String?
     @State private var isHydratingMusicLink = false
 
     var body: some View {
@@ -41,22 +43,17 @@ struct SessionDetailView: View {
         .navigationTitle("")
         .toolbar {
             ToolbarItem(placement: .principal) {
-                VStack(spacing: 2) {
-                    TreatmentAvatar(type: self.session.treatmentType)
-                        .frame(width: 36, height: 36)
-                        .clipShape(Circle())
-                        .accessibilityHidden(true)
-                    Text("Session")
-                        .font(.headline)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-                        .accessibilityLabel("Session: \(self.session.treatmentType.displayName)")
-                }
+                Text("Session")
+                    .font(.headline)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .accessibilityLabel("Session: \(self.session.treatmentType.displayName)")
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Edit") {
                     self.showingEdit = true
                 }
+                .accessibilityHint("Opens the form to edit this session")
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -68,7 +65,7 @@ struct SessionDetailView: View {
             }
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
-            .presentationCornerRadius(16)
+            .presentationCornerRadius(DesignConstants.CornerRadius.large)
             .toolbarBackground(.visible, for: .automatic)
         }
         .alert(
@@ -82,6 +79,7 @@ struct SessionDetailView: View {
         } message: {
             Text(self.linkErrorMessage ?? "")
         }
+        .errorAlert(title: "Update Failed", error: self.$updateError)
         .task {
             await self.hydrateMusicMetadataIfNeeded()
         }
@@ -140,7 +138,7 @@ private struct StatusPill: View {
         .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(self.status.accentColor.opacity(0.15))
+        .background(self.status.accentColor.opacity(DesignConstants.Opacity.faint))
         .foregroundStyle(self.status.accentColor)
         .clipShape(Capsule())
     }
@@ -165,7 +163,7 @@ private struct MoodDeltaPill: View {
         .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(self.tintColor.opacity(0.15))
+        .background(self.tintColor.opacity(DesignConstants.Opacity.faint))
         .foregroundStyle(self.tintColor)
         .clipShape(Capsule())
     }
@@ -190,7 +188,7 @@ private struct MoodBeforePill: View {
         .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Color.teal.opacity(0.15))
+        .background(Color.teal.opacity(DesignConstants.Opacity.faint))
         .foregroundStyle(Color.teal)
         .clipShape(Capsule())
     }
@@ -208,7 +206,7 @@ private struct ReminderPill: View {
         .font(.footnote)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(tint.opacity(0.15))
+        .background(tint.opacity(DesignConstants.Opacity.faint))
         .foregroundStyle(tint)
         .clipShape(Capsule())
     }
@@ -223,9 +221,9 @@ private struct MusicLinkDetailCard: View {
     let openAction: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: DesignConstants.Spacing.medium) {
             Button(action: self.openAction) {
-                HStack(spacing: 12) {
+                HStack(spacing: DesignConstants.Spacing.medium) {
                     self.artworkView
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -261,6 +259,7 @@ private struct MusicLinkDetailCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityHint("Opens the music link in your browser or music app")
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
@@ -283,7 +282,7 @@ private struct MusicLinkDetailCard: View {
                         .scaledToFill()
                 case .empty:
                     ZStack {
-                        Color.gray.opacity(0.15)
+                        Color.gray.opacity(DesignConstants.Opacity.faint)
                         ProgressView()
                     }
                 case .failure:
@@ -293,7 +292,7 @@ private struct MusicLinkDetailCard: View {
                 }
             }
             .frame(width: 72, height: 72)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.small))
         } else {
             self.fallbackArtwork
         }
@@ -306,19 +305,19 @@ private struct MusicLinkDetailCard: View {
                     .resizable()
                     .scaledToFill()
                     .frame(width: 72, height: 72)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.small))
             )
         }
 
         return AnyView(
             ZStack {
-                Color.gray.opacity(0.12)
+                Color.gray.opacity(DesignConstants.Opacity.ghost)
                 Image(systemName: "music.note.list")
                     .imageScale(.medium)
                     .foregroundStyle(.secondary)
             }
             .frame(width: 72, height: 72)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.small))
         )
     }
 }
@@ -329,7 +328,7 @@ private struct SessionSummarySection: View {
 
     var body: some View {
         Section {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: DesignConstants.Spacing.medium) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(self.session.treatmentType.displayName)
@@ -345,7 +344,7 @@ private struct SessionSummarySection: View {
                     }
                 }
 
-                HStack(spacing: 8) {
+                HStack(spacing: DesignConstants.Spacing.small) {
                     StatusPill(status: self.session.status)
                     if self.hasAfterMood {
                         MoodDeltaPill(before: self.session.moodBefore, after: self.session.moodAfter)
@@ -366,7 +365,7 @@ private struct SessionSummarySection: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.large, style: .continuous)
                     .fill(Color(.secondarySystemBackground))
             )
         }
@@ -387,7 +386,7 @@ private struct SessionSummarySection: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 20, height: 20)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.small / 2))
             )
         }
         return AnyView(
@@ -478,7 +477,7 @@ private struct SessionMusicSection: View {
                     artworkURL: self.session.musicLinkArtworkURL.flatMap(URL.init(string:)),
                     openAction: self.onOpenLink
                 )
-                .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
+                .listRowInsets(.init(top: DesignConstants.Spacing.small / 2, leading: DesignConstants.Spacing.small, bottom: DesignConstants.Spacing.small / 2, trailing: DesignConstants.Spacing.small))
             } else {
                 Button {
                     self.onAttachMusic()
@@ -490,8 +489,9 @@ private struct SessionMusicSection: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("attachMusicLinkFromDetail")
+                .accessibilityHint("Opens the form to attach a music link to this session")
                 .padding(.vertical, 2)
-                .listRowInsets(.init(top: 4, leading: 8, bottom: 4, trailing: 8))
+                .listRowInsets(.init(top: DesignConstants.Spacing.small / 2, leading: DesignConstants.Spacing.small, bottom: DesignConstants.Spacing.small / 2, trailing: DesignConstants.Spacing.small))
             }
         }
         .accessibilityElement(children: .contain)
@@ -586,10 +586,15 @@ extension SessionDetailView {
                 self.session.musicLinkArtworkURL = metadata.thumbnailURL?.absoluteString
                 self.session.musicLinkDurationSeconds = metadata.durationSeconds
                 self.session.musicLinkProvider = metadata.provider
-                try? self.sessionStore.update(self.session)
+
+                do {
+                    try self.sessionStore.update(self.session)
+                } catch {
+                    self.updateError = "Failed to save music metadata: \(error.localizedDescription)"
+                }
             }
         } catch {
-            // Silent failure; UI continues with existing data.
+            // Silent failure acceptable - metadata fetch is optional enhancement, UI continues with existing data
         }
     }
 }
@@ -607,6 +612,7 @@ extension SessionDetailView {
     }()
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
     let session = TherapeuticSession(intention: "Feel more open with my partner", moodBefore: 4, moodAfter: 7)
+    // Acceptable to ignore errors in preview - non-critical seed data
     try? store.create(session)
     return NavigationStack {
         SessionDetailView(session: session)
