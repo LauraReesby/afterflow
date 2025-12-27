@@ -82,7 +82,7 @@ final class PDFExportServiceTests: XCTestCase {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }
 
-    // MARK: - Edge Cases: Cover Page Options
+    
 
     func testCoverPageIncluded() throws {
         #if canImport(PDFKit)
@@ -126,7 +126,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            // Verify PDF was created (without relying on text extraction)
+            
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
@@ -145,7 +145,7 @@ final class PDFExportServiceTests: XCTestCase {
                 moodAfter: 7
             )
 
-            // Test that privacy note option exists and can be set
+            
             let optionsWithPrivacy = PDFExportService.Options(includeCoverPage: true, showPrivacyNote: true)
             let optionsWithoutPrivacy = PDFExportService.Options(includeCoverPage: true, showPrivacyNote: false)
 
@@ -159,7 +159,7 @@ final class PDFExportServiceTests: XCTestCase {
         #endif
     }
 
-    // MARK: - Edge Cases: Empty and Minimal Data
+    
 
     func testEmptySessionsShowsEmptyState() throws {
         #if canImport(PDFKit)
@@ -189,21 +189,21 @@ final class PDFExportServiceTests: XCTestCase {
                 moodAfter: 7,
                 reflections: ""
             )
-            // No music link
+            
 
             let url = try service.export(sessions: [session], options: .init(includeCoverPage: false))
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            // Verify PDF was created successfully with the session
+            
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
 
-    // MARK: - Edge Cases: Unicode and Special Characters
+    
 
     func testUnicodeAndEmojiInAllFields() throws {
         #if canImport(PDFKit)
@@ -223,7 +223,7 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            // Verify PDF was created successfully (Unicode handling can vary in PDFs)
+            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -253,7 +253,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            // Verify PDF handles long text
+            
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
@@ -278,14 +278,14 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            // Verify PDF handles multiline text
+            
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
 
-    // MARK: - Edge Cases: Filtering
+    
 
     func testFiltersByTreatmentType() throws {
         #if canImport(PDFKit)
@@ -309,7 +309,7 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            // Verify PDF was created successfully (filtering logic is tested at service level)
+            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -346,7 +346,7 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            // Verify PDF was created successfully (combined filtering logic is tested at service level)
+            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -375,7 +375,7 @@ final class PDFExportServiceTests: XCTestCase {
         #endif
     }
 
-    // MARK: - Edge Cases: All Treatment Types and Administration Methods
+    
 
     func testAllTreatmentTypes() throws {
         #if canImport(PDFKit)
@@ -398,7 +398,7 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            // Verify PDF was created successfully with all treatment types
+            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -428,14 +428,14 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            // Verify PDF was created with all administration methods
+            
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
 
-    // MARK: - Edge Cases: Performance and Page Breaks
+    
 
     func testPerformanceOneHundredSessions() throws {
         #if canImport(PDFKit)
@@ -459,7 +459,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            XCTAssertGreaterThan(document?.pageCount ?? 0, 1) // Should span multiple pages
+            XCTAssertGreaterThan(document?.pageCount ?? 0, 1) 
         #else
             throw XCTSkip("PDFKit not available")
         #endif
@@ -470,7 +470,7 @@ final class PDFExportServiceTests: XCTestCase {
             let service = PDFExportService()
             var sessions: [TherapeuticSession] = []
 
-            // Create sessions with long reflections to force page breaks
+            
             for i in 0 ..< 20 {
                 let session = TherapeuticSession(
                     sessionDate: date("2024-12-01T00:00:00Z").addingTimeInterval(TimeInterval(i * 3600)),
@@ -489,13 +489,13 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            XCTAssertGreaterThan(document?.pageCount ?? 0, 1) // Should span multiple pages
+            XCTAssertGreaterThan(document?.pageCount ?? 0, 1) 
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
 
-    // MARK: - Edge Cases: Mood Values
+    
 
     func testMoodBoundaryValues() throws {
         #if canImport(PDFKit)
@@ -514,14 +514,14 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            // Verify PDF was created with boundary mood values
+            
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
 
-    // MARK: - Edge Cases: Data Integrity
+    
 
     func testMultipleMusicLinkFormats() throws {
         #if canImport(PDFKit)
@@ -564,7 +564,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            // Verify PDF was created with multiple sessions
+            
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")

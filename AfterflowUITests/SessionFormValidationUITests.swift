@@ -70,14 +70,14 @@ final class SessionFormValidationUITests: XCTestCase {
             return
         }
 
-        // On launch, intention is empty; the field should be enabled but not hittable for submit.
+        
         XCTAssertTrue(intentionField.waitForExistence(timeout: 2))
 
-        // Enter valid text to clear validation outline state.
+        
         intentionField.tap()
         intentionField.typeText("Grounding intention")
 
-        // Expect the field to remain hittable and the Save button to enable after debounce.
+        
         let saveButton = app.navigationBars["New Session"].buttons["Save"]
         XCTAssertTrue(saveButton.waitForExistence(timeout: 2), "Save button should exist")
         let enabledPredicate = NSPredicate(format: "isEnabled == true")

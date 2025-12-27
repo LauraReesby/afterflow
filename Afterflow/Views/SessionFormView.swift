@@ -446,7 +446,7 @@ extension SessionFormView {
         do {
             try self.sessionStore.update(session)
         } catch {
-            // If persistence fails, keep in-memory state; user can retry saving.
+            
         }
     }
 

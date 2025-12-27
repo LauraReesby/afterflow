@@ -4,7 +4,7 @@ import Testing
 
 @Suite("RelativeDateHelper Tests")
 struct RelativeDateHelperTests {
-    // MARK: - Basic Functionality
+    
 
     @Test("Today's date returns 'Today'") func todayReturnsToday() {
         let now = Date()
@@ -22,7 +22,7 @@ struct RelativeDateHelperTests {
         let twoDaysAgo = calendar.date(byAdding: .day, value: -2, to: Date())!
         let label = twoDaysAgo.relativeSessionLabel
 
-        // Should match MM/dd/yy format (e.g., "12/24/25")
+        
         let pattern = #"^\d{2}/\d{2}/\d{2}$"#
         let regex = try! NSRegularExpression(pattern: pattern)
         let range = NSRange(label.startIndex..., in: label)
@@ -34,11 +34,11 @@ struct RelativeDateHelperTests {
         let twoWeeksAgo = calendar.date(byAdding: .day, value: -14, to: Date())!
         let label = twoWeeksAgo.relativeSessionLabel
 
-        // Should not be "Today" or "Yesterday"
+        
         #expect(label != "Today")
         #expect(label != "Yesterday")
 
-        // Should match MM/dd/yy format
+        
         let pattern = #"^\d{2}/\d{2}/\d{2}$"#
         let regex = try! NSRegularExpression(pattern: pattern)
         let range = NSRange(label.startIndex..., in: label)
@@ -50,14 +50,14 @@ struct RelativeDateHelperTests {
         let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: Date())!
         let label = oneYearAgo.relativeSessionLabel
 
-        // Should match MM/dd/yy format
+        
         let pattern = #"^\d{2}/\d{2}/\d{2}$"#
         let regex = try! NSRegularExpression(pattern: pattern)
         let range = NSRange(label.startIndex..., in: label)
         #expect(regex.firstMatch(in: label, range: range) != nil)
     }
 
-    // MARK: - Edge Cases: Midnight Boundaries
+    
 
     @Test("Midnight today returns 'Today'") func midnightTodayReturnsToday() {
         let calendar = Calendar.current
@@ -88,17 +88,17 @@ struct RelativeDateHelperTests {
         #expect(oneSecondBeforeMidnight.relativeSessionLabel == "Yesterday")
     }
 
-    // MARK: - Edge Cases: Future Dates
+    
 
     @Test("Tomorrow returns formatted date") func tomorrowReturnsFormattedDate() {
         let calendar = Calendar.current
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date())!
         let label = tomorrow.relativeSessionLabel
 
-        // Future dates should return formatted date, not "Today"
+        
         #expect(label != "Today")
 
-        // Should match MM/dd/yy format
+        
         let pattern = #"^\d{2}/\d{2}/\d{2}$"#
         let regex = try! NSRegularExpression(pattern: pattern)
         let range = NSRange(label.startIndex..., in: label)
@@ -110,25 +110,25 @@ struct RelativeDateHelperTests {
         let oneWeekFromNow = calendar.date(byAdding: .day, value: 7, to: Date())!
         let label = oneWeekFromNow.relativeSessionLabel
 
-        // Should match MM/dd/yy format
+        
         let pattern = #"^\d{2}/\d{2}/\d{2}$"#
         let regex = try! NSRegularExpression(pattern: pattern)
         let range = NSRange(label.startIndex..., in: label)
         #expect(regex.firstMatch(in: label, range: range) != nil)
     }
 
-    // MARK: - Edge Cases: Specific Date Formatting
+    
 
     @Test("Date format includes leading zeros") func dateFormatIncludesLeadingZeros() {
-        // Create a date with single-digit month and day (e.g., January 5)
+        
         let components = DateComponents(year: 2025, month: 1, day: 5)
         let calendar = Calendar.current
         let date = calendar.date(from: components)!
 
         let label = date.relativeSessionLabel
 
-        // Should be in format MM/dd/yy (e.g., "01/05/25")
-        // Verify it has leading zeros
+        
+        
         if label != "Today", label != "Yesterday" {
             #expect(label.hasPrefix("01/05/"))
         }
@@ -141,30 +141,30 @@ struct RelativeDateHelperTests {
 
         let label = date.relativeSessionLabel
 
-        // Should match MM/dd/yy format
+        
         if label != "Today", label != "Yesterday" {
             #expect(label.hasPrefix("12/31/"))
         }
     }
 
     @Test("Leap year date formats correctly") func leapYearDateFormatsCorrectly() {
-        // February 29, 2024 (leap year)
+        
         let components = DateComponents(year: 2024, month: 2, day: 29)
         let calendar = Calendar.current
         let date = calendar.date(from: components)!
 
         let label = date.relativeSessionLabel
 
-        // Should match MM/dd/yy format
+        
         if label != "Today", label != "Yesterday" {
             #expect(label.hasPrefix("02/29/"))
         }
     }
 
-    // MARK: - Edge Cases: Year Boundaries
+    
 
     @Test("Year transitions correctly in format") func yearTransitionsCorrectlyInFormat() {
-        // Test a date from last year
+        
         let calendar = Calendar.current
         let lastYear = calendar.component(.year, from: Date()) - 1
         let components = DateComponents(year: lastYear, month: 6, day: 15)
@@ -172,11 +172,11 @@ struct RelativeDateHelperTests {
 
         let label = date.relativeSessionLabel
 
-        // Should not be "Today" or "Yesterday"
+        
         #expect(label != "Today")
         #expect(label != "Yesterday")
 
-        // Should match MM/dd/yy format with last year's year
+        
         let yearSuffix = String(lastYear % 100)
         let paddedYear = yearSuffix.count == 1 ? "0\(yearSuffix)" : yearSuffix
         #expect(label.hasSuffix("/\(paddedYear)"))

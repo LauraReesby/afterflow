@@ -1,7 +1,7 @@
 import Foundation
 
 extension Date {
-    // Returns "Today", "Yesterday", or a short date string (MM/dd/yy).
+    
     var relativeSessionLabel: String {
         let calendar = Calendar.current
         if calendar.isDateInToday(self) { return "Today" }

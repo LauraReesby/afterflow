@@ -15,9 +15,9 @@ struct SessionFormData {
 }
 
 struct FormValidation {
-    private static let earliestValidSessionDate: TimeInterval = -10 * 365 * 24 * 60 * 60 // 10 years ago
+    private static let earliestValidSessionDate: TimeInterval = -10 * 365 * 24 * 60 * 60 
 
-    private static let futureToleranceInterval: TimeInterval = 60 * 60 * 8 // 8 hours
+    private static let futureToleranceInterval: TimeInterval = 60 * 60 * 8 
 
     func validateIntention(_ intention: String) -> FieldValidationState {
         let trimmed = intention.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -49,21 +49,21 @@ struct FormValidation {
     func normalizeSessionDate(_ date: Date) -> Date {
         let calendar = Calendar.current
 
-        // Get date components in current timezone
+        
         var components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
 
-        // Round minutes to nearest 15-minute interval (therapeutic sessions typically align to quarters)
+        
         if let minute = components.minute {
-            let roundedMinute = ((minute + 7) / 15) * 15 // Round to nearest 15
+            let roundedMinute = ((minute + 7) / 15) * 15 
             components.minute = roundedMinute >= 60 ? 0 : roundedMinute
 
-            // Handle hour overflow if minute was rounded to 60
+            
             if roundedMinute >= 60, let hour = components.hour {
                 components.hour = (hour + 1) % 24
             }
         }
 
-        // Create normalized date
+        
         let normalizedDate = calendar.date(from: components) ?? date
 
         return normalizedDate

@@ -24,7 +24,7 @@ final class ExportState {
             do {
                 let result = try await self.performExport(for: sessions, request: request)
 
-                // Add delay for UI testing - acceptable to ignore sleep error (UI timing only)
+                
                 if ProcessInfo.processInfo.arguments.contains("-ui-testing") {
                     try? await Task.sleep(nanoseconds: DesignConstants.Testing.exportDelay)
                 }
@@ -60,7 +60,7 @@ final class ExportState {
                 treatmentType: request.treatmentType
             )
             let data = try Data(contentsOf: url)
-            // Acceptable to ignore cleanup error - temporary file removal
+            
             try? FileManager.default.removeItem(at: url)
             try Task.checkCancellation()
             return ExportResult(data: data, type: .commaSeparatedText, filename: "Afterflow-Export")
@@ -73,7 +73,7 @@ final class ExportState {
                 options: .init(includeCoverPage: true, showPrivacyNote: true)
             )
             let data = try Data(contentsOf: url)
-            // Acceptable to ignore cleanup error - temporary file removal
+            
             try? FileManager.default.removeItem(at: url)
             try Task.checkCancellation()
             return ExportResult(data: data, type: .pdf, filename: "Afterflow-Export")

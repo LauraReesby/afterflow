@@ -7,7 +7,7 @@ final class AfterflowUITests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        // Clean up code
+        
     }
 
     @MainActor func testAppLaunches() throws {

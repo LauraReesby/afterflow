@@ -100,7 +100,7 @@ import SwiftUI
     }
 
 #else
-    // Fallback for non-UIKit platforms
+    
     struct RichTextEditor: View {
         @Binding var text: String
         @FocusState.Binding var isFocused: Bool

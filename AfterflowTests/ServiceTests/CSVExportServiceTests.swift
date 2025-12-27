@@ -115,14 +115,14 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: sessions)
         let csv = try String(contentsOf: url, encoding: .utf8)
         let lines = csv.split(separator: "\n")
-        XCTAssertEqual(lines.count, 1001) // header + 1000 rows
+        XCTAssertEqual(lines.count, 1001) 
     }
 
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }
 
-    // MARK: - Edge Cases: Empty and Minimal Data
+    
 
     func testEmptySessionsArrayExportsHeaderOnly() throws {
         let service = CSVExportService()
@@ -130,7 +130,7 @@ final class CSVExportServiceTests: XCTestCase {
         let csv = try String(contentsOf: url, encoding: .utf8)
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 1) // Header only
+        XCTAssertEqual(lines.count, 1) 
         XCTAssertEqual(
             lines[0],
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL"
@@ -155,7 +155,7 @@ final class CSVExportServiceTests: XCTestCase {
 
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, 2)
-        // Empty fields should be quoted
+        
         XCTAssertTrue(lines[1].contains("\"\""))
     }
 
@@ -174,12 +174,12 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: [session])
         let csv = try String(contentsOf: url, encoding: .utf8)
 
-        // Should end with quoted empty string for music link
+        
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertTrue(lines[1].hasSuffix("\"\""))
     }
 
-    // MARK: - Edge Cases: Unicode and Special Characters
+    
 
     func testUnicodeInAllFields() throws {
         let service = CSVExportService()
@@ -243,12 +243,12 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: [session])
         let csv = try String(contentsOf: url, encoding: .utf8)
 
-        // Fields with commas and newlines should be quoted
+        
         XCTAssertTrue(csv.contains("\"Test,with,commas\""))
         XCTAssertTrue(csv.contains("\"Line1\nLine2\rLine3\""))
     }
 
-    // MARK: - Edge Cases: Mood Values
+    
 
     func testMoodBoundaryValues() throws {
         let service = CSVExportService()
@@ -295,7 +295,7 @@ final class CSVExportServiceTests: XCTestCase {
         XCTAssertTrue(csv.contains("100"))
     }
 
-    // MARK: - Edge Cases: Combined Filters
+    
 
     func testCombinedDateRangeAndTreatmentTypeFilters() throws {
         let service = CSVExportService()
@@ -325,7 +325,7 @@ final class CSVExportServiceTests: XCTestCase {
         let csv = try String(contentsOf: url, encoding: .utf8)
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 2) // Header + 1 matching row
+        XCTAssertEqual(lines.count, 2) 
         XCTAssertTrue(lines[1].contains("Psilocybin"))
         XCTAssertFalse(csv.contains("Ketamine"))
     }
@@ -342,10 +342,10 @@ final class CSVExportServiceTests: XCTestCase {
         let csv = try String(contentsOf: url, encoding: .utf8)
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 1) // Header only, no data rows
+        XCTAssertEqual(lines.count, 1) 
     }
 
-    // MARK: - Edge Cases: All Treatment Types and Administration Methods
+    
 
     func testAllTreatmentTypes() throws {
         let service = CSVExportService()
@@ -369,7 +369,7 @@ final class CSVExportServiceTests: XCTestCase {
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, PsychedelicTreatmentType.allCases.count + 1)
 
-        // Verify all treatment types are present
+        
         for treatmentType in PsychedelicTreatmentType.allCases {
             XCTAssertTrue(csv.contains(treatmentType.displayName))
         }
@@ -397,13 +397,13 @@ final class CSVExportServiceTests: XCTestCase {
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, AdministrationMethod.allCases.count + 1)
 
-        // Verify all administration methods are present
+        
         for method in AdministrationMethod.allCases {
             XCTAssertTrue(csv.contains(method.displayName))
         }
     }
 
-    // MARK: - Edge Cases: Multiple Formula Injection Patterns
+    
 
     func testMultipleFormulaInjectionPatterns() throws {
         let service = CSVExportService()
@@ -431,14 +431,14 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: sessions)
         let csv = try String(contentsOf: url, encoding: .utf8)
 
-        // All dangerous patterns should be prefixed with '
+        
         XCTAssertTrue(csv.contains("'=1+1"))
         XCTAssertTrue(csv.contains("'+cmd"))
         XCTAssertTrue(csv.contains("'-2-2"))
         XCTAssertTrue(csv.contains("'@SUM"))
     }
 
-    // MARK: - Edge Cases: Data Integrity
+    
 
     func testMultipleMusicLinkFormats() throws {
         let service = CSVExportService()
@@ -470,7 +470,7 @@ final class CSVExportServiceTests: XCTestCase {
             moodBefore: 5,
             moodAfter: 7
         )
-        // No music link
+        
 
         let url = try service.export(sessions: [session1, session2, session3])
         let csv = try String(contentsOf: url, encoding: .utf8)
@@ -479,7 +479,7 @@ final class CSVExportServiceTests: XCTestCase {
         XCTAssertTrue(csv.contains("https://youtube.com/watch?v=xyz"))
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 4) // Header + 3 rows
+        XCTAssertEqual(lines.count, 4) 
     }
 
     func testDateFormatConsistency() throws {
@@ -509,9 +509,9 @@ final class CSVExportServiceTests: XCTestCase {
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, 4)
 
-        // All dates should be formatted consistently (medium date + short time)
+        
         for line in lines.dropFirst() {
-            // Should start with a quoted date field
+            
             XCTAssertTrue(line.hasPrefix("\"") || !line.isEmpty)
         }
     }

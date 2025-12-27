@@ -5,7 +5,7 @@ import Testing
 
 @Suite("MarkdownRenderer Tests")
 struct MarkdownRendererTests {
-    // MARK: - render() Tests
+    
 
     @Test("Plain text renders without modification") func plainTextRendersWithoutModification() {
         let text = "This is plain text without any markdown."
@@ -22,7 +22,7 @@ struct MarkdownRendererTests {
         let text = "This is **bold** text."
         let result = MarkdownRenderer.render(text)
 
-        // Verify the text contains "bold" (markdown will be processed)
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("bold"))
         #expect(resultString.contains("This is"))
@@ -33,7 +33,7 @@ struct MarkdownRendererTests {
         let text = "This is *italic* text."
         let result = MarkdownRenderer.render(text)
 
-        // Verify the text contains "italic"
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("italic"))
         #expect(resultString.contains("This is"))
@@ -43,7 +43,7 @@ struct MarkdownRendererTests {
         let text = "# Main Heading"
         let result = MarkdownRenderer.render(text)
 
-        // Verify the heading text is present
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("Main Heading"))
     }
@@ -52,7 +52,7 @@ struct MarkdownRendererTests {
         let text = "• First item\n• Second item\n• Third item"
         let result = MarkdownRenderer.render(text)
 
-        // Verify list items are present
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("First item"))
         #expect(resultString.contains("Second item"))
@@ -63,7 +63,7 @@ struct MarkdownRendererTests {
         let text = "1. First item\n2. Second item\n3. Third item"
         let result = MarkdownRenderer.render(text)
 
-        // Verify list items are present
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("First item"))
         #expect(resultString.contains("Second item"))
@@ -74,7 +74,7 @@ struct MarkdownRendererTests {
         let text = "# Heading\n\nThis is **bold** and *italic* text.\n\n• Bullet point"
         let result = MarkdownRenderer.render(text)
 
-        // Verify all components are present
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("Heading"))
         #expect(resultString.contains("bold"))
@@ -83,11 +83,11 @@ struct MarkdownRendererTests {
     }
 
     @Test("Malformed markdown renders as plain text") func malformedMarkdownRendersAsPlainText() {
-        // Markdown with unclosed bold
+        
         let text = "This is **unclosed bold text"
         let result = MarkdownRenderer.render(text)
 
-        // Should still render the text content (may render as plain text)
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("unclosed bold text"))
     }
@@ -96,7 +96,7 @@ struct MarkdownRendererTests {
         let longText = String(repeating: "This is a long piece of text. ", count: 100)
         let result = MarkdownRenderer.render(longText)
 
-        // Verify it doesn't crash and contains the text
+        
         let resultString = String(result.characters)
         #expect(resultString.contains("This is a long piece of text."))
     }
@@ -122,7 +122,7 @@ struct MarkdownRendererTests {
         #expect(resultString.contains("Line 3"))
     }
 
-    // MARK: - hasFormatting() Tests
+    
 
     @Test("hasFormatting detects double asterisks (bold)") func hasFormattingDetectsDoubleAsterisks() {
         #expect(MarkdownRenderer.hasFormatting("This is **bold** text") == true)
@@ -165,27 +165,27 @@ struct MarkdownRendererTests {
     }
 
     @Test("hasFormatting handles text with hashtag mid-sentence") func hasFormattingHandlesHashtagMidSentence() {
-        // Should detect # even if it's not at the start
+        
         #expect(MarkdownRenderer.hasFormatting("Use the #hashtag feature") == true)
     }
 
     @Test("hasFormatting handles asterisks in different contexts")
     func hasFormattingHandlesAsterisksInDifferentContexts() {
-        // Any asterisk should trigger hasFormatting
+        
         #expect(MarkdownRenderer.hasFormatting("5 * 3 = 15") == true)
     }
 
-    // MARK: - Edge Cases
+    
 
     @Test("render handles only asterisks") func renderHandlesOnlyAsterisks() {
         let result = MarkdownRenderer.render("***")
-        // Should not crash
+        
         #expect(result.characters.count >= 0)
     }
 
     @Test("render handles only hashes") func renderHandlesOnlyHashes() {
         let result = MarkdownRenderer.render("###")
-        // Should not crash
+        
         #expect(result.characters.count >= 0)
     }
 

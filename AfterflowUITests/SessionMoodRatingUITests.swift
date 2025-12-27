@@ -65,7 +65,7 @@ final class SessionMoodRatingUITests: XCTestCase {
             app.scrollViews.firstMatch
         }
 
-        // Only scroll until moodBeforeSlider is visible (moodAfterSlider doesn't exist in creation form)
+        
         var attempts = 0
         while !app.sliders["moodBeforeSlider"].exists, attempts < 40 {
             container.swipeUp()

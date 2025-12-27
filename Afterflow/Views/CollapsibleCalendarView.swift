@@ -29,9 +29,9 @@ public struct CollapsibleCalendarView: View {
     private let estimatedRowHeight: CGFloat = 44
 
     private var estimatedMonthHeight: CGFloat {
-        // Approximate month block height: rows * estimatedRowHeight + vertical spacing between weeks and months
-        // We already use `expandedRowCount` and `estimatedRowHeight` to size the ScrollView frame.
-        // Add a conservative spacing buffer (e.g., 12 per month + 4 per week row spacing).
+        
+        
+        
         self.expandedRowCount * self.estimatedRowHeight
     }
 
@@ -92,13 +92,13 @@ public struct CollapsibleCalendarView: View {
         .animation(.easeInOut(duration: 0.25), value: self.mode)
         .onChange(of: self.mode) { _, newMode in
             if newMode == .month {
-                // Decide authoritative month to center
+                
                 let anchor = self
                     .centerOnMonthRequest ??
                     (self.selectedDate.map { self.calendar.startOfMonth(for: $0) } ?? self.currentMonthStart)
                 let normalized = self.clampMonth(self.calendar.startOfMonth(for: anchor))
 
-                // Make currentMonthStart authoritative
+                
                 if normalized != self.currentMonthStart {
                     self.currentMonthStart = normalized
                 }
@@ -106,12 +106,12 @@ public struct CollapsibleCalendarView: View {
                     self.selectedDate = normalized
                 }
 
-                // Seed stack around the authoritative month and schedule centering
+                
                 self.resetMonthStack()
                 self.hasCenteredExpanded = false
                 self.pendingCenterMonth = normalized
 
-                // Clear one-shot request
+                
                 self.centerOnMonthRequest = nil
             } else {
                 self.pendingCenterMonth = nil
@@ -233,7 +233,7 @@ public struct CollapsibleCalendarView: View {
     }
 
     private func oneWeekDays() -> [Date] {
-        // Collapsed view follows the week anchored to the selected date or the current month.
+        
         let anchor = self.selectedDate ?? self.currentMonthStart
         let reference = self.calendar
             .isDate(anchor, equalTo: self.currentMonthStart, toGranularity: .month) ? anchor : self
@@ -270,7 +270,7 @@ public struct CollapsibleCalendarView: View {
             .onEnded { value in
                 let verticalDistance = abs(value.translation.height)
 
-                // When expanded, vertical swipes navigate months; otherwise they toggle size.
+                
                 if verticalDistance > 20 {
                     if self.mode == .month {
                         if value.translation.height > 0 {
@@ -347,7 +347,7 @@ public struct CollapsibleCalendarView: View {
             .simultaneousGesture(
                 DragGesture(minimumDistance: 10)
                     .onChanged { value in
-                        // Accumulate vertical translation while dragging
+                        
                         self.pagingDragAccumulation = value.translation.height
                     }
                     .onEnded { value in
@@ -362,7 +362,7 @@ public struct CollapsibleCalendarView: View {
 
                         self.shiftMonth(deltaIndex)
 
-                        // Clear accumulation
+                        
                         self.pagingDragAccumulation = 0
                     }
             )
@@ -434,7 +434,7 @@ public struct CollapsibleCalendarView: View {
         let action = {
             let targetID = self.id(for: month)
 
-            // Defer scroll one tick to ensure layout is committed
+            
             DispatchQueue.main.async {
                 proxy.scrollTo(targetID, anchor: .top)
                 self.hasCenteredExpanded = true

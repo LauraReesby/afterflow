@@ -25,7 +25,7 @@ struct SessionListViewModel {
     var searchText: String = ""
     var selectedDate: Date?
 
-    // MARK: - Performance Optimization (Memoization)
+    
 
     private var cachedFilteredSessions: [TherapeuticSession] = []
     private var lastSessionsHash: Int = 0
@@ -35,16 +35,16 @@ struct SessionListViewModel {
         let currentSessionsHash = sessions.map(\.id).hashValue
         let currentFilterHash = self.filterHash
 
-        // Return cached result if inputs haven't changed
+        
         if currentSessionsHash == self.lastSessionsHash, currentFilterHash == self.lastFilterHash {
             return self.cachedFilteredSessions
         }
 
-        // Update cache tracking
+        
         self.lastSessionsHash = currentSessionsHash
         self.lastFilterHash = currentFilterHash
 
-        // Perform filtering
+        
         var filtered = sessions
 
         if let treatmentFilter {
@@ -73,7 +73,7 @@ struct SessionListViewModel {
             }
         }
 
-        // Cache and return result
+        
         self.cachedFilteredSessions = filtered
         return filtered
     }

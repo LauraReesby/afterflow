@@ -6,21 +6,21 @@ import SwiftData
 @Suite("ViewModel Integration Tests")
 @MainActor
 struct ViewModelIntegrationTests {
-    // MARK: - SessionListViewModel with Live Store
+    
 
     @Test("SessionListViewModel with live SwiftData store") func listViewModelWithLiveStore() async throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
 
-        // Insert test sessions
+        
         let sessions = SessionFixtureFactory.makeSessions(count: 10)
         for session in sessions {
             context.insert(session)
         }
         try context.save()
 
-        // Fetch and filter
+        
         let descriptor = FetchDescriptor<TherapeuticSession>(sortBy: [SortDescriptor(\.sessionDate, order: .reverse)])
         let fetchedSessions = try context.fetch(descriptor)
 
@@ -41,7 +41,7 @@ struct ViewModelIntegrationTests {
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
 
-        // Insert mixed sessions
+        
         let psilocybin = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -122,10 +122,10 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].intention.contains("Healing"))
     }
 
-    // MARK: - Import → Filter Workflow
+    
 
     @Test("Import CSV then filter in SessionListViewModel") func importThenFilterWorkflow() async throws {
-        // Create and export sessions
+        
         let sessions = [
             TherapeuticSession(
                 sessionDate: Date(),
@@ -148,13 +148,13 @@ struct ViewModelIntegrationTests {
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: sessions)
 
-        // Import
+        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 
         try? FileManager.default.removeItem(at: csvURL)
 
-        // Filter with ViewModel
+        
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
@@ -167,12 +167,12 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].treatmentType == .psilocybin)
     }
 
-    // MARK: - Filter → Export Workflow
+    
 
     @Test("Filter sessions then export") func filterThenExportWorkflow() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 20)
 
-        // Filter with ViewModel
+        
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
@@ -181,17 +181,17 @@ struct ViewModelIntegrationTests {
 
         let filtered = viewModel.applyFilters(to: sessions)
 
-        // Export filtered results
+        
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: filtered)
 
-        // Verify export worked
+        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 
         try? FileManager.default.removeItem(at: csvURL)
 
-        // All imported sessions should be psilocybin
+        
         #expect(importedSessions.allSatisfy { $0.treatmentType == .psilocybin })
     }
 
@@ -223,7 +223,7 @@ struct ViewModelIntegrationTests {
             )
         ]
 
-        // Search and filter
+        
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "healing",
             treatmentFilter: .psilocybin,
@@ -235,11 +235,11 @@ struct ViewModelIntegrationTests {
         #expect(filtered.count == 1)
         #expect(filtered[0].intention == "Healing journey")
 
-        // Export filtered results
+        
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: filtered)
 
-        // Verify round trip
+        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 

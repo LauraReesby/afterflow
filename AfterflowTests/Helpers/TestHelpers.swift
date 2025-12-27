@@ -3,9 +3,9 @@ import Foundation
 import SwiftData
 
 enum TestHelpers {
-    // MARK: - Test Environment Creation (MainActor-isolated)
+    
 
-    /// Creates an in-memory ModelContainer and SessionStore for testing
+    
     @MainActor static func makeTestEnvironment() throws -> (ModelContainer, SessionStore) {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
@@ -13,21 +13,21 @@ enum TestHelpers {
         return (container, store)
     }
 
-    // MARK: - ViewModel Helpers (MainActor-isolated)
+    
 
-    /// Creates an ExportState instance for testing
+    
     @MainActor static func makeExportState(sessionStore: SessionStore? = nil) throws -> ExportState {
         let store = try sessionStore ?? self.makeTestEnvironment().1
         return ExportState()
     }
 
-    /// Creates an ImportState instance for testing
+    
     @MainActor static func makeImportState(sessionStore: SessionStore? = nil) throws -> ImportState {
         let store = try sessionStore ?? self.makeTestEnvironment().1
         return ImportState(sessionStore: store)
     }
 
-    /// Creates a SessionListViewModel instance for testing
+    
     static func makeSessionListViewModel(
         searchText: String = "",
         treatmentFilter: PsychedelicTreatmentType? = nil,
@@ -40,9 +40,9 @@ enum TestHelpers {
         return viewModel
     }
 
-    // MARK: - Calendar Test Data
+    
 
-    /// Creates test session data spanning multiple months for calendar testing
+    
     static func makeCalendarTestData(monthCount: Int = 3, sessionsPerMonth: Int = 5) -> [TherapeuticSession] {
         var sessions: [TherapeuticSession] = []
         let calendar = Calendar.current
@@ -75,9 +75,9 @@ enum TestHelpers {
         return sessions
     }
 
-    // MARK: - Date/Time Utilities
+    
 
-    /// Returns a fixed date for consistent testing (2024-12-01 12:00:00 UTC)
+    
     static func fixedDate() -> Date {
         var components = DateComponents()
         components.year = 2024
@@ -91,14 +91,14 @@ enum TestHelpers {
         return Calendar.current.date(from: components) ?? Date()
     }
 
-    /// Returns the first day of the month for a given date
+    
     static func monthStart(for date: Date) -> Date {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month], from: date)
         return calendar.date(from: components) ?? date
     }
 
-    /// Creates a date from year, month, and day components
+    
     static func dateComponents(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0) -> Date {
         var components = DateComponents()
         components.year = year
@@ -112,22 +112,22 @@ enum TestHelpers {
         return Calendar.current.date(from: components) ?? Date()
     }
 
-    /// Returns the start of the week for a given date
+    
     static func weekStart(for date: Date) -> Date {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
         return calendar.date(from: components) ?? date
     }
 
-    /// Returns a date normalized to start of day (midnight)
+    
     static func startOfDay(for date: Date) -> Date {
         let calendar = Calendar.current
         return calendar.startOfDay(for: date)
     }
 
-    // MARK: - Async Testing Helpers
+    
 
-    /// Waits for a condition to be true with a timeout
+    
     static func waitFor(
         _ condition: @escaping () -> Bool,
         timeout: TimeInterval = 1.0,
@@ -143,14 +143,14 @@ enum TestHelpers {
         }
     }
 
-    /// Creates a temporary file URL for testing
+    
     static func makeTemporaryFileURL(filename: String) -> URL {
         let temporaryDirectory = FileManager.default.temporaryDirectory
         return temporaryDirectory.appendingPathComponent(filename)
     }
 }
 
-// MARK: - Test Errors
+
 
 enum TestError: Error {
     case timeout

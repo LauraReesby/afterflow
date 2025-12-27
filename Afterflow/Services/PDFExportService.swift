@@ -25,7 +25,7 @@ struct PDFExportService: Sendable {
             let fileURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("Afterflow-Export-\(UUID().uuidString).pdf")
 
-            let pageRect = CGRect(x: 0, y: 0, width: 612, height: 792) // US Letter @72dpi
+            let pageRect = CGRect(x: 0, y: 0, width: 612, height: 792) 
             let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
 
             let data = renderer.pdfData { context in

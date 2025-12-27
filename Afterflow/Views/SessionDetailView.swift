@@ -604,7 +604,7 @@ extension SessionDetailView {
                 }
             }
         } catch {
-            // Silent failure acceptable - metadata fetch is optional enhancement, UI continues with existing data
+            
         }
     }
 }
@@ -622,7 +622,7 @@ extension SessionDetailView {
     }()
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
     let session = TherapeuticSession(intention: "Feel more open with my partner", moodBefore: 4, moodAfter: 7)
-    // Acceptable to ignore errors in preview - non-critical seed data
+    
     try? store.create(session)
     return NavigationStack {
         SessionDetailView(session: session)

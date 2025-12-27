@@ -182,7 +182,7 @@ final class ReflectionQueue: ObservableObject {
 
         await task.value
 
-        // Clean up completed tasks (remove this one since it's done)
+        
         self.confirmationTasks.removeAll { $0.isCancelled }
     }
 

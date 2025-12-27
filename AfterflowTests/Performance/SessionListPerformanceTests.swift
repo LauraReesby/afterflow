@@ -46,7 +46,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 0.8)
     }
 
-    // MARK: - Large Dataset Performance Tests
+    
 
     @Test("Filtering 10k sessions completes quickly") func filteringTenThousandSessions() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 10000)
@@ -61,7 +61,7 @@ struct SessionListPerformanceTests {
             filtered = viewModel.applyFilters(to: sessions)
         }
 
-        // Should filter quickly even with 10k sessions
+        
         #expect(duration < 2.0)
         #expect(filtered.count > 0)
     }
@@ -79,7 +79,7 @@ struct SessionListPerformanceTests {
             filtered = viewModel.applyFilters(to: sessions)
         }
 
-        // Search should be fast
+        
         #expect(duration < 0.5)
     }
 
@@ -96,11 +96,11 @@ struct SessionListPerformanceTests {
             filtered = viewModel.applyFilters(to: sessions)
         }
 
-        // Search should complete in reasonable time even with 5k sessions
+        
         #expect(duration < 1.5)
     }
 
-    // MARK: - Sort Algorithm Performance
+    
 
     @Test("Sorting by date descending is fast") func sortByDateDescending() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
@@ -117,7 +117,7 @@ struct SessionListPerformanceTests {
 
         #expect(duration < 0.5)
         #expect(filtered.count == 1000)
-        // Verify sort order
+        
         if filtered.count > 1 {
             #expect(filtered[0].sessionDate >= filtered[1].sessionDate)
         }
@@ -138,7 +138,7 @@ struct SessionListPerformanceTests {
 
         #expect(duration < 0.5)
         #expect(filtered.count == 1000)
-        // Verify sort order
+        
         if filtered.count > 1 {
             #expect(filtered[0].sessionDate <= filtered[1].sessionDate)
         }
@@ -161,7 +161,7 @@ struct SessionListPerformanceTests {
         #expect(filtered.count == 1000)
     }
 
-    // MARK: - Cache Performance
+    
 
     @Test("Cache hit provides fast results") func cacheHitPerformance() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
@@ -171,16 +171,16 @@ struct SessionListPerformanceTests {
             sortOption: .newestFirst
         )
 
-        // First call to populate cache
+        
         _ = viewModel.applyFilters(to: sessions)
 
-        // Second call should hit cache and be very fast
+        
         var filtered: [TherapeuticSession] = []
         let duration = measureTime {
             filtered = viewModel.applyFilters(to: sessions)
         }
 
-        // Cache hit should be extremely fast
+        
         #expect(duration < 0.1)
         #expect(filtered.count > 0)
     }
@@ -193,10 +193,10 @@ struct SessionListPerformanceTests {
             sortOption: .newestFirst
         )
 
-        // First call with psilocybin filter
+        
         _ = viewModel.applyFilters(to: sessions)
 
-        // Change filter to cause cache miss
+        
         viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .ketamine,
@@ -208,11 +208,11 @@ struct SessionListPerformanceTests {
             filtered = viewModel.applyFilters(to: sessions)
         }
 
-        // Cache miss should still be reasonably fast
+        
         #expect(duration < 0.5)
     }
 
-    // MARK: - Export/Import Performance
+    
 
     @Test("CSV export of 1k sessions completes quickly") func csvExportPerformance() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
@@ -237,7 +237,7 @@ struct SessionListPerformanceTests {
         }
 
         #expect(csvURL != nil)
-        // Larger dataset should still complete in reasonable time
+        
         #expect(duration < 8.0)
     }
 
@@ -259,7 +259,7 @@ struct SessionListPerformanceTests {
     }
 
     @Test("CSV import of 1k sessions is performant") func csvImportPerformance() async throws {
-        // Generate CSV file for 1000 sessions
+        
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let exportService = CSVExportService()
         guard let csvURL = try? exportService.export(sessions: sessions) else {
@@ -273,17 +273,17 @@ struct SessionListPerformanceTests {
             importedSessions = (try? importService.import(from: csvURL)) ?? []
         }
 
-        // Clean up
+        
         try? FileManager.default.removeItem(at: csvURL)
 
         #expect(importedSessions.count == 1000)
         #expect(duration < 3.0)
     }
 
-    // MARK: - Calendar Performance
+    
 
     @Test("Calendar with 365 marked dates renders quickly") func calendarRenderingPerformance() async throws {
-        // Create sessions for every day of the year
+        
         let sessions = SessionFixtureFactory.makeSessionsForCalendar(monthCount: 12)
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -297,7 +297,7 @@ struct SessionListPerformanceTests {
         }
 
         #expect(markedDates.count > 0)
-        // Should compute marked dates quickly even for a full year
+        
         #expect(duration < 0.5)
     }
 
@@ -314,7 +314,7 @@ struct SessionListPerformanceTests {
             filtered = viewModel.applyFilters(to: sessions)
         }
 
-        // Combined operations should still be fast
+        
         #expect(duration < 1.5)
     }
 }

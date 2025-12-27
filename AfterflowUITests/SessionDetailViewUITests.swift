@@ -35,7 +35,7 @@ final class SessionDetailViewUITests: XCTestCase {
         XCTAssertTrue(doneButton.waitForExistence(timeout: 2), "Done button should exist")
         doneButton.tap()
 
-        // Wait for the sheet to dismiss before checking detail content
+        
         XCTAssertFalse(doneButton.waitForExistence(timeout: 3))
 
         let reflectionText = app.staticTexts["Gentle integration notes for testing."]

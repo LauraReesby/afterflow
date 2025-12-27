@@ -4,10 +4,10 @@ import Foundation
 
 @Suite("Export/Import Integration Tests")
 struct ExportImportIntegrationTests {
-    // MARK: - Round Trip Tests
+    
 
     @Test("CSV round trip preserves all session data") func csvRoundTripPreservesData() async throws {
-        // Create sessions with comprehensive data
+        
         let originalSessions = [
             TherapeuticSession(
                 sessionDate: date("2024-12-01T14:30:00Z"),
@@ -33,18 +33,18 @@ struct ExportImportIntegrationTests {
         originalSessions[0].musicLinkURL = "https://open.spotify.com/playlist/123"
         originalSessions[1].musicLinkURL = "https://youtube.com/watch?v=abc"
 
-        // Export to CSV
+        
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: originalSessions)
 
-        // Import from CSV
+        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 
-        // Cleanup
+        
         try? FileManager.default.removeItem(at: csvURL)
 
-        // Verify all data preserved
+        
         #expect(importedSessions.count == 2)
 
         let first = importedSessions[0]
@@ -149,7 +149,7 @@ struct ExportImportIntegrationTests {
     }
 
     @Test("CSV round trip with large dataset") func csvRoundTripLargeDataset() async throws {
-        // Create 100 sessions
+        
         let originalSessions = SessionFixtureFactory.makeSessions(count: 100)
 
         let exportService = CSVExportService()
@@ -161,12 +161,12 @@ struct ExportImportIntegrationTests {
         try? FileManager.default.removeItem(at: csvURL)
 
         #expect(importedSessions.count == 100)
-        // Verify first and last sessions as spot checks
+        
         #expect(importedSessions[0].treatmentType == originalSessions[0].treatmentType)
         #expect(importedSessions[99].treatmentType == originalSessions[99].treatmentType)
     }
 
-    // MARK: - Filtered Export Tests
+    
 
     @Test("Filtered export by date range then import") func filteredExportByDateRange() async throws {
         let inRange = TherapeuticSession(
@@ -198,7 +198,7 @@ struct ExportImportIntegrationTests {
 
         try? FileManager.default.removeItem(at: csvURL)
 
-        // Only the in-range session should be exported and imported
+        
         #expect(importedSessions.count == 1)
         #expect(importedSessions[0].intention == "In Range")
     }
@@ -237,7 +237,7 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[0].intention == "Psilocybin Session")
     }
 
-    // MARK: - Music Links
+    
 
     @Test("CSV round trip preserves all music link providers") func csvRoundTripMusicLinks() async throws {
         var spotify = SessionFixtureFactory.makeSessionWithMusicLink(provider: "spotify")
@@ -258,7 +258,7 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[2].musicLinkURL?.contains("apple") == true)
     }
 
-    // MARK: - Edge Cases
+    
 
     @Test("CSV round trip with mood boundary values") func csvRoundTripMoodBoundaries() async throws {
         let session = TherapeuticSession(
@@ -307,7 +307,7 @@ struct ExportImportIntegrationTests {
         try? FileManager.default.removeItem(at: csvURL)
 
         #expect(importedSessions.count == PsychedelicTreatmentType.allCases.count)
-        // Verify all types are present
+        
         for treatmentType in PsychedelicTreatmentType.allCases {
             #expect(importedSessions.contains { $0.treatmentType == treatmentType })
         }
@@ -335,13 +335,13 @@ struct ExportImportIntegrationTests {
         try? FileManager.default.removeItem(at: csvURL)
 
         #expect(importedSessions.count == AdministrationMethod.allCases.count)
-        // Verify all methods are present
+        
         for method in AdministrationMethod.allCases {
             #expect(importedSessions.contains { $0.administration == method })
         }
     }
 
-    // MARK: - Helper Methods
+    
 
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()

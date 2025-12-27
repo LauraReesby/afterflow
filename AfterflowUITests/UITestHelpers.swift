@@ -83,12 +83,12 @@ extension XCUIElement {
             return
         }
 
-        // Wait a bit for layout to settle
+        
         if !self.exists {
             return
         }
 
-        // Give the view time to get a valid frame
+        
         let deadline = Date().addingTimeInterval(2)
         while Date() < deadline {
             if self.isHittable {
@@ -97,7 +97,7 @@ extension XCUIElement {
             }
 
             let frame = self.frame
-            // Check if frame is valid (not negative, not NaN, not infinite)
+            
             if frame.width > 0, frame.height > 0,
                frame.width.isFinite, frame.height.isFinite,
                frame.origin.x.isFinite, frame.origin.y.isFinite {
@@ -112,8 +112,8 @@ extension XCUIElement {
         }
     }
 
-    // Some XCTest APIs surface "Invalid frame dimension" when acting on elements that report NaN/zero-sized frames.
-    // This helper keeps those elements out of swipe/tap flows.
+    
+    
     fileprivate var hasUsableFrame: Bool {
         let frame = self.frame
         return frame.width.isFinite && frame.height.isFinite &&

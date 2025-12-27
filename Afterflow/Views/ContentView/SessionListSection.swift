@@ -85,19 +85,19 @@ struct SessionListSection: View {
     }
 
     private func focusCalendar(on date: Date) {
-        // Normalize to start of day to avoid time component drift
+        
         let normalized = Calendar.current.startOfDay(for: date)
         let monthStart = Calendar.current.startOfMonth(for: normalized)
 
-        // Update calendar month immediately so the header reflects the new month
+        
         self.calendarMonth = monthStart
 
-        // Also update the selected date so CollapsibleCalendarView highlights the day
+        
         self.listViewModel.selectedDate = normalized
 
         if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
             let session = self.sessions[idx]
-            // Mark that the following scroll originated from a calendar action
+            
             self.pendingCalendarMonth = monthStart
             self.suppressListSync = true
             self.scrollTarget = session.id
@@ -105,7 +105,7 @@ struct SessionListSection: View {
             self.pendingCalendarMonth = nil
         }
 
-        // Clear any stale external centering request; a new one will be set if we expand
+        
         self.calendarCenterOnMonth = nil
     }
 
@@ -148,7 +148,7 @@ struct SessionListSection: View {
             }
             .onChange(of: self.calendarMonth) { _, _ in
                 if self.pendingCalendarMonth == nil {
-                    // Prevent the next TopVisibleDatePreference update from bouncing the month back
+                    
                     self.suppressListSync = true
                 }
             }
@@ -174,31 +174,31 @@ struct SessionListSection: View {
     private func handleTopVisibleDateChange(_ date: Date?) {
         guard let date else { return }
 
-        // Update selected date to reflect the list's top-most visible day
+        
         let normalized = Calendar.current.startOfDay(for: date)
         self.listViewModel.selectedDate = normalized
 
-        // Compute the month header value derived from the top visible date
+        
         let monthStart = Calendar.current.startOfMonth(for: normalized)
 
-        // When collapsed and sync is enabled, let the list drive the calendar header month
+        
         if self.calendarMode == .twoWeeks, self.collapsedHeaderSyncEnabled, monthStart != self.calendarMonth {
             withAnimation(.easeInOut(duration: DesignConstants.Animation.quickDuration)) {
                 self.calendarMonth = monthStart
             }
         }
 
-        // If we had a pending month change that matches the header, clear it and stop.
+        
         if let pending = self.pendingCalendarMonth,
            Calendar.current.isDate(monthStart, equalTo: pending, toGranularity: .month) {
             self.pendingCalendarMonth = nil
             return
         }
 
-        // If we are in the middle of a transition to a specific month, don't override it.
+        
         if self.pendingCalendarMonth != nil { return }
 
-        // Smoothly update the header month only when it actually changes.
+        
         if monthStart != self.calendarMonth {
             withAnimation(.easeInOut(duration: DesignConstants.Animation.quickDuration)) {
                 self.calendarMonth = monthStart
@@ -212,26 +212,26 @@ struct SessionListSection: View {
     ) {
         guard old != new else { return }
 
-        // Disarm collapsed header sync when expanding; arm it after collapsing
+        
         if new == .month {
             self.collapsedHeaderSyncEnabled = false
         } else if new == .twoWeeks {
-            // Arm on next runloop to avoid interference from programmatic updates
+            
             DispatchQueue.main.async {
                 self.collapsedHeaderSyncEnabled = true
             }
         }
 
-        // When expanding to month view, ensure the calendar centers on the selected date's month
+        
         if new == .month {
             if let selected = self.listViewModel.selectedDate {
                 let normalized = Calendar.current.startOfDay(for: selected)
                 let monthStart = Calendar.current.startOfMonth(for: normalized)
-                // Keep list anchored and avoid feedback loop
+                
                 self.pendingCalendarMonth = monthStart
                 self.suppressListSync = true
                 self.calendarMonth = monthStart
-                // Request the expanded calendar to center on this month (one-shot)
+                
                 self.calendarCenterOnMonth = monthStart
                 if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
                     let session = self.sessions[idx]
