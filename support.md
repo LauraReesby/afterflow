@@ -32,11 +32,6 @@ permalink: /support/
       autocomplete="off"
     />
 
-    <p>
-      Send feedback, report a bug, or ask a question.
-      Messages are delivered privately via email.
-    </p>
-
     <label for="email">Your email (optional)</label>
     <input
       id="email"
