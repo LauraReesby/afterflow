@@ -25,8 +25,6 @@ struct SessionListViewModel {
     var searchText: String = ""
     var selectedDate: Date?
 
-    
-
     private var cachedFilteredSessions: [TherapeuticSession] = []
     private var lastSessionsHash: Int = 0
     private var lastFilterHash: Int = 0
@@ -35,16 +33,13 @@ struct SessionListViewModel {
         let currentSessionsHash = sessions.map(\.id).hashValue
         let currentFilterHash = self.filterHash
 
-        
         if currentSessionsHash == self.lastSessionsHash, currentFilterHash == self.lastFilterHash {
             return self.cachedFilteredSessions
         }
 
-        
         self.lastSessionsHash = currentSessionsHash
         self.lastFilterHash = currentFilterHash
 
-        
         var filtered = sessions
 
         if let treatmentFilter {
@@ -73,7 +68,6 @@ struct SessionListViewModel {
             }
         }
 
-        
         self.cachedFilteredSessions = filtered
         return filtered
     }

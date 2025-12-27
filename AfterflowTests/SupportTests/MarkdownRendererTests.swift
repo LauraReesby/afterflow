@@ -5,8 +5,6 @@ import Testing
 
 @Suite("MarkdownRenderer Tests")
 struct MarkdownRendererTests {
-    
-
     @Test("Plain text renders without modification") func plainTextRendersWithoutModification() {
         let text = "This is plain text without any markdown."
         let result = MarkdownRenderer.render(text)
@@ -22,7 +20,6 @@ struct MarkdownRendererTests {
         let text = "This is **bold** text."
         let result = MarkdownRenderer.render(text)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("bold"))
         #expect(resultString.contains("This is"))
@@ -33,7 +30,6 @@ struct MarkdownRendererTests {
         let text = "This is *italic* text."
         let result = MarkdownRenderer.render(text)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("italic"))
         #expect(resultString.contains("This is"))
@@ -43,7 +39,6 @@ struct MarkdownRendererTests {
         let text = "# Main Heading"
         let result = MarkdownRenderer.render(text)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("Main Heading"))
     }
@@ -52,7 +47,6 @@ struct MarkdownRendererTests {
         let text = "• First item\n• Second item\n• Third item"
         let result = MarkdownRenderer.render(text)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("First item"))
         #expect(resultString.contains("Second item"))
@@ -63,7 +57,6 @@ struct MarkdownRendererTests {
         let text = "1. First item\n2. Second item\n3. Third item"
         let result = MarkdownRenderer.render(text)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("First item"))
         #expect(resultString.contains("Second item"))
@@ -74,7 +67,6 @@ struct MarkdownRendererTests {
         let text = "# Heading\n\nThis is **bold** and *italic* text.\n\n• Bullet point"
         let result = MarkdownRenderer.render(text)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("Heading"))
         #expect(resultString.contains("bold"))
@@ -83,11 +75,9 @@ struct MarkdownRendererTests {
     }
 
     @Test("Malformed markdown renders as plain text") func malformedMarkdownRendersAsPlainText() {
-        
         let text = "This is **unclosed bold text"
         let result = MarkdownRenderer.render(text)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("unclosed bold text"))
     }
@@ -96,7 +86,6 @@ struct MarkdownRendererTests {
         let longText = String(repeating: "This is a long piece of text. ", count: 100)
         let result = MarkdownRenderer.render(longText)
 
-        
         let resultString = String(result.characters)
         #expect(resultString.contains("This is a long piece of text."))
     }
@@ -121,8 +110,6 @@ struct MarkdownRendererTests {
         #expect(resultString.contains("Line 2"))
         #expect(resultString.contains("Line 3"))
     }
-
-    
 
     @Test("hasFormatting detects double asterisks (bold)") func hasFormattingDetectsDoubleAsterisks() {
         #expect(MarkdownRenderer.hasFormatting("This is **bold** text") == true)
@@ -165,27 +152,23 @@ struct MarkdownRendererTests {
     }
 
     @Test("hasFormatting handles text with hashtag mid-sentence") func hasFormattingHandlesHashtagMidSentence() {
-        
         #expect(MarkdownRenderer.hasFormatting("Use the #hashtag feature") == true)
     }
 
     @Test("hasFormatting handles asterisks in different contexts")
     func hasFormattingHandlesAsterisksInDifferentContexts() {
-        
         #expect(MarkdownRenderer.hasFormatting("5 * 3 = 15") == true)
     }
 
-    
-
     @Test("render handles only asterisks") func renderHandlesOnlyAsterisks() {
         let result = MarkdownRenderer.render("***")
-        
+
         #expect(result.characters.count >= 0)
     }
 
     @Test("render handles only hashes") func renderHandlesOnlyHashes() {
         let result = MarkdownRenderer.render("###")
-        
+
         #expect(result.characters.count >= 0)
     }
 

@@ -12,12 +12,12 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 
 ### Key Features
 
+- **📊 Mood Tracking**: Before and after session mood ratings with visual feedback
+- **📝 Comprehensive Logging**: Capture treatment type, intentions, and reflections (editable later in Session Detail)
 - **🔒 Privacy-First**: All data stays on your device. No cloud sync, tracking, or external data collection
 - **📱 Native iOS**: Built with SwiftUI and SwiftData for optimal performance on iPhone and iPad
 - **🌐 Offline-First**: Core functionality works without internet connection
 - **🎵 Music Links**: Playlist/track/album previews for oEmbed-capable providers (Spotify, YouTube, SoundCloud, Tidal), plus link-only fallbacks for Apple Music/Podcasts and Bandcamp
-- **📊 Mood Tracking**: Before and after session mood ratings with visual feedback
-- **📝 Comprehensive Logging**: Capture treatment type, intentions, and reflections (editable later in Session Detail)
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
 - **📚 History Filters**: Sort/search the session list, filter by treatment type
 - **⏰ Reflection Reminders**: Optional reminders to add post session mood and reflections
@@ -429,7 +429,6 @@ Afterflow collects **zero** personal data. All information stays on your device.
 ## Support
 
 - **Issues**: Report bugs or request features via GitHub Issues
-- **Documentation**: See `/specs` directory for detailed feature specifications
 
 ## License
 

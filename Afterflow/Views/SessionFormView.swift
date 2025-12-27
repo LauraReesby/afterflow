@@ -445,9 +445,7 @@ extension SessionFormView {
         self.assign(metadata, to: session)
         do {
             try self.sessionStore.update(session)
-        } catch {
-            
-        }
+        } catch {}
     }
 
     static func metadata(from session: TherapeuticSession) -> MusicLinkMetadata? {

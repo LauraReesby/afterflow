@@ -1,13 +1,10 @@
-import Testing
-import Foundation
 @testable import Afterflow
+import Foundation
+import Testing
 
 @Suite("Export/Import Integration Tests")
 struct ExportImportIntegrationTests {
-    
-
     @Test("CSV round trip preserves all session data") func csvRoundTripPreservesData() async throws {
-        
         let originalSessions = [
             TherapeuticSession(
                 sessionDate: date("2024-12-01T14:30:00Z"),
@@ -33,18 +30,14 @@ struct ExportImportIntegrationTests {
         originalSessions[0].musicLinkURL = "https://open.spotify.com/playlist/123"
         originalSessions[1].musicLinkURL = "https://youtube.com/watch?v=abc"
 
-        
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: originalSessions)
 
-        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 
-        
         try? FileManager.default.removeItem(at: csvURL)
 
-        
         #expect(importedSessions.count == 2)
 
         let first = importedSessions[0]
@@ -149,7 +142,6 @@ struct ExportImportIntegrationTests {
     }
 
     @Test("CSV round trip with large dataset") func csvRoundTripLargeDataset() async throws {
-        
         let originalSessions = SessionFixtureFactory.makeSessions(count: 100)
 
         let exportService = CSVExportService()
@@ -161,12 +153,10 @@ struct ExportImportIntegrationTests {
         try? FileManager.default.removeItem(at: csvURL)
 
         #expect(importedSessions.count == 100)
-        
+
         #expect(importedSessions[0].treatmentType == originalSessions[0].treatmentType)
         #expect(importedSessions[99].treatmentType == originalSessions[99].treatmentType)
     }
-
-    
 
     @Test("Filtered export by date range then import") func filteredExportByDateRange() async throws {
         let inRange = TherapeuticSession(
@@ -187,7 +177,7 @@ struct ExportImportIntegrationTests {
         )
 
         let exportService = CSVExportService()
-        let range = date("2024-11-01T00:00:00Z") ... date("2024-12-31T00:00:00Z")
+        let range = self.date("2024-11-01T00:00:00Z") ... self.date("2024-12-31T00:00:00Z")
         let csvURL = try exportService.export(
             sessions: [inRange, outOfRange],
             dateRange: range
@@ -198,7 +188,6 @@ struct ExportImportIntegrationTests {
 
         try? FileManager.default.removeItem(at: csvURL)
 
-        
         #expect(importedSessions.count == 1)
         #expect(importedSessions[0].intention == "In Range")
     }
@@ -237,8 +226,6 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[0].intention == "Psilocybin Session")
     }
 
-    
-
     @Test("CSV round trip preserves all music link providers") func csvRoundTripMusicLinks() async throws {
         var spotify = SessionFixtureFactory.makeSessionWithMusicLink(provider: "spotify")
         var youtube = SessionFixtureFactory.makeSessionWithMusicLink(provider: "youtube")
@@ -257,8 +244,6 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[1].musicLinkURL?.contains("youtube") == true)
         #expect(importedSessions[2].musicLinkURL?.contains("apple") == true)
     }
-
-    
 
     @Test("CSV round trip with mood boundary values") func csvRoundTripMoodBoundaries() async throws {
         let session = TherapeuticSession(
@@ -307,7 +292,7 @@ struct ExportImportIntegrationTests {
         try? FileManager.default.removeItem(at: csvURL)
 
         #expect(importedSessions.count == PsychedelicTreatmentType.allCases.count)
-        
+
         for treatmentType in PsychedelicTreatmentType.allCases {
             #expect(importedSessions.contains { $0.treatmentType == treatmentType })
         }
@@ -335,13 +320,11 @@ struct ExportImportIntegrationTests {
         try? FileManager.default.removeItem(at: csvURL)
 
         #expect(importedSessions.count == AdministrationMethod.allCases.count)
-        
+
         for method in AdministrationMethod.allCases {
             #expect(importedSessions.contains { $0.administration == method })
         }
     }
-
-    
 
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()

@@ -70,14 +70,11 @@ final class SessionFormValidationUITests: XCTestCase {
             return
         }
 
-        
         XCTAssertTrue(intentionField.waitForExistence(timeout: 2))
 
-        
         intentionField.tap()
         intentionField.typeText("Grounding intention")
 
-        
         let saveButton = app.navigationBars["New Session"].buttons["Save"]
         XCTAssertTrue(saveButton.waitForExistence(timeout: 2), "Save button should exist")
         let enabledPredicate = NSPredicate(format: "isEnabled == true")

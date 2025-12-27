@@ -49,7 +49,6 @@ struct CSVExportService: Sendable {
     }
 
     private nonisolated static func escape(_ value: String) -> String {
-        
         let injectionGuarded: String = if let first = value.first, ["=", "+", "-", "@"].contains(first) {
             "'" + value
         } else {

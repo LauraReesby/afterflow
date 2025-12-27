@@ -74,7 +74,7 @@ Every public interface must be test-first and measurable.
 
 - Integration tests for SwiftData persistence and complex workflows.
 
-- Each pull request (PR) must reference its corresponding spec item and include a test evidence summary.
+- Each pull request (PR) must include a test evidence summary and reference any relevant issues.
 
 - No feature merges without meeting coverage and test requirements.
 

@@ -83,12 +83,10 @@ extension XCUIElement {
             return
         }
 
-        
         if !self.exists {
             return
         }
 
-        
         let deadline = Date().addingTimeInterval(2)
         while Date() < deadline {
             if self.isHittable {
@@ -97,7 +95,7 @@ extension XCUIElement {
             }
 
             let frame = self.frame
-            
+
             if frame.width > 0, frame.height > 0,
                frame.width.isFinite, frame.height.isFinite,
                frame.origin.x.isFinite, frame.origin.y.isFinite {
@@ -112,8 +110,6 @@ extension XCUIElement {
         }
     }
 
-    
-    
     fileprivate var hasUsableFrame: Bool {
         let frame = self.frame
         return frame.width.isFinite && frame.height.isFinite &&

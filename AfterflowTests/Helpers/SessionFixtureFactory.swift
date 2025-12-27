@@ -28,7 +28,6 @@ enum SessionFixtureFactory {
         SeedDataFactory.makeSeedSessions(referenceDate: referenceDate)
     }
 
-    
     static func makeSessionWithReminder(
         referenceDate: Date = Date(),
         reminderOffset: TimeInterval = 3600
@@ -45,7 +44,6 @@ enum SessionFixtureFactory {
         )
     }
 
-    
     static func makeSessionsForCalendar(
         monthCount: Int = 3,
         sessionsPerMonth: Int = 5,
@@ -82,7 +80,6 @@ enum SessionFixtureFactory {
         return sessions
     }
 
-    
     static func makeSessionWithMusicLink(
         provider: String = "spotify",
         referenceDate: Date = Date()
@@ -117,11 +114,9 @@ enum SessionFixtureFactory {
         return session
     }
 
-    
     static func makeSessionsWithEdgeCases() -> [TherapeuticSession] {
         var sessions: [TherapeuticSession] = []
 
-        
         sessions.append(TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -133,7 +128,6 @@ enum SessionFixtureFactory {
             reminderDate: nil
         ))
 
-        
         let longText = String(repeating: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", count: 100)
         sessions.append(TherapeuticSession(
             sessionDate: Date(),
@@ -146,7 +140,6 @@ enum SessionFixtureFactory {
             reminderDate: nil
         ))
 
-        
         sessions.append(TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .mdma,
@@ -158,7 +151,6 @@ enum SessionFixtureFactory {
             reminderDate: nil
         ))
 
-        
         sessions.append(TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .ketamine,
@@ -170,7 +162,6 @@ enum SessionFixtureFactory {
             reminderDate: nil
         ))
 
-        
         sessions.append(TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .ayahuasca,

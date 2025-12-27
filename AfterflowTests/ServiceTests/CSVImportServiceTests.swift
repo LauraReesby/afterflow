@@ -71,7 +71,6 @@ final class CSVImportServiceTests: XCTestCase {
     }
 
     func testInvalidRowThrows() {
-        
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Grounding,5,5,Missing URL"
@@ -86,8 +85,6 @@ final class CSVImportServiceTests: XCTestCase {
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }
-
-    
 
     func testEmptyFileReturnsEmptyArray() throws {
         let csv = ""
@@ -117,10 +114,7 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertEqual(imported[0].intention, "Grounding")
     }
 
-    
-
     func testMixedLineEndingsAreNormalized() throws {
-        
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\r\n" +
             "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test1,5,7,Reflections1,\n" +
@@ -134,8 +128,6 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertEqual(imported[2].intention, "Test3")
     }
 
-    
-
     func testMoodValueZeroIsAccepted() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
@@ -148,7 +140,6 @@ final class CSVImportServiceTests: XCTestCase {
     }
 
     func testMoodValueOutOfRangeIsAccepted() throws {
-        
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test,15,20,Reflections,"
@@ -193,8 +184,6 @@ final class CSVImportServiceTests: XCTestCase {
             }
         }
     }
-
-    
 
     func testUnknownMusicProviderSetsLinkOnly() throws {
         let csv =
@@ -256,8 +245,6 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertEqual(imported[3].musicLinkProvider, .appleMusic)
     }
 
-    
-
     func testInvalidDateFormatThrows() {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
@@ -283,8 +270,6 @@ final class CSVImportServiceTests: XCTestCase {
         }
     }
 
-    
-
     func testInvalidTreatmentTypeThrows() {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
@@ -308,8 +293,6 @@ final class CSVImportServiceTests: XCTestCase {
             }
         }
     }
-
-    
 
     func testUnicodeInIntentionAndReflections() throws {
         let csv =
@@ -347,8 +330,6 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertEqual(imported[0].reflections, "")
     }
 
-    
-
     func testFirstRowErrorReportsCorrectIndex() {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
@@ -359,7 +340,7 @@ final class CSVImportServiceTests: XCTestCase {
             guard case let CSVImportService.CSVImportError.invalidRow(index) = error else {
                 return XCTFail("Expected invalidRow, got \(error)")
             }
-            XCTAssertEqual(index, 1) 
+            XCTAssertEqual(index, 1)
         }
     }
 
@@ -374,14 +355,12 @@ final class CSVImportServiceTests: XCTestCase {
             guard case let CSVImportService.CSVImportError.invalidRow(index) = error else {
                 return XCTFail("Expected invalidRow, got \(error)")
             }
-            XCTAssertEqual(index, 2) 
+            XCTAssertEqual(index, 2)
         }
     }
 
-    
-
     func testNonUTF8DataThrows() throws {
-        let invalidData = Data([0xFF, 0xFE, 0x00, 0x00]) 
+        let invalidData = Data([0xFF, 0xFE, 0x00, 0x00])
         let importService = CSVImportService()
 
         XCTAssertThrowsError(try importService.import(from: invalidData)) { error in

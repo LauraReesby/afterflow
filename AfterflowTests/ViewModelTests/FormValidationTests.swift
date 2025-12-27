@@ -39,7 +39,7 @@ struct FormValidationTests {
 
     @Test("Date within 1 hour future tolerance passes validation") func futureToleranceValidation() async throws {
         let validation = FormValidation()
-        let nearFutureDate = Date().addingTimeInterval(30 * 60) 
+        let nearFutureDate = Date().addingTimeInterval(30 * 60)
 
         let result = validation.validateSessionDate(nearFutureDate)
 
@@ -48,7 +48,7 @@ struct FormValidationTests {
 
     @Test("Date well beyond future tolerance fails validation") func futureBeyondToleranceValidation() async throws {
         let validation = FormValidation()
-        let tooFarFuture = Date().addingTimeInterval(12 * 60 * 60) 
+        let tooFarFuture = Date().addingTimeInterval(12 * 60 * 60)
 
         let result = validation.validateSessionDate(tooFarFuture)
 
@@ -58,7 +58,7 @@ struct FormValidationTests {
     @Test("Date comfortably within 10-year minimum passes validation") func earliestAllowedDateValidation(
     ) async throws {
         let validation = FormValidation()
-        let withinRange = Date().addingTimeInterval(-9 * 365 * 24 * 60 * 60) 
+        let withinRange = Date().addingTimeInterval(-9 * 365 * 24 * 60 * 60)
 
         let result = validation.validateSessionDate(withinRange)
 
@@ -78,7 +78,6 @@ struct FormValidationTests {
         let validation = FormValidation()
         let calendar = Calendar.current
 
-        
         var components = DateComponents(year: 2024, month: 11, day: 13, hour: 14, minute: 7)
         let testDate1 = calendar.date(from: components)!
         let normalized1 = validation.normalizeSessionDate(testDate1)
@@ -87,7 +86,6 @@ struct FormValidationTests {
         #expect(result1Components.hour == 14)
         #expect(result1Components.minute == 0)
 
-        
         components.minute = 12
         let testDate2 = calendar.date(from: components)!
         let normalized2 = validation.normalizeSessionDate(testDate2)
@@ -101,14 +99,12 @@ struct FormValidationTests {
         let validation = FormValidation()
         let calendar = Calendar.current
 
-        
         let components = DateComponents(year: 2024, month: 11, day: 13, hour: 14, minute: 7)
         let originalDate = calendar.date(from: components)!
         let normalizedDate = validation.normalizeSessionDate(originalDate)
 
         let message = validation.getDateNormalizationMessage(originalDate: originalDate, normalizedDate: normalizedDate)
 
-        
         #expect(message?.contains("Time adjusted") == true)
     }
 
@@ -116,14 +112,12 @@ struct FormValidationTests {
         let validation = FormValidation()
         let calendar = Calendar.current
 
-        
         let components = DateComponents(year: 2024, month: 11, day: 13, hour: 14, minute: 15)
         let originalDate = calendar.date(from: components)!
         let normalizedDate = validation.normalizeSessionDate(originalDate)
 
         let message = validation.getDateNormalizationMessage(originalDate: originalDate, normalizedDate: normalizedDate)
 
-        
         #expect(message == nil)
     }
 

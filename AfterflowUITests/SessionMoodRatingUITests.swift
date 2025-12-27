@@ -65,7 +65,6 @@ final class SessionMoodRatingUITests: XCTestCase {
             app.scrollViews.firstMatch
         }
 
-        
         var attempts = 0
         while !app.sliders["moodBeforeSlider"].exists, attempts < 40 {
             container.swipeUp()

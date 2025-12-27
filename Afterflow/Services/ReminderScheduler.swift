@@ -133,11 +133,6 @@ final class ReminderScheduler {
         self.notificationCenter.removePendingNotificationRequests(withIdentifiers: [self.identifier(for: session)])
     }
 
-    
-    
-    
-    
-    
     func scheduleImmediateTestNotification(for session: TherapeuticSession) async throws -> Date {
         await self.requestPermissionIfNeeded()
         let authStatus = await notificationCenter.authorizationStatus()

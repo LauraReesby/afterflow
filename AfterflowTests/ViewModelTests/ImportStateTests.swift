@@ -5,18 +5,14 @@ import Testing
 
 @MainActor
 struct ImportStateTests {
-    
-
     @Test(
         "Import CSV parses sessions successfully",
         .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importCSVParsesSessionsSuccessfully() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let csvContent = """
         Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
         Dec 10, 2024 at 2:30 PM,Psilocybin,Oral,Test intention,5,8,Test reflections,https://open.spotify.com/playlist/test
@@ -24,23 +20,18 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-import.csv")
         try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 10.0
         )
 
-        
         #expect(importState.pendingImportedSessions.count > 0)
         #expect(importState.importError == nil)
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
@@ -49,7 +40,6 @@ struct ImportStateTests {
         .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importSetsShowingImportConfirmation() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -60,22 +50,17 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-import-confirm.csv")
         try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { importState.showingImportConfirmation || importState.importError != nil },
             timeout: 10.0
         )
 
-        
         #expect(importState.showingImportConfirmation == true)
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
@@ -84,7 +69,6 @@ struct ImportStateTests {
         .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importSetsPendingImportedSessions() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -96,19 +80,15 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-import-pending.csv")
         try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 10.0
         )
 
-        
         #expect(importState.importError == nil, "Import should succeed without errors")
         #expect(importState.pendingImportedSessions.count == 2)
 
@@ -117,16 +97,13 @@ struct ImportStateTests {
             #expect(importState.pendingImportedSessions[1].intention == "Intention 2")
         }
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
     @Test("Confirm import adds sessions to store") func confirmImportAddsSessionsToStore() async throws {
-        
         let (container, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let session1 = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -149,10 +126,8 @@ struct ImportStateTests {
         )
         importState.pendingImportedSessions = [session1, session2]
 
-        
         importState.confirmImport()
 
-        
         let fetchedSessions = try container.mainContext.fetch(FetchDescriptor<TherapeuticSession>())
         #expect(fetchedSessions.count == 2)
         #expect(fetchedSessions.contains { $0.intention == "Test 1" })
@@ -160,7 +135,6 @@ struct ImportStateTests {
     }
 
     @Test("Confirm import clears pending sessions") func confirmImportClearsPendingSessions() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -176,21 +150,15 @@ struct ImportStateTests {
         )
         importState.pendingImportedSessions = [session]
 
-        
         importState.confirmImport()
 
-        
         #expect(importState.pendingImportedSessions.isEmpty)
     }
 
-    
-
     @Test("Import error captured on invalid CSV") func importErrorCapturedOnInvalidCSV() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let invalidCSV = """
         Invalid,Header,Structure
         Data,Data,Data
@@ -198,50 +166,39 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-invalid.csv")
         try invalidCSV.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
         try await TestHelpers.waitFor({ importState.importError != nil }, timeout: 2.0)
 
-        
         #expect(importState.importError != nil)
         #expect(importState.pendingImportedSessions.isEmpty)
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
     @Test("Import error captured on file read failure") func importErrorCapturedOnFileReadFailure() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let nonExistentURL = URL(fileURLWithPath: "/tmp/nonexistent-file-\(UUID().uuidString).csv")
 
-        
         importState.importCSV(from: nonExistentURL)
 
-        
         try await TestHelpers.waitFor({ importState.importError != nil }, timeout: 2.0)
 
-        
         #expect(importState.importError != nil)
         #expect(importState.pendingImportedSessions.isEmpty)
     }
 
     @Test("Import error on store failure") func importErrorOnStoreFailure() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let invalidSession = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
             administration: .oral,
-            intention: "", 
+            intention: "",
             moodBefore: 5,
             moodAfter: 8,
             reflections: "",
@@ -249,56 +206,42 @@ struct ImportStateTests {
         )
         importState.pendingImportedSessions = [invalidSession]
 
-        
         importState.confirmImport()
 
-        
-        
         if importState.importError != nil {
             #expect(importState.importError!.contains("Failed to import"))
         }
     }
 
-    
-
     @Test("Import empty CSV file", .serialized, .disabled("Fails in full suite - MainActor/async timing issue"))
     func importEmptyCSVFile() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let emptyCSV = ""
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-empty.csv")
         try emptyCSV.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { importState.importError != nil || importState.showingImportConfirmation },
             timeout: 10.0
         )
 
-        
         if importState.importError == nil {
             #expect(importState.pendingImportedSessions.isEmpty)
         }
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
     @Test("Import malformed CSV handled") func importMalformedCSVHandled() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let malformedCSV = """
         Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
         Invalid date format,Psilocybin,Oral,Test,5,8,,
@@ -306,34 +249,26 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-malformed.csv")
         try malformedCSV.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
         try await TestHelpers.waitFor(
             { importState.importError != nil || !importState.pendingImportedSessions.isEmpty },
             timeout: 2.0
         )
 
-        
         #expect(importState.importError != nil || importState.pendingImportedSessions.isEmpty)
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
     @Test("Confirm import with empty pending sessions") func confirmImportWithEmptyPendingSessions() async throws {
-        
         let (container, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         importState.pendingImportedSessions = []
 
-        
         importState.confirmImport()
 
-        
         let fetchedSessions = try container.mainContext.fetch(FetchDescriptor<TherapeuticSession>())
         #expect(fetchedSessions.isEmpty)
         #expect(importState.importError == nil)
@@ -341,11 +276,9 @@ struct ImportStateTests {
 
     @Test("Multiple imports in sequence", .serialized, .disabled("Fails in full suite - MainActor/async timing issue"))
     func multipleImportsInSequence() async throws {
-        
         let (container, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
-        
         let csv1 = """
         Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
         Dec 10, 2024 at 2:30 PM,Psilocybin,Oral,First import,5,8,,
@@ -354,7 +287,7 @@ struct ImportStateTests {
         try csv1.write(to: tempURL1, atomically: true, encoding: .utf8)
 
         importState.importCSV(from: tempURL1)
-        try await Task.sleep(nanoseconds: 50_000_000) 
+        try await Task.sleep(nanoseconds: 50_000_000)
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 3.0
@@ -363,7 +296,6 @@ struct ImportStateTests {
         let firstImportCount = importState.pendingImportedSessions.count
         importState.confirmImport()
 
-        
         let csv2 = """
         Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
         Dec 11, 2024 at 3:00 PM,LSD,Oral,Second import,4,9,,
@@ -372,7 +304,7 @@ struct ImportStateTests {
         try csv2.write(to: tempURL2, atomically: true, encoding: .utf8)
 
         importState.importCSV(from: tempURL2)
-        try await Task.sleep(nanoseconds: 50_000_000) 
+        try await Task.sleep(nanoseconds: 50_000_000)
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 3.0
@@ -381,14 +313,12 @@ struct ImportStateTests {
         let secondImportCount = importState.pendingImportedSessions.count
         importState.confirmImport()
 
-        
         #expect(firstImportCount > 0)
         #expect(secondImportCount > 0)
 
         let fetchedSessions = try container.mainContext.fetch(FetchDescriptor<TherapeuticSession>())
         #expect(fetchedSessions.count == firstImportCount + secondImportCount)
 
-        
         try? FileManager.default.removeItem(at: tempURL1)
         try? FileManager.default.removeItem(at: tempURL2)
     }
@@ -398,7 +328,6 @@ struct ImportStateTests {
         .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importWithUnicodeCharacters() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -409,19 +338,15 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-unicode.csv")
         try csvWithUnicode.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 3.0
         )
 
-        
         #expect(importState.importError == nil)
         #expect(importState.pendingImportedSessions.count == 1)
 
@@ -429,7 +354,6 @@ struct ImportStateTests {
             #expect(importState.pendingImportedSessions[0].intention.contains("🌈"))
         }
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
@@ -438,7 +362,6 @@ struct ImportStateTests {
         .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importWithSpecialCSVCharacters() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -449,23 +372,18 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-special.csv")
         try csvWithSpecialChars.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 3.0
         )
 
-        
         #expect(importState.importError == nil)
         #expect(importState.pendingImportedSessions.count == 1)
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
@@ -474,7 +392,6 @@ struct ImportStateTests {
         .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importPreservesMusicLinkURLs() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -485,19 +402,15 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-music.csv")
         try csvWithMusicLink.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 3.0
         )
 
-        
         #expect(importState.importError == nil)
         #expect(importState.pendingImportedSessions.count == 1)
 
@@ -505,7 +418,6 @@ struct ImportStateTests {
             #expect(importState.pendingImportedSessions[0].musicLinkURL == "https://open.spotify.com/playlist/test123")
         }
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 
@@ -514,7 +426,6 @@ struct ImportStateTests {
         .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importWithBoundaryMoodValues() async throws {
-        
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -525,19 +436,15 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-boundary.csv")
         try csvWithBoundaryValues.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        
         importState.importCSV(from: tempURL)
 
-        
-        try await Task.sleep(nanoseconds: 500_000_000) 
+        try await Task.sleep(nanoseconds: 500_000_000)
 
-        
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
             timeout: 3.0
         )
 
-        
         #expect(importState.importError == nil)
         #expect(importState.pendingImportedSessions.count == 1)
 
@@ -546,7 +453,6 @@ struct ImportStateTests {
             #expect(importState.pendingImportedSessions[0].moodAfter == 10)
         }
 
-        
         try? FileManager.default.removeItem(at: tempURL)
     }
 }

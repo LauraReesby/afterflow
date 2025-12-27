@@ -53,8 +53,6 @@ final class NotificationHandlerTests: XCTestCase {
         XCTAssertTrue(refreshed?.reflections.contains("Noted from notification") ?? false)
     }
 
-    
-
     func testValidateSessionThrowsForMissingSession() throws {
         let container = try ModelContainer(
             for: TherapeuticSession.self,
@@ -79,8 +77,6 @@ final class NotificationHandlerTests: XCTestCase {
         }
     }
 
-    
-
     func testConfirmationsAccessorReturnsReflectionQueue() throws {
         let container = try ModelContainer(
             for: TherapeuticSession.self,
@@ -90,8 +86,6 @@ final class NotificationHandlerTests: XCTestCase {
 
         XCTAssertNotNil(handler.confirmations, "Should provide access to reflection queue")
     }
-
-    
 
     func testNotificationErrorDescriptions() {
         let sessionID = UUID()
@@ -110,8 +104,6 @@ final class NotificationHandlerTests: XCTestCase {
             "Error description should include failure reason"
         )
     }
-
-    
 
     func testDeepLinkActionEquality() {
         let sessionID = UUID()
@@ -141,15 +133,13 @@ final class NotificationHandlerTests: XCTestCase {
         )
         let handler = NotificationHandler(modelContext: container.mainContext, skipQueueReplay: true)
 
-        
         do {
             try await handler.processDeepLink(.addReflection(sessionID: UUID(), text: "test"))
-            
+
         } catch {
             XCTFail("Should queue reflection instead of throwing: \(error)")
         }
 
-        
         XCTAssertGreaterThan(handler.confirmations.queuedCount, 0, "Should have queued the reflection")
     }
 }

@@ -13,7 +13,7 @@ enum ReminderOption: CaseIterable {
             return date.addingTimeInterval(3 * 3600)
         case .tomorrow:
             let startOfDay = calendar.startOfDay(for: date)
-            
+
             return calendar.date(byAdding: DateComponents(day: 1, hour: 9), to: startOfDay)
         }
     }

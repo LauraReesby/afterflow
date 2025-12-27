@@ -20,4 +20,4 @@
 --extensionacl on-extension
 --wrap-conditions after-first
 --disable wrapMultilineStatementBraces
---exclude build,.specify,ai,.github,specs
+--exclude build,.agent,.github

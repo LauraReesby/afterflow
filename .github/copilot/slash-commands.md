@@ -120,13 +120,12 @@ Custom slash commands to streamline development of the therapeutic session loggi
 
 ## Quality Assurance Commands
 
-### `/review [code|spec]`
+### `/review [code]`
 **Purpose**: Constitutional compliance and quality review
 
 **Usage**:
 ```
 /review SessionDataService.swift
-/review 001-core-session-logging
 ```
 
 **Output**:
@@ -143,7 +142,6 @@ Custom slash commands to streamline development of the therapeutic session loggi
 
 **Usage**:
 ```
-/complete T025
 /complete US1-mood-rating
 ```
 
@@ -157,18 +155,17 @@ Custom slash commands to streamline development of the therapeutic session loggi
 
 ---
 
-### `/commit [task-id] [message]`
-**Purpose**: Generate conventional commit with spec references
+### `/commit [message]`
+**Purpose**: Generate conventional commit message
 
 **Usage**:
 ```
-/commit T025 "implement mood rating slider component"
-/commit US1 "complete session creation workflow"
+/commit "implement mood rating slider component"
+/commit "complete session creation workflow"
 ```
 
 **Output**:
 - Conventional commit message format
-- Spec ID references
 - Coverage metrics inclusion
 - Constitutional compliance note
 - Change summary with context

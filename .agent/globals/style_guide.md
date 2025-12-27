@@ -25,7 +25,6 @@ Applies to every agent touching Swift, Markdown, or automation scripts. Suppleme
 
 ## Documentation & Comments
 - Prefer expressive naming over comments; add a short comment only before non-obvious logic (e.g., privacy-sensitive persistence, data migrations).
-- Update `specs/<id>/spec.md` when implementation deviates from the original assumption.
 
 ## Testing Standards
 - Unit tests use the Swift Testing framework ( `import Testing`, `@Test` ) and should run headlessly via `xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16'`.
@@ -42,7 +41,7 @@ Applies to every agent touching Swift, Markdown, or automation scripts. Suppleme
       return (container, store)
   }
   ```
-- UI and accessibility flows rely on XCUITest (`AfterflowUITests/`); snapshot VoiceOver + Dynamic Type tests mirror the acceptance criteria in `specs/<id>/tasks.md`.
+- UI and accessibility flows rely on XCUITest (`AfterflowUITests/`); snapshot VoiceOver + Dynamic Type tests must meet the project's accessibility standards.
 
 ## Markdown & Docs
 - Headings use sentence case (`## Project structure`).
@@ -51,9 +50,9 @@ Applies to every agent touching Swift, Markdown, or automation scripts. Suppleme
 
 ## Privacy Defaults
 - Never log therapeutic session contents or user-identifying data.
-- Do not introduce network calls without an approved spec; when unavoidable, document endpoints and data contracts in the spec plus PR checklist.
+- Do not introduce network calls without explicit approval; when unavoidable, document endpoints and data contracts in the PR checklist.
 
 ## Performance & Accessibility Targets
 - Constitutional baseline: launch < 2 s, main-thread I/O < 16 ms, workflows usable offline.
-- Feature-specific goals from `specs/*/plan.md` must be honored (e.g., session creation ≤ 60 s, Spotify connect ≤ 15 s, CSV export 1k sessions ≤ 2 s, PDF export 25 sessions ≤ 4 s); include measurements or rationale in PRs.
-- Every major phase concludes with “Constitutional QA verification” (accessibility, performance profiling, privacy compliance) as listed in `specs/*/tasks.md`; ensure these checks are documented before marking tasks complete.
+- Performance goals must be honored (e.g., session creation ≤ 60 s, Spotify connect ≤ 15 s, CSV export 1k sessions ≤ 2 s, PDF export 25 sessions ≤ 4 s); include measurements or rationale in PRs.
+- Every major phase concludes with “Constitutional QA verification” (accessibility, performance profiling, privacy compliance); ensure these checks are documented before marking tasks complete.

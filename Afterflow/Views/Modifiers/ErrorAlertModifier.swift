@@ -1,13 +1,6 @@
 import SwiftUI
 
 extension View {
-    
-    
-    
-    
-    
-    
-    
     func errorAlert(
         title: String = "Error",
         error: Binding<String?>

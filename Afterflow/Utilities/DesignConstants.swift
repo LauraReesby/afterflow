@@ -40,9 +40,8 @@ enum DesignConstants {
     }
 
     enum Testing {
-        
         static let exportDelay: UInt64 = 300_000_000
-        
+
         static let downloadPollingInterval: UInt64 = 200_000_000
     }
 }

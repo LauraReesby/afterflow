@@ -35,7 +35,6 @@ final class SessionDetailViewUITests: XCTestCase {
         XCTAssertTrue(doneButton.waitForExistence(timeout: 2), "Done button should exist")
         doneButton.tap()
 
-        
         XCTAssertFalse(doneButton.waitForExistence(timeout: 3))
 
         let reflectionText = app.staticTexts["Gentle integration notes for testing."]

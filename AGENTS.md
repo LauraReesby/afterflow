@@ -1,12 +1,11 @@
 # Repository Guidelines
 
-This guide captures the expectations for contributors extending Afterflow’s privacy-first iOS app. Automation agents should also load `ai/README.md` for workflow- and tool-specific context.
+This guide captures the expectations for contributors extending Afterflow’s privacy-first iOS app. Automation agents should also load `.agent/README.md` for workflow- and tool-specific context.
 
 ## Project Structure & Module Organization
 - `Afterflow/Models`, `Services`, `Views`, and `ViewModels` implement SwiftData entities, persistence, SwiftUI surfaces, and state layers respectively; keep new modules inside these folders so Swift Package targets remain predictable.
 - `Resources/Assets.xcassets` holds app colors and icons; any additional assets or localized strings belong here.
-- Tests split into `AfterflowTests/ModelTests`, `ServiceTests`, `ViewModelTests`, and `AfterflowUITests/`; mirror production folders when adding specs.
-- Product requirements and UX notes live under `specs/00x-*`; update the matching spec before large feature work.
+- Product requirements and UX notes live in the project README; consult it before large feature work.
 
 ## Build, Test, and Development Commands
 - `./Scripts/run-swiftformat.sh` — repository-wide SwiftFormat pass.
@@ -21,7 +20,7 @@ This guide captures the expectations for contributors extending Afterflow’s pr
 - Use 4-space indentation and target files under ~300 lines (300-400 acceptable if cohesive; above 400 requires refactoring); extract SwiftUI subviews into `Views/Components` when bodies exceed ~80 lines.
 - Large feature sections can be extracted to `Views/<ParentView>/` subdirectories (e.g., `SessionListSection.swift` in `Views/ContentView/`).
 - Keep view models `Observable` structs/classes with clearly named `@Published` fields (`formState`, `validationErrors`); avoid single-letter abbreviations.
-- **Follow established patterns** (see `ai/globals/style_guide.md` for details):
+- **Follow established patterns** (see `.agent/globals/style_guide.md` for details):
   - Extract complex state to dedicated `@Observable` managers (e.g., `ExportState`, `ImportState`)
   - Create reusable view modifiers for repeated UI patterns (e.g., `ErrorAlertModifier`)
   - Use `DesignConstants` for all spacing, animation, and styling values
@@ -36,9 +35,7 @@ This guide captures the expectations for contributors extending Afterflow’s pr
 
 ## Commit & Pull Request Guidelines
 - Match existing history: concise, present-tense subjects (`session tasks completed`, `clean up`) without prefixes; squash micro commits locally.
-- Reference issues or specs in the body (`Specs: 002-music-links`) and describe user value plus risk mitigations.
-- PRs must include: summary, screenshots for UI changes, simulator/device target, testing checklist, and description of privacy implications (data touched, storage location).
-- Tag reviewers who own the touched area (`Models`, `Services`, etc.) and confirm that `specs/` updates accompany any feature-level change.
+- Tag reviewers who own the touched area (`Models`, `Services`, etc.).
 
 ## Security & Configuration Notes
 - Treat all features as offline-first: no new network calls or third-party SDKs without explicit approval.

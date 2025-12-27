@@ -240,12 +240,9 @@ private extension ContentView {
                 _ = try await scheduler.scheduleImmediateTestNotification(for: session)
                 self.debugNotificationScheduled = true
 
-                
                 try? await Task.sleep(for: .seconds(6))
                 self.debugNotificationScheduled = false
-            } catch {
-                
-            }
+            } catch {}
         #endif
     }
 
@@ -331,7 +328,7 @@ private func makePreviewContainerAndStore() -> (container: ModelContainer, store
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
         let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
-        
+
         SeedDataFactory.makeSeedSessions().forEach { try? store.create($0) }
         return (container, store)
     } catch {

@@ -1,28 +1,19 @@
 @testable import Afterflow
 import Foundation
 
-
 enum ErrorFixtureFactory {
-    
-
-    
     static func makeInvalidHeaderError() -> CSVImportService.CSVImportError {
         .invalidHeader
     }
 
-    
     static func makeInvalidRowError(row: Int = 1) -> CSVImportService.CSVImportError {
         .invalidRow(row)
     }
 
-    
     static func makeParseFailureError(reason: String = "Parse failed") -> CSVImportService.CSVImportError {
         .parseFailure(reason)
     }
 
-    
-
-    
     static func makeFileNotFoundError(path: String = "/tmp/nonexistent.csv") -> NSError {
         NSError(
             domain: NSCocoaErrorDomain,
@@ -34,7 +25,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makePermissionDeniedError(path: String = "/tmp/protected.csv") -> NSError {
         NSError(
             domain: NSCocoaErrorDomain,
@@ -46,7 +36,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeDiskFullError() -> NSError {
         NSError(
             domain: NSCocoaErrorDomain,
@@ -57,9 +46,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
-
-    
     static func makeTimeoutError() -> NSError {
         NSError(
             domain: NSURLErrorDomain,
@@ -70,7 +56,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeNoConnectionError() -> NSError {
         NSError(
             domain: NSURLErrorDomain,
@@ -81,9 +66,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
-
-    
     static func makeExportFailureError(reason: String = "Unknown export error") -> NSError {
         NSError(
             domain: "com.afterflow.export",
@@ -94,7 +76,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeInvalidFormatError(format: String = "unknown") -> NSError {
         NSError(
             domain: "com.afterflow.export",
@@ -105,9 +86,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
-
-    
     static func makeParseError(line: Int = 1, column: Int = 1) -> NSError {
         NSError(
             domain: "com.afterflow.import",
@@ -118,7 +96,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeEncodingError(encoding: String = "UTF-8") -> NSError {
         NSError(
             domain: NSCocoaErrorDomain,
@@ -129,9 +106,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
-
-    
     static func makeSecurityScopedResourceError() -> NSError {
         NSError(
             domain: NSCocoaErrorDomain,
@@ -142,9 +116,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
-
-    
     static func makeICloudDownloadError() -> NSError {
         NSError(
             domain: NSCocoaErrorDomain,
@@ -155,7 +126,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeICloudUnavailableError() -> NSError {
         NSError(
             domain: NSCocoaErrorDomain,
@@ -166,9 +136,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
-
-    
     static func makeSaveError(reason: String = "Unknown save error") -> NSError {
         NSError(
             domain: "com.afterflow.swiftdata",
@@ -179,7 +146,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeFetchError(reason: String = "Unknown fetch error") -> NSError {
         NSError(
             domain: "com.afterflow.swiftdata",
@@ -190,9 +156,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
-
-    
     static func makeInvalidDateError(dateString: String = "invalid-date") -> NSError {
         NSError(
             domain: "com.afterflow.validation",
@@ -203,7 +166,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeOutOfRangeError(value: Int, min: Int, max: Int) -> NSError {
         NSError(
             domain: "com.afterflow.validation",
@@ -214,7 +176,6 @@ enum ErrorFixtureFactory {
         )
     }
 
-    
     static func makeMissingFieldError(field: String) -> NSError {
         NSError(
             domain: "com.afterflow.validation",

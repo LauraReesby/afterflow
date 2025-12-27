@@ -1,26 +1,22 @@
-import Testing
+@testable import Afterflow
 import Foundation
 import SwiftData
-@testable import Afterflow
+import Testing
 
 @Suite("ViewModel Integration Tests")
 @MainActor
 struct ViewModelIntegrationTests {
-    
-
     @Test("SessionListViewModel with live SwiftData store") func listViewModelWithLiveStore() async throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
 
-        
         let sessions = SessionFixtureFactory.makeSessions(count: 10)
         for session in sessions {
             context.insert(session)
         }
         try context.save()
 
-        
         let descriptor = FetchDescriptor<TherapeuticSession>(sortBy: [SortDescriptor(\.sessionDate, order: .reverse)])
         let fetchedSessions = try context.fetch(descriptor)
 
@@ -41,7 +37,6 @@ struct ViewModelIntegrationTests {
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
 
-        
         let psilocybin = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -122,10 +117,7 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].intention.contains("Healing"))
     }
 
-    
-
     @Test("Import CSV then filter in SessionListViewModel") func importThenFilterWorkflow() async throws {
-        
         let sessions = [
             TherapeuticSession(
                 sessionDate: Date(),
@@ -148,13 +140,11 @@ struct ViewModelIntegrationTests {
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: sessions)
 
-        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 
         try? FileManager.default.removeItem(at: csvURL)
 
-        
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
@@ -167,12 +157,9 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].treatmentType == .psilocybin)
     }
 
-    
-
     @Test("Filter sessions then export") func filterThenExportWorkflow() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 20)
 
-        
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
@@ -181,17 +168,14 @@ struct ViewModelIntegrationTests {
 
         let filtered = viewModel.applyFilters(to: sessions)
 
-        
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: filtered)
 
-        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 
         try? FileManager.default.removeItem(at: csvURL)
 
-        
         #expect(importedSessions.allSatisfy { $0.treatmentType == .psilocybin })
     }
 
@@ -223,7 +207,6 @@ struct ViewModelIntegrationTests {
             )
         ]
 
-        
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "healing",
             treatmentFilter: .psilocybin,
@@ -235,11 +218,9 @@ struct ViewModelIntegrationTests {
         #expect(filtered.count == 1)
         #expect(filtered[0].intention == "Healing journey")
 
-        
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: filtered)
 
-        
         let importService = CSVImportService()
         let importedSessions = try importService.import(from: csvURL)
 

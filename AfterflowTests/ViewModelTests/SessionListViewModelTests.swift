@@ -39,8 +39,6 @@ struct SessionListViewModelTests {
         #expect(filtered.first?.intention.contains("3") == true)
     }
 
-    
-
     @Test("Marked dates returns unique start of days") func markedDatesReturnsUniqueStartOfDays() async throws {
         let calendar = Calendar.current
         let baseDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
@@ -75,7 +73,7 @@ struct SessionListViewModelTests {
         let viewModel = SessionListViewModel()
         let markedDates = viewModel.markedDates(from: sessions)
 
-        #expect(markedDates.count == 2) 
+        #expect(markedDates.count == 2)
         #expect(markedDates.contains(calendar.startOfDay(for: baseDate)))
         #expect(markedDates.contains(calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: baseDate)!)))
     }
@@ -111,8 +109,6 @@ struct SessionListViewModelTests {
 
         #expect(markedDates.isEmpty)
     }
-
-    
 
     @Test("Index of first session finds correct index") func indexOfFirstSessionFindsCorrectIndex() async throws {
         let calendar = Calendar.current
@@ -175,8 +171,6 @@ struct SessionListViewModelTests {
         #expect(index == nil)
     }
 
-    
-
     @Test("Clear filters clears treatment filter") func clearFiltersClearsTreatmentFilter() async throws {
         var viewModel = SessionListViewModel()
         viewModel.treatmentFilter = .psilocybin
@@ -185,7 +179,7 @@ struct SessionListViewModelTests {
         viewModel.clearFilters()
 
         #expect(viewModel.treatmentFilter == nil)
-        #expect(viewModel.sortOption == .moodChange) 
+        #expect(viewModel.sortOption == .moodChange)
     }
 
     @Test("Clear filters clears search text") func clearFiltersClearsSearchText() async throws {
@@ -196,7 +190,7 @@ struct SessionListViewModelTests {
         viewModel.clearFilters()
 
         #expect(viewModel.searchText == "")
-        #expect(viewModel.sortOption == .newestFirst) 
+        #expect(viewModel.sortOption == .newestFirst)
     }
 
     @Test("Clear filters does not affect sort option") func clearFiltersDoesNotAffectSortOption() async throws {
@@ -210,8 +204,6 @@ struct SessionListViewModelTests {
         #expect(viewModel.sortOption == .oldestFirst)
     }
 
-    
-
     @Test("Cache hit when inputs unchanged") func cacheHitWhenInputsUnchanged() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 10)
         var viewModel = SessionListViewModel()
@@ -219,7 +211,6 @@ struct SessionListViewModelTests {
         let result1 = viewModel.applyFilters(to: sessions)
         let result2 = viewModel.applyFilters(to: sessions)
 
-        
         #expect(result1.count == result2.count)
         #expect(zip(result1, result2).allSatisfy { $0.0.id == $0.1.id })
     }
@@ -245,10 +236,8 @@ struct SessionListViewModelTests {
         viewModel.treatmentFilter = .psilocybin
         let result2 = viewModel.applyFilters(to: sessions)
 
-        #expect(result1.count >= result2.count) 
+        #expect(result1.count >= result2.count)
     }
-
-    
 
     @Test("Apply filters with empty sessions") func applyFiltersWithEmptySessions() async throws {
         var viewModel = SessionListViewModel()
@@ -267,21 +256,18 @@ struct SessionListViewModelTests {
 
         let filtered = viewModel.applyFilters(to: sessions)
 
-        #expect(filtered.count == sessions.count) 
+        #expect(filtered.count == sessions.count)
     }
 
     @Test("Current filter description formats correctly") func currentFilterDescriptionFormats() async throws {
         var viewModel = SessionListViewModel()
 
-        
         #expect(viewModel.currentFilterDescription == "Newest First")
 
-        
         viewModel.treatmentFilter = .psilocybin
         #expect(viewModel.currentFilterDescription.contains("Psilocybin"))
         #expect(viewModel.currentFilterDescription.contains("Newest First"))
 
-        
         viewModel.sortOption = .moodChange
         #expect(viewModel.currentFilterDescription.contains("Psilocybin"))
         #expect(viewModel.currentFilterDescription.contains("Biggest Mood Lift"))
@@ -350,7 +336,7 @@ struct SessionListViewModelTests {
                 intention: "Test 1",
                 moodBefore: 5,
                 moodAfter: 8
-            ), 
+            ),
             TherapeuticSession(
                 sessionDate: date2,
                 treatmentType: .lsd,
@@ -358,7 +344,7 @@ struct SessionListViewModelTests {
                 intention: "Test 2",
                 moodBefore: 5,
                 moodAfter: 8
-            ) 
+            )
         ]
 
         var viewModel = SessionListViewModel()
@@ -366,7 +352,6 @@ struct SessionListViewModelTests {
 
         let sorted = viewModel.applyFilters(to: sessions)
 
-        
         #expect(sorted.first?.sessionDate == date2)
     }
 }

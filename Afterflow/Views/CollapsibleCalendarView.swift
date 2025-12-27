@@ -29,9 +29,6 @@ public struct CollapsibleCalendarView: View {
     private let estimatedRowHeight: CGFloat = 44
 
     private var estimatedMonthHeight: CGFloat {
-        
-        
-        
         self.expandedRowCount * self.estimatedRowHeight
     }
 
@@ -92,13 +89,11 @@ public struct CollapsibleCalendarView: View {
         .animation(.easeInOut(duration: 0.25), value: self.mode)
         .onChange(of: self.mode) { _, newMode in
             if newMode == .month {
-                
                 let anchor = self
                     .centerOnMonthRequest ??
                     (self.selectedDate.map { self.calendar.startOfMonth(for: $0) } ?? self.currentMonthStart)
                 let normalized = self.clampMonth(self.calendar.startOfMonth(for: anchor))
 
-                
                 if normalized != self.currentMonthStart {
                     self.currentMonthStart = normalized
                 }
@@ -106,12 +101,10 @@ public struct CollapsibleCalendarView: View {
                     self.selectedDate = normalized
                 }
 
-                
                 self.resetMonthStack()
                 self.hasCenteredExpanded = false
                 self.pendingCenterMonth = normalized
 
-                
                 self.centerOnMonthRequest = nil
             } else {
                 self.pendingCenterMonth = nil
@@ -233,7 +226,6 @@ public struct CollapsibleCalendarView: View {
     }
 
     private func oneWeekDays() -> [Date] {
-        
         let anchor = self.selectedDate ?? self.currentMonthStart
         let reference = self.calendar
             .isDate(anchor, equalTo: self.currentMonthStart, toGranularity: .month) ? anchor : self
@@ -270,7 +262,6 @@ public struct CollapsibleCalendarView: View {
             .onEnded { value in
                 let verticalDistance = abs(value.translation.height)
 
-                
                 if verticalDistance > 20 {
                     if self.mode == .month {
                         if value.translation.height > 0 {
@@ -347,7 +338,6 @@ public struct CollapsibleCalendarView: View {
             .simultaneousGesture(
                 DragGesture(minimumDistance: 10)
                     .onChanged { value in
-                        
                         self.pagingDragAccumulation = value.translation.height
                     }
                     .onEnded { value in
@@ -362,7 +352,6 @@ public struct CollapsibleCalendarView: View {
 
                         self.shiftMonth(deltaIndex)
 
-                        
                         self.pagingDragAccumulation = 0
                     }
             )
@@ -434,7 +423,6 @@ public struct CollapsibleCalendarView: View {
         let action = {
             let targetID = self.id(for: month)
 
-            
             DispatchQueue.main.async {
                 proxy.scrollTo(targetID, anchor: .top)
                 self.hasCenteredExpanded = true

@@ -100,7 +100,7 @@ import SwiftUI
     }
 
 #else
-    
+
     struct RichTextEditor: View {
         @Binding var text: String
         @FocusState.Binding var isFocused: Bool

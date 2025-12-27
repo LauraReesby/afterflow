@@ -82,8 +82,6 @@ final class PDFExportServiceTests: XCTestCase {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }
 
-    
-
     func testCoverPageIncluded() throws {
         #if canImport(PDFKit)
             let service = PDFExportService()
@@ -126,7 +124,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            
+
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
@@ -145,7 +143,6 @@ final class PDFExportServiceTests: XCTestCase {
                 moodAfter: 7
             )
 
-            
             let optionsWithPrivacy = PDFExportService.Options(includeCoverPage: true, showPrivacyNote: true)
             let optionsWithoutPrivacy = PDFExportService.Options(includeCoverPage: true, showPrivacyNote: false)
 
@@ -158,8 +155,6 @@ final class PDFExportServiceTests: XCTestCase {
             throw XCTSkip("PDFKit not available")
         #endif
     }
-
-    
 
     func testEmptySessionsShowsEmptyState() throws {
         #if canImport(PDFKit)
@@ -189,21 +184,18 @@ final class PDFExportServiceTests: XCTestCase {
                 moodAfter: 7,
                 reflections: ""
             )
-            
 
             let url = try service.export(sessions: [session], options: .init(includeCoverPage: false))
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            
+
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
-
-    
 
     func testUnicodeAndEmojiInAllFields() throws {
         #if canImport(PDFKit)
@@ -223,7 +215,6 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -253,7 +244,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            
+
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
@@ -278,14 +269,12 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            
+
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
-
-    
 
     func testFiltersByTreatmentType() throws {
         #if canImport(PDFKit)
@@ -309,7 +298,6 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -346,7 +334,6 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -375,8 +362,6 @@ final class PDFExportServiceTests: XCTestCase {
         #endif
     }
 
-    
-
     func testAllTreatmentTypes() throws {
         #if canImport(PDFKit)
             let service = PDFExportService()
@@ -398,7 +383,6 @@ final class PDFExportServiceTests: XCTestCase {
             let data = try Data(contentsOf: url)
             let document = PDFDocument(data: data)
 
-            
             XCTAssertNotNil(document)
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
@@ -428,14 +412,12 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            
+
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
-
-    
 
     func testPerformanceOneHundredSessions() throws {
         #if canImport(PDFKit)
@@ -459,7 +441,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            XCTAssertGreaterThan(document?.pageCount ?? 0, 1) 
+            XCTAssertGreaterThan(document?.pageCount ?? 0, 1)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
@@ -470,7 +452,6 @@ final class PDFExportServiceTests: XCTestCase {
             let service = PDFExportService()
             var sessions: [TherapeuticSession] = []
 
-            
             for i in 0 ..< 20 {
                 let session = TherapeuticSession(
                     sessionDate: date("2024-12-01T00:00:00Z").addingTimeInterval(TimeInterval(i * 3600)),
@@ -489,13 +470,11 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            XCTAssertGreaterThan(document?.pageCount ?? 0, 1) 
+            XCTAssertGreaterThan(document?.pageCount ?? 0, 1)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
-
-    
 
     func testMoodBoundaryValues() throws {
         #if canImport(PDFKit)
@@ -514,14 +493,12 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            
+
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")
         #endif
     }
-
-    
 
     func testMultipleMusicLinkFormats() throws {
         #if canImport(PDFKit)
@@ -564,7 +541,7 @@ final class PDFExportServiceTests: XCTestCase {
             let document = PDFDocument(data: data)
 
             XCTAssertNotNil(document)
-            
+
             XCTAssertGreaterThan(document?.pageCount ?? 0, 0)
         #else
             throw XCTSkip("PDFKit not available")

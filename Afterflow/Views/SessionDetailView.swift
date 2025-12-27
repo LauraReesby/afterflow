@@ -603,9 +603,7 @@ extension SessionDetailView {
                     self.updateError = "Failed to save music metadata: \(error.localizedDescription)"
                 }
             }
-        } catch {
-            
-        }
+        } catch {}
     }
 }
 
@@ -622,7 +620,7 @@ extension SessionDetailView {
     }()
     let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
     let session = TherapeuticSession(intention: "Feel more open with my partner", moodBefore: 4, moodAfter: 7)
-    
+
     try? store.create(session)
     return NavigationStack {
         SessionDetailView(session: session)

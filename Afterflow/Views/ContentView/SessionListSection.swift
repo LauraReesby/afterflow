@@ -85,19 +85,16 @@ struct SessionListSection: View {
     }
 
     private func focusCalendar(on date: Date) {
-        
         let normalized = Calendar.current.startOfDay(for: date)
         let monthStart = Calendar.current.startOfMonth(for: normalized)
 
-        
         self.calendarMonth = monthStart
 
-        
         self.listViewModel.selectedDate = normalized
 
         if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
             let session = self.sessions[idx]
-            
+
             self.pendingCalendarMonth = monthStart
             self.suppressListSync = true
             self.scrollTarget = session.id
@@ -105,7 +102,6 @@ struct SessionListSection: View {
             self.pendingCalendarMonth = nil
         }
 
-        
         self.calendarCenterOnMonth = nil
     }
 
@@ -148,7 +144,6 @@ struct SessionListSection: View {
             }
             .onChange(of: self.calendarMonth) { _, _ in
                 if self.pendingCalendarMonth == nil {
-                    
                     self.suppressListSync = true
                 }
             }
@@ -174,31 +169,25 @@ struct SessionListSection: View {
     private func handleTopVisibleDateChange(_ date: Date?) {
         guard let date else { return }
 
-        
         let normalized = Calendar.current.startOfDay(for: date)
         self.listViewModel.selectedDate = normalized
 
-        
         let monthStart = Calendar.current.startOfMonth(for: normalized)
 
-        
         if self.calendarMode == .twoWeeks, self.collapsedHeaderSyncEnabled, monthStart != self.calendarMonth {
             withAnimation(.easeInOut(duration: DesignConstants.Animation.quickDuration)) {
                 self.calendarMonth = monthStart
             }
         }
 
-        
         if let pending = self.pendingCalendarMonth,
            Calendar.current.isDate(monthStart, equalTo: pending, toGranularity: .month) {
             self.pendingCalendarMonth = nil
             return
         }
 
-        
         if self.pendingCalendarMonth != nil { return }
 
-        
         if monthStart != self.calendarMonth {
             withAnimation(.easeInOut(duration: DesignConstants.Animation.quickDuration)) {
                 self.calendarMonth = monthStart
@@ -212,26 +201,23 @@ struct SessionListSection: View {
     ) {
         guard old != new else { return }
 
-        
         if new == .month {
             self.collapsedHeaderSyncEnabled = false
         } else if new == .twoWeeks {
-            
             DispatchQueue.main.async {
                 self.collapsedHeaderSyncEnabled = true
             }
         }
 
-        
         if new == .month {
             if let selected = self.listViewModel.selectedDate {
                 let normalized = Calendar.current.startOfDay(for: selected)
                 let monthStart = Calendar.current.startOfMonth(for: normalized)
-                
+
                 self.pendingCalendarMonth = monthStart
                 self.suppressListSync = true
                 self.calendarMonth = monthStart
-                
+
                 self.calendarCenterOnMonth = monthStart
                 if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
                     let session = self.sessions[idx]

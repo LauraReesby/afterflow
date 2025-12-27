@@ -115,14 +115,12 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: sessions)
         let csv = try String(contentsOf: url, encoding: .utf8)
         let lines = csv.split(separator: "\n")
-        XCTAssertEqual(lines.count, 1001) 
+        XCTAssertEqual(lines.count, 1001)
     }
 
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }
-
-    
 
     func testEmptySessionsArrayExportsHeaderOnly() throws {
         let service = CSVExportService()
@@ -130,7 +128,7 @@ final class CSVExportServiceTests: XCTestCase {
         let csv = try String(contentsOf: url, encoding: .utf8)
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 1) 
+        XCTAssertEqual(lines.count, 1)
         XCTAssertEqual(
             lines[0],
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL"
@@ -155,7 +153,7 @@ final class CSVExportServiceTests: XCTestCase {
 
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, 2)
-        
+
         XCTAssertTrue(lines[1].contains("\"\""))
     }
 
@@ -174,12 +172,9 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: [session])
         let csv = try String(contentsOf: url, encoding: .utf8)
 
-        
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertTrue(lines[1].hasSuffix("\"\""))
     }
-
-    
 
     func testUnicodeInAllFields() throws {
         let service = CSVExportService()
@@ -243,12 +238,9 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: [session])
         let csv = try String(contentsOf: url, encoding: .utf8)
 
-        
         XCTAssertTrue(csv.contains("\"Test,with,commas\""))
         XCTAssertTrue(csv.contains("\"Line1\nLine2\rLine3\""))
     }
-
-    
 
     func testMoodBoundaryValues() throws {
         let service = CSVExportService()
@@ -295,8 +287,6 @@ final class CSVExportServiceTests: XCTestCase {
         XCTAssertTrue(csv.contains("100"))
     }
 
-    
-
     func testCombinedDateRangeAndTreatmentTypeFilters() throws {
         let service = CSVExportService()
         let match = TherapeuticSession(
@@ -325,7 +315,7 @@ final class CSVExportServiceTests: XCTestCase {
         let csv = try String(contentsOf: url, encoding: .utf8)
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 2) 
+        XCTAssertEqual(lines.count, 2)
         XCTAssertTrue(lines[1].contains("Psilocybin"))
         XCTAssertFalse(csv.contains("Ketamine"))
     }
@@ -342,10 +332,8 @@ final class CSVExportServiceTests: XCTestCase {
         let csv = try String(contentsOf: url, encoding: .utf8)
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 1) 
+        XCTAssertEqual(lines.count, 1)
     }
-
-    
 
     func testAllTreatmentTypes() throws {
         let service = CSVExportService()
@@ -369,7 +357,6 @@ final class CSVExportServiceTests: XCTestCase {
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, PsychedelicTreatmentType.allCases.count + 1)
 
-        
         for treatmentType in PsychedelicTreatmentType.allCases {
             XCTAssertTrue(csv.contains(treatmentType.displayName))
         }
@@ -397,13 +384,10 @@ final class CSVExportServiceTests: XCTestCase {
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, AdministrationMethod.allCases.count + 1)
 
-        
         for method in AdministrationMethod.allCases {
             XCTAssertTrue(csv.contains(method.displayName))
         }
     }
-
-    
 
     func testMultipleFormulaInjectionPatterns() throws {
         let service = CSVExportService()
@@ -431,14 +415,11 @@ final class CSVExportServiceTests: XCTestCase {
         let url = try service.export(sessions: sessions)
         let csv = try String(contentsOf: url, encoding: .utf8)
 
-        
         XCTAssertTrue(csv.contains("'=1+1"))
         XCTAssertTrue(csv.contains("'+cmd"))
         XCTAssertTrue(csv.contains("'-2-2"))
         XCTAssertTrue(csv.contains("'@SUM"))
     }
-
-    
 
     func testMultipleMusicLinkFormats() throws {
         let service = CSVExportService()
@@ -470,7 +451,6 @@ final class CSVExportServiceTests: XCTestCase {
             moodBefore: 5,
             moodAfter: 7
         )
-        
 
         let url = try service.export(sessions: [session1, session2, session3])
         let csv = try String(contentsOf: url, encoding: .utf8)
@@ -479,7 +459,7 @@ final class CSVExportServiceTests: XCTestCase {
         XCTAssertTrue(csv.contains("https://youtube.com/watch?v=xyz"))
 
         let lines = csv.split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines.count, 4) 
+        XCTAssertEqual(lines.count, 4)
     }
 
     func testDateFormatConsistency() throws {
@@ -509,9 +489,7 @@ final class CSVExportServiceTests: XCTestCase {
         let lines = csv.split(separator: "\n").map(String.init)
         XCTAssertEqual(lines.count, 4)
 
-        
         for line in lines.dropFirst() {
-            
             XCTAssertTrue(line.hasPrefix("\"") || !line.isEmpty)
         }
     }

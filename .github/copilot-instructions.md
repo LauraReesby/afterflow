@@ -101,13 +101,13 @@ AfterflowTests/
 ```
 
 ### Task Management
-- Tasks tracked in `/specs/001-core-session-logging/tasks.md`
+- Tasks tracked in the project README or relevant issues.
 - Mark complete (✅) only after: Code + Tests + Coverage + Functionality verified
-- Reference spec IDs in commit messages: `feat(session): add mood slider (001-core-session-logging)`
+- Use descriptive commit messages: `feat(session): add mood slider`
 
 ### Commit Convention
 ```
-feat(models): add mood change computed property (001-core-session-logging)
+feat(models): add mood change computed property
 test(services): increase SessionDataService coverage to 85%
 fix(ui): resolve VoiceOver accessibility in session form
 refactor(views): extract reusable form validation components
@@ -160,7 +160,7 @@ refactor(views): extract reusable form validation components
 ## When Working on Features
 
 1. **Check constitutional compliance** against all 6 principles
-2. **Read relevant spec** in `/specs/[feature-id]/` directory  
+2. **Read relevant documentation** in the project README or issues
 3. **Write tests first** before implementation (TDD)
 4. **Use existing patterns** from Models/Services layers
 5. **Verify 80% coverage** after changes

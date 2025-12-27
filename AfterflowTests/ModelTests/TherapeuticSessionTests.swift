@@ -8,9 +8,9 @@ struct TherapeuticSessionTests {
     func therapeuticSessionDefaultInitialization() async throws {
         let session = TherapeuticSession()
 
-        #expect(session.id != UUID()) 
-        #expect(session.treatmentType == .psilocybin) 
-        #expect(session.administration == .oral) 
+        #expect(session.id != UUID())
+        #expect(session.treatmentType == .psilocybin)
+        #expect(session.administration == .oral)
         #expect(session.intention == "")
         #expect(session.moodBefore == 5)
         #expect(session.moodAfter == 5)
@@ -31,7 +31,7 @@ struct TherapeuticSessionTests {
 
     @Test("TherapeuticSession initialization with custom values")
     func therapeuticSessionCustomInitialization() async throws {
-        let customDate = Date(timeIntervalSinceNow: -3600) 
+        let customDate = Date(timeIntervalSinceNow: -3600)
         let reminderDate = Date().addingTimeInterval(3600)
         let session = TherapeuticSession(
             sessionDate: customDate,
@@ -120,7 +120,7 @@ struct TherapeuticSessionTests {
         let invalidMoodBefore = TherapeuticSession(
             treatmentType: .ketamine,
             intention: "Valid intention",
-            moodBefore: 0, 
+            moodBefore: 0,
             moodAfter: 7
         )
         #expect(invalidMoodBefore.isValid == false)
@@ -129,7 +129,7 @@ struct TherapeuticSessionTests {
             treatmentType: .cannabis,
             intention: "Valid intention",
             moodBefore: 5,
-            moodAfter: 11 
+            moodAfter: 11
         )
         #expect(invalidMoodAfter.isValid == false)
     }
@@ -138,8 +138,7 @@ struct TherapeuticSessionTests {
         let session = TherapeuticSession()
         let originalUpdatedAt = session.updatedAt
 
-        
-        try await Task.sleep(nanoseconds: 1_000_000) 
+        try await Task.sleep(nanoseconds: 1_000_000)
 
         session.markAsUpdated()
 
@@ -156,7 +155,7 @@ struct TherapeuticSessionTests {
         session.musicLinkProvider = .spotify
 
         let originalUpdatedAt = session.updatedAt
-        try await Task.sleep(nanoseconds: 1_000_000) 
+        try await Task.sleep(nanoseconds: 1_000_000)
 
         session.clearMusicLinkData()
 
@@ -207,7 +206,7 @@ struct TherapeuticSessionTests {
         #expect(session.administration == .oral)
         #expect(session.intention.count == 1000)
         #expect(session.reflections.count == 1000)
-        #expect(session.isValid == true) 
+        #expect(session.isValid == true)
     }
 
     @Test("Unicode and special characters") func unicodeSupport() async throws {

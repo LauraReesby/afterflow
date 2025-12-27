@@ -15,13 +15,8 @@
       ],
       "model": "gpt-4o",
       "context": {
-        "constitution": ".specify/memory/constitution.md",
-        "project_structure": "specs/",
-        "current_specs": [
-          "specs/001-core-session-logging/",
-          "specs/002-spotify-integration/", 
-          "specs/003-data-export/"
-        ]
+        "constitution": ".agent/globals/constitution.md",
+        "project_structure": "Afterflow/"
       }
     }
   ]

@@ -18,7 +18,7 @@ final class ExportFlowUITests: XCTestCase {
         var menuButton = navBar.buttons.matching(menuPredicate).firstMatch
         if !menuButton.exists {
             let candidates = navBar.buttons.allElementsBoundByIndex
-            
+
             menuButton = candidates.last(where: { !$0.label.localizedCaseInsensitiveContains("filter") }) ?? navBar
                 .buttons.element(boundBy: 0)
         }
@@ -72,7 +72,6 @@ final class ExportFlowUITests: XCTestCase {
                 }
             }
         } else {
-            
             XCTAssertTrue(fileExporter.waitForExistence(timeout: 6), "File exporter should appear for exports")
             let saveButton = app.buttons["Save"]
             if saveButton.waitForExistence(timeout: 2), saveButton.isEnabled {

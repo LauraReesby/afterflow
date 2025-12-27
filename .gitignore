@@ -83,7 +83,3 @@ WARP.md
 *.swp
 *.lock
 
-### Spec Kit artifacts ###
-spec/**/__pycache__/
-spec/**/.DS_Store
-spec/**/.env

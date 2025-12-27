@@ -6,9 +6,7 @@ final class AfterflowUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    override func tearDownWithError() throws {
-        
-    }
+    override func tearDownWithError() throws {}
 
     @MainActor func testAppLaunches() throws {
         let app = self.makeApp()

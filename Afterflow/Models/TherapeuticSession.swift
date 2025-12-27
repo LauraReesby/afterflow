@@ -300,25 +300,10 @@ extension TherapeuticSession {
         self.markAsUpdated()
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     func addReflection(_ reflection: String, timestamp: Date = Date()) {
         let trimmedReflection = reflection.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedReflection.isEmpty else { return }
 
-        
         let timestampedEntry = "[\(timestamp.formatted(date: .omitted, time: .shortened))] \(trimmedReflection)"
 
         if self.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
