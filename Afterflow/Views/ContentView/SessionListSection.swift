@@ -1,6 +1,7 @@
 import SwiftData
 import SwiftUI
 
+// swiftlint:disable:next type_body_length
 struct SessionListSection: View {
     let sessions: [TherapeuticSession]
     @Binding var listViewModel: SessionListViewModel
@@ -51,7 +52,11 @@ struct SessionListSection: View {
                     ))
                 }
             }
-            .animation(.spring(response: DesignConstants.Animation.springResponse, dampingFraction: DesignConstants.Animation.springDampingFraction), value: self.isSearchExpanded)
+            .animation(
+                .spring(response: DesignConstants.Animation.springResponse,
+                        dampingFraction: DesignConstants.Animation.springDampingFraction),
+                value: self.isSearchExpanded
+            )
         }
     }
 
@@ -114,7 +119,12 @@ struct SessionListSection: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
-            .listRowInsets(.init(top: DesignConstants.Spacing.small, leading: DesignConstants.Spacing.large, bottom: DesignConstants.Spacing.small, trailing: DesignConstants.Spacing.large))
+            .listRowInsets(.init(
+                top: DesignConstants.Spacing.small,
+                leading: DesignConstants.Spacing.large,
+                bottom: DesignConstants.Spacing.small,
+                trailing: DesignConstants.Spacing.large
+            ))
             .listSectionSeparator(.hidden)
             .listStyle(.plain)
             .scrollBounceBehavior(.basedOnSize)
@@ -152,11 +162,6 @@ struct SessionListSection: View {
         DragGesture(minimumDistance: 30)
             .onEnded { value in
                 let velocity = value.translation.height
-                // if velocity > 50 && self.calendarMode == .twoWeeks {
-                //     withAnimation(.easeInOut(duration: 0.3)) {
-                //         self.calendarMode = .month
-                //     }
-                // } else
 
                 if velocity < -50, self.calendarMode == .month {
                     withAnimation(.easeInOut(duration: DesignConstants.Animation.standardDuration)) {

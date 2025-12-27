@@ -1,4 +1,5 @@
 @testable import Afterflow
+import Foundation
 import Testing
 
 @MainActor
@@ -36,5 +37,336 @@ struct SessionListViewModelTests {
         let filtered = viewModel.applyFilters(to: sessions)
         #expect(filtered.count == 1)
         #expect(filtered.first?.intention.contains("3") == true)
+    }
+
+    // MARK: - Marked Dates Tests
+
+    @Test("Marked dates returns unique start of days") func markedDatesReturnsUniqueStartOfDays() async throws {
+        let calendar = Calendar.current
+        let baseDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
+
+        let sessions = [
+            TherapeuticSession(
+                sessionDate: baseDate,
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "Test 1",
+                moodBefore: 5,
+                moodAfter: 8
+            ),
+            TherapeuticSession(
+                sessionDate: calendar.date(byAdding: .hour, value: 5, to: baseDate)!,
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "Test 2",
+                moodBefore: 5,
+                moodAfter: 8
+            ),
+            TherapeuticSession(
+                sessionDate: calendar.date(byAdding: .day, value: 1, to: baseDate)!,
+                treatmentType: .lsd,
+                administration: .oral,
+                intention: "Test 3",
+                moodBefore: 5,
+                moodAfter: 8
+            )
+        ]
+
+        let viewModel = SessionListViewModel()
+        let markedDates = viewModel.markedDates(from: sessions)
+
+        #expect(markedDates.count == 2) // Two unique days
+        #expect(markedDates.contains(calendar.startOfDay(for: baseDate)))
+        #expect(markedDates.contains(calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: baseDate)!)))
+    }
+
+    @Test("Marked dates normalizes to midnight") func markedDatesNormalizesToMidnight() async throws {
+        let calendar = Calendar.current
+        let dateWithTime = TestHelpers.dateComponents(year: 2024, month: 12, day: 15, hour: 14, minute: 30)
+
+        let sessions = [
+            TherapeuticSession(
+                sessionDate: dateWithTime,
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "Test",
+                moodBefore: 5,
+                moodAfter: 8
+            )
+        ]
+
+        let viewModel = SessionListViewModel()
+        let markedDates = viewModel.markedDates(from: sessions)
+
+        let markedDate = markedDates.first!
+        let components = calendar.dateComponents([.hour, .minute, .second], from: markedDate)
+        #expect(components.hour == 0)
+        #expect(components.minute == 0)
+        #expect(components.second == 0)
+    }
+
+    @Test("Marked dates handles empty sessions") func markedDatesHandlesEmptySessions() async throws {
+        let viewModel = SessionListViewModel()
+        let markedDates = viewModel.markedDates(from: [])
+
+        #expect(markedDates.isEmpty)
+    }
+
+    // MARK: - Index of First Session Tests
+
+    @Test("Index of first session finds correct index") func indexOfFirstSessionFindsCorrectIndex() async throws {
+        let calendar = Calendar.current
+        let date1 = TestHelpers.dateComponents(year: 2024, month: 12, day: 10)
+        let date2 = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
+        let date3 = TestHelpers.dateComponents(year: 2024, month: 12, day: 20)
+
+        let sessions = [
+            TherapeuticSession(
+                sessionDate: date1,
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "Test 1",
+                moodBefore: 5,
+                moodAfter: 8
+            ),
+            TherapeuticSession(
+                sessionDate: date2,
+                treatmentType: .lsd,
+                administration: .oral,
+                intention: "Test 2",
+                moodBefore: 5,
+                moodAfter: 8
+            ),
+            TherapeuticSession(
+                sessionDate: date3,
+                treatmentType: .mdma,
+                administration: .oral,
+                intention: "Test 3",
+                moodBefore: 5,
+                moodAfter: 8
+            )
+        ]
+
+        let viewModel = SessionListViewModel()
+        let index = viewModel.indexOfFirstSession(on: date2, in: sessions)
+
+        #expect(index == 1)
+    }
+
+    @Test("Index of first session returns nil when not found")
+    func indexOfFirstSessionReturnsNilWhenNotFound() async throws {
+        let date1 = TestHelpers.dateComponents(year: 2024, month: 12, day: 10)
+        let searchDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 25)
+
+        let sessions = [
+            TherapeuticSession(
+                sessionDate: date1,
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "Test 1",
+                moodBefore: 5,
+                moodAfter: 8
+            )
+        ]
+
+        let viewModel = SessionListViewModel()
+        let index = viewModel.indexOfFirstSession(on: searchDate, in: sessions)
+
+        #expect(index == nil)
+    }
+
+    // MARK: - Clear Filters Tests
+
+    @Test("Clear filters clears treatment filter") func clearFiltersClearsTreatmentFilter() async throws {
+        var viewModel = SessionListViewModel()
+        viewModel.treatmentFilter = .psilocybin
+        viewModel.sortOption = .moodChange
+
+        viewModel.clearFilters()
+
+        #expect(viewModel.treatmentFilter == nil)
+        #expect(viewModel.sortOption == .moodChange) // Sort option should remain
+    }
+
+    @Test("Clear filters clears search text") func clearFiltersClearsSearchText() async throws {
+        var viewModel = SessionListViewModel()
+        viewModel.searchText = "test query"
+        viewModel.sortOption = .newestFirst
+
+        viewModel.clearFilters()
+
+        #expect(viewModel.searchText == "")
+        #expect(viewModel.sortOption == .newestFirst) // Sort option should remain
+    }
+
+    @Test("Clear filters does not affect sort option") func clearFiltersDoesNotAffectSortOption() async throws {
+        var viewModel = SessionListViewModel()
+        viewModel.treatmentFilter = .mdma
+        viewModel.searchText = "test"
+        viewModel.sortOption = .oldestFirst
+
+        viewModel.clearFilters()
+
+        #expect(viewModel.sortOption == .oldestFirst)
+    }
+
+    // MARK: - Cache Behavior Tests
+
+    @Test("Cache hit when inputs unchanged") func cacheHitWhenInputsUnchanged() async throws {
+        let sessions = SessionFixtureFactory.makeSessions(count: 10)
+        var viewModel = SessionListViewModel()
+
+        let result1 = viewModel.applyFilters(to: sessions)
+        let result2 = viewModel.applyFilters(to: sessions)
+
+        // Results should be identical (same cached array)
+        #expect(result1.count == result2.count)
+        #expect(zip(result1, result2).allSatisfy { $0.0.id == $0.1.id })
+    }
+
+    @Test("Cache miss when sessions change") func cacheMissWhenSessionsChange() async throws {
+        let sessions1 = SessionFixtureFactory.makeSessions(count: 5)
+        let sessions2 = SessionFixtureFactory.makeSessions(count: 10)
+        var viewModel = SessionListViewModel()
+
+        let result1 = viewModel.applyFilters(to: sessions1)
+        let result2 = viewModel.applyFilters(to: sessions2)
+
+        #expect(result1.count == 5)
+        #expect(result2.count == 10)
+    }
+
+    @Test("Cache miss when filters change") func cacheMissWhenFiltersChange() async throws {
+        let sessions = SessionFixtureFactory.makeSessions(count: 10)
+        var viewModel = SessionListViewModel()
+
+        let result1 = viewModel.applyFilters(to: sessions)
+
+        viewModel.treatmentFilter = .psilocybin
+        let result2 = viewModel.applyFilters(to: sessions)
+
+        #expect(result1.count >= result2.count) // Filtered result should be smaller or equal
+    }
+
+    // MARK: - Edge Cases Tests
+
+    @Test("Apply filters with empty sessions") func applyFiltersWithEmptySessions() async throws {
+        var viewModel = SessionListViewModel()
+        viewModel.treatmentFilter = .psilocybin
+        viewModel.searchText = "test"
+
+        let filtered = viewModel.applyFilters(to: [])
+
+        #expect(filtered.isEmpty)
+    }
+
+    @Test("Search text with whitespace only") func searchTextWithWhitespaceOnly() async throws {
+        let sessions = SessionFixtureFactory.makeSessions(count: 5)
+        var viewModel = SessionListViewModel()
+        viewModel.searchText = "   \n\t   "
+
+        let filtered = viewModel.applyFilters(to: sessions)
+
+        #expect(filtered.count == sessions.count) // Should return all sessions
+    }
+
+    @Test("Current filter description formats correctly") func currentFilterDescriptionFormats() async throws {
+        var viewModel = SessionListViewModel()
+
+        // No filter
+        #expect(viewModel.currentFilterDescription == "Newest First")
+
+        // With treatment filter
+        viewModel.treatmentFilter = .psilocybin
+        #expect(viewModel.currentFilterDescription.contains("Psilocybin"))
+        #expect(viewModel.currentFilterDescription.contains("Newest First"))
+
+        // Different sort option
+        viewModel.sortOption = .moodChange
+        #expect(viewModel.currentFilterDescription.contains("Psilocybin"))
+        #expect(viewModel.currentFilterDescription.contains("Biggest Mood Lift"))
+    }
+
+    @Test("Search filters reflections as well as intentions") func searchFiltersReflections() async throws {
+        let sessions = [
+            TherapeuticSession(
+                sessionDate: Date(),
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "Explore creativity",
+                moodBefore: 5,
+                moodAfter: 8,
+                reflections: "Amazing insights about art"
+            ),
+            TherapeuticSession(
+                sessionDate: Date(),
+                treatmentType: .lsd,
+                administration: .oral,
+                intention: "Healing",
+                moodBefore: 4,
+                moodAfter: 9,
+                reflections: "Felt peaceful"
+            )
+        ]
+
+        var viewModel = SessionListViewModel()
+        viewModel.searchText = "insights"
+
+        let filtered = viewModel.applyFilters(to: sessions)
+
+        #expect(filtered.count == 1)
+        #expect(filtered.first?.reflections.contains("insights") == true)
+    }
+
+    @Test("Search is case insensitive") func searchIsCaseInsensitive() async throws {
+        let sessions = [
+            TherapeuticSession(
+                sessionDate: Date(),
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "EXPLORE CREATIVITY",
+                moodBefore: 5,
+                moodAfter: 8
+            )
+        ]
+
+        var viewModel = SessionListViewModel()
+        viewModel.searchText = "explore"
+
+        let filtered = viewModel.applyFilters(to: sessions)
+
+        #expect(filtered.count == 1)
+    }
+
+    @Test("Mood change sort uses date as tiebreaker") func moodChangeSortUsesDateAsTiebreaker() async throws {
+        let date1 = TestHelpers.dateComponents(year: 2024, month: 12, day: 10)
+        let date2 = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
+
+        let sessions = [
+            TherapeuticSession(
+                sessionDate: date1,
+                treatmentType: .psilocybin,
+                administration: .oral,
+                intention: "Test 1",
+                moodBefore: 5,
+                moodAfter: 8
+            ), // +3 mood change
+            TherapeuticSession(
+                sessionDate: date2,
+                treatmentType: .lsd,
+                administration: .oral,
+                intention: "Test 2",
+                moodBefore: 5,
+                moodAfter: 8
+            ) // +3 mood change
+        ]
+
+        var viewModel = SessionListViewModel()
+        viewModel.sortOption = .moodChange
+
+        let sorted = viewModel.applyFilters(to: sessions)
+
+        // When mood change is equal, newer date should come first
+        #expect(sorted.first?.sessionDate == date2)
     }
 }

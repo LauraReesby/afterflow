@@ -477,7 +477,12 @@ private struct SessionMusicSection: View {
                     artworkURL: self.session.musicLinkArtworkURL.flatMap(URL.init(string:)),
                     openAction: self.onOpenLink
                 )
-                .listRowInsets(.init(top: DesignConstants.Spacing.small / 2, leading: DesignConstants.Spacing.small, bottom: DesignConstants.Spacing.small / 2, trailing: DesignConstants.Spacing.small))
+                .listRowInsets(.init(
+                    top: DesignConstants.Spacing.small / 2,
+                    leading: DesignConstants.Spacing.small,
+                    bottom: DesignConstants.Spacing.small / 2,
+                    trailing: DesignConstants.Spacing.small
+                ))
             } else {
                 Button {
                     self.onAttachMusic()
@@ -491,7 +496,12 @@ private struct SessionMusicSection: View {
                 .accessibilityIdentifier("attachMusicLinkFromDetail")
                 .accessibilityHint("Opens the form to attach a music link to this session")
                 .padding(.vertical, 2)
-                .listRowInsets(.init(top: DesignConstants.Spacing.small / 2, leading: DesignConstants.Spacing.small, bottom: DesignConstants.Spacing.small / 2, trailing: DesignConstants.Spacing.small))
+                .listRowInsets(.init(
+                    top: DesignConstants.Spacing.small / 2,
+                    leading: DesignConstants.Spacing.small,
+                    bottom: DesignConstants.Spacing.small / 2,
+                    trailing: DesignConstants.Spacing.small
+                ))
             }
         }
         .accessibilityElement(children: .contain)

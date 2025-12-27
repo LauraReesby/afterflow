@@ -1,4 +1,3 @@
-// swiftlint:disable file_length
 import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
@@ -197,7 +196,12 @@ private extension ContentView {
                     .background(
                         RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)
                             .fill(.regularMaterial)
-                            .shadow(color: .black.opacity(DesignConstants.Shadow.standardOpacity), radius: DesignConstants.Shadow.standardRadius, x: DesignConstants.Shadow.standardX, y: DesignConstants.Shadow.standardY)
+                            .shadow(
+                                color: .black.opacity(DesignConstants.Shadow.standardOpacity),
+                                radius: DesignConstants.Shadow.standardRadius,
+                                x: DesignConstants.Shadow.standardX,
+                                y: DesignConstants.Shadow.standardY
+                            )
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)
@@ -215,11 +219,16 @@ private extension ContentView {
             }
         }
         .padding(.top, DesignConstants.Spacing.small)
-        .animation(.easeInOut(duration: DesignConstants.Animation.standardDuration), value: self.notificationHandler.confirmations.recentConfirmations)
-        .animation(.easeInOut(duration: DesignConstants.Animation.standardDuration), value: self.debugNotificationScheduled)
+        .animation(
+            .easeInOut(duration: DesignConstants.Animation.standardDuration),
+            value: self.notificationHandler.confirmations.recentConfirmations
+        )
+        .animation(
+            .easeInOut(duration: DesignConstants.Animation.standardDuration),
+            value: self.debugNotificationScheduled
+        )
     }
 }
-
 
 private extension ContentView {
     func scheduleDebugNotification() async {
@@ -268,7 +277,6 @@ private extension ContentView {
     }
 }
 
-
 private struct ReflectionConfirmationBanner: View {
     let message: String
 
@@ -289,7 +297,12 @@ private struct ReflectionConfirmationBanner: View {
         .background(
             RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)
                 .fill(.regularMaterial)
-                .shadow(color: .black.opacity(DesignConstants.Shadow.standardOpacity), radius: DesignConstants.Shadow.standardRadius, x: DesignConstants.Shadow.standardX, y: DesignConstants.Shadow.standardY)
+                .shadow(
+                    color: .black.opacity(DesignConstants.Shadow.standardOpacity),
+                    radius: DesignConstants.Shadow.standardRadius,
+                    x: DesignConstants.Shadow.standardX,
+                    y: DesignConstants.Shadow.standardY
+                )
         )
         .overlay(
             RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)

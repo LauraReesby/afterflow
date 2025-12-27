@@ -33,16 +33,16 @@ struct SessionListViewModel {
 
     mutating func applyFilters(to sessions: [TherapeuticSession]) -> [TherapeuticSession] {
         let currentSessionsHash = sessions.map(\.id).hashValue
-        let currentFilterHash = filterHash
+        let currentFilterHash = self.filterHash
 
         // Return cached result if inputs haven't changed
-        if currentSessionsHash == lastSessionsHash && currentFilterHash == lastFilterHash {
-            return cachedFilteredSessions
+        if currentSessionsHash == self.lastSessionsHash, currentFilterHash == self.lastFilterHash {
+            return self.cachedFilteredSessions
         }
 
         // Update cache tracking
-        lastSessionsHash = currentSessionsHash
-        lastFilterHash = currentFilterHash
+        self.lastSessionsHash = currentSessionsHash
+        self.lastFilterHash = currentFilterHash
 
         // Perform filtering
         var filtered = sessions
@@ -74,15 +74,15 @@ struct SessionListViewModel {
         }
 
         // Cache and return result
-        cachedFilteredSessions = filtered
+        self.cachedFilteredSessions = filtered
         return filtered
     }
 
     private var filterHash: Int {
         var hasher = Hasher()
-        hasher.combine(sortOption)
-        hasher.combine(treatmentFilter)
-        hasher.combine(searchText)
+        hasher.combine(self.sortOption)
+        hasher.combine(self.treatmentFilter)
+        hasher.combine(self.searchText)
         return hasher.finalize()
     }
 
