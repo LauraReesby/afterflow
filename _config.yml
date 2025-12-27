@@ -1,0 +1,12 @@
+title: Afterflow
+description: Private, offline session logging for reflection and well-being.
+
+url: "https://laurareesby.github.io"
+baseurl: "/afterflow"
+
+markdown: kramdown
+theme: minima
+
+header_pages:
+  - support.md
+  - privacy.md
