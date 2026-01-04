@@ -39,7 +39,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(components.day == 1)
     }
 
-    @Test("Start of month handles first day of month", .serialized) func startOfMonthHandlesFirstDayOfMonth() throws {
+    @Test("Start of month handles first day of month") func startOfMonthHandlesFirstDayOfMonth() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
         let date = TestHelpers.dateComponents(year: 2024, month: 6, day: 1)
@@ -106,8 +106,6 @@ struct CollapsibleCalendarSupportTests {
 
     @Test("First grid date when month starts on first weekday")
     func firstGridDateWhenMonthStartsOnFirstWeekday() throws {
-        let calendar = Calendar.current
-
         var testCalendar = Calendar.current
         testCalendar.firstWeekday = 1
 
@@ -147,7 +145,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(decWeekday == calendar.firstWeekday)
     }
 
-    @Test("Accessibility label includes full date", .serialized) func accessibilityLabelIncludesFullDate() throws {
+    @Test("Accessibility label includes full date") func accessibilityLabelIncludesFullDate() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
         let date = TestHelpers.dateComponents(year: 2024, month: 12, day: 25)

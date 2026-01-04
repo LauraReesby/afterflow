@@ -2,6 +2,7 @@
 import Foundation
 import Testing
 
+@MainActor
 @Suite("Export/Import Integration Tests")
 struct ExportImportIntegrationTests {
     @Test("CSV round trip preserves all session data") func csvRoundTripPreservesData() async throws {
@@ -227,9 +228,9 @@ struct ExportImportIntegrationTests {
     }
 
     @Test("CSV round trip preserves all music link providers") func csvRoundTripMusicLinks() async throws {
-        var spotify = SessionFixtureFactory.makeSessionWithMusicLink(provider: "spotify")
-        var youtube = SessionFixtureFactory.makeSessionWithMusicLink(provider: "youtube")
-        var apple = SessionFixtureFactory.makeSessionWithMusicLink(provider: "apple")
+        let spotify = SessionFixtureFactory.makeSessionWithMusicLink(provider: "spotify")
+        let youtube = SessionFixtureFactory.makeSessionWithMusicLink(provider: "youtube")
+        let apple = SessionFixtureFactory.makeSessionWithMusicLink(provider: "apple")
 
         let exportService = CSVExportService()
         let csvURL = try exportService.export(sessions: [spotify, youtube, apple])

@@ -41,16 +41,6 @@
 			path = .github;
 			sourceTree = "<group>";
 		};
-		82DA2AB82EC7F89A00A0CAE9 /* ai */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ai;
-			sourceTree = "<group>";
-		};
-		82DA2AC62EC7F89A00A0CAE9 /* specs */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = specs;
-			sourceTree = "<group>";
-		};
 		82DA2AC92EC7FBE100A0CAE9 /* Scripts */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Scripts;
@@ -112,9 +102,7 @@
 				82DA2AC72EC7FBE100A0CAE9 /* .swiftlint.yml */,
 				82DA2ACB2EC7FEAE00A0CAE9 /* .swiftformat */,
 				82DA2AC92EC7FBE100A0CAE9 /* Scripts */,
-				82DA2AB82EC7F89A00A0CAE9 /* ai */,
 				82DA2AB92EC7F89A00A0CAE9 /* README.md */,
-				82DA2AC62EC7F89A00A0CAE9 /* specs */,
 			);
 			sourceTree = "<group>";
 		};

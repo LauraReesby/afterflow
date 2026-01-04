@@ -264,7 +264,6 @@ struct ExportStateTests {
 
     @Test(
         "Export cancels previous task on new export",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func exportCancelsPreviousTaskOnNewExport() async throws {
         let exportState = ExportState()

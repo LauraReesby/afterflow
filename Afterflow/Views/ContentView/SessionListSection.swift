@@ -16,62 +16,35 @@ struct SessionListSection: View {
     let onDebugNotification: () -> Void
 
     @State private var scrollTarget: UUID?
-    @State private var calendarMonth: Date = Calendar.current.startOfMonth(for: Date())
-    @State private var calendarMode: CollapsibleCalendarView.DisplayMode = .twoWeeks
-    @State private var pendingCalendarMonth: Date?
-    @State private var suppressListSync = false
-    @State private var calendarCenterOnMonth: Date?
-    @State private var collapsedHeaderSyncEnabled = false
-    @State private var isSearchExpanded = false
+    @State private var showCalendarView = false
 
     var body: some View {
-        NavigationStack(path: self.$navigationPath) {
-            VStack(spacing: 0) {
-                self.buildCalendarView()
-                self.sessionList()
-            }
-            .toolbar { self.toolbarContent }
-            .toolbarBackground(self.isSearchExpanded ? .hidden : .visible, for: .navigationBar)
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(for: UUID.self) { sessionID in
-                if let session = self.sessions.first(where: { $0.id == sessionID }) {
-                    SessionDetailView(session: session)
-                        .environment(self.sessionStore)
+        ZStack(alignment: .bottom) {
+            NavigationStack(path: self.$navigationPath) {
+                VStack(spacing: 0) {
+                    if self.showCalendarView {
+                        self.calendarScrollView()
+                    } else {
+                        self.sessionList()
+                    }
+                }
+                .navigationTitle("Sessions")
+                .toolbar { self.toolbarContent }
+                .toolbarBackground(.visible, for: .navigationBar)
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationDestination(for: UUID.self) { sessionID in
+                    if let session = self.sessions.first(where: { $0.id == sessionID }) {
+                        SessionDetailView(session: session)
+                            .environment(self.sessionStore)
+                    }
                 }
             }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                if self.isSearchExpanded {
-                    FullWidthSearchBar(
-                        searchText: self.$listViewModel.searchText,
-                        isExpanded: self.$isSearchExpanded
-                    )
-                    .background(Color(.systemBackground))
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .top).combined(with: .opacity),
-                        removal: .move(edge: .top).combined(with: .opacity)
-                    ))
-                }
-            }
-            .animation(
-                .spring(response: DesignConstants.Animation.springResponse,
-                        dampingFraction: DesignConstants.Animation.springDampingFraction),
-                value: self.isSearchExpanded
+
+            BottomControls(
+                searchText: self.$listViewModel.searchText,
+                onAdd: self.onAdd
             )
         }
-    }
-
-    private func buildCalendarView() -> some View {
-        CollapsibleCalendarView(
-            selectedDate: self.$listViewModel.selectedDate,
-            currentMonth: self.$calendarMonth,
-            mode: self.$calendarMode,
-            markedDates: self.calendarMarkers(),
-            centerOnMonth: self.$calendarCenterOnMonth,
-            onSelect: { date in
-                self.focusCalendar(on: date)
-            }
-        )
-        .padding(.bottom, 4)
     }
 
     private func calendarMarkers() -> [Date: Color] {
@@ -84,25 +57,139 @@ struct SessionListSection: View {
         }
     }
 
-    private func focusCalendar(on date: Date) {
-        let normalized = Calendar.current.startOfDay(for: date)
-        let monthStart = Calendar.current.startOfMonth(for: normalized)
+    private func calendarScrollView() -> some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach(self.generateMonthRange(), id: \.self) { monthStart in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(monthStart, format: .dateTime.month(.wide).year())
+                            .font(.headline)
+                            .padding(.horizontal)
 
-        self.calendarMonth = monthStart
+                        self.monthGrid(for: monthStart)
+                    }
+                }
+            }
+            .padding(.vertical)
+        }
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: 88)
+        }
+    }
 
-        self.listViewModel.selectedDate = normalized
+    private func monthGrid(for monthStart: Date) -> some View {
+        let calendar = Calendar.current
+        let gridDays = self.generateGridDaysForMonth(monthStart)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
+        let markedDates = self.calendarMarkers()
 
-        if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
-            let session = self.sessions[idx]
+        return VStack(spacing: 8) {
+            LazyVGrid(columns: columns, spacing: 4) {
+                ForEach(0..<7, id: \.self) { index in
+                    let weekdayIndex = (calendar.firstWeekday + index - 1) % 7 + 1
+                    let weekdaySymbol = calendar.veryShortWeekdaySymbols[weekdayIndex - 1]
+                    Text(weekdaySymbol)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
 
-            self.pendingCalendarMonth = monthStart
-            self.suppressListSync = true
-            self.scrollTarget = session.id
-        } else {
-            self.pendingCalendarMonth = nil
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(0..<gridDays.count, id: \.self) { index in
+                    if let date = gridDays[index] {
+                        self.dayCell(for: date, in: monthStart, markedDates: markedDates)
+                    } else {
+                        Color.clear
+                            .frame(width: 36, height: 36)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    private func dayCell(for date: Date, in monthStart: Date, markedDates: [Date: Color]) -> some View {
+        let calendar = Calendar.current
+        let day = calendar.component(.day, from: date)
+        let isToday = calendar.isDateInToday(date)
+        let markerColor = markedDates[calendar.startOfDay(for: date)]
+
+        return Text("\(day)")
+            .font(.body)
+            .foregroundColor(markerColor != nil ? .white : .primary)
+            .frame(width: 36, height: 36)
+            .background(
+                Circle()
+                    .fill(markerColor ?? (isToday ? Color.accentColor.opacity(0.2) : Color.clear))
+            )
+            .overlay(
+                Circle()
+                    .stroke(isToday && markerColor == nil ? Color.accentColor : Color.clear, lineWidth: 1)
+            )
+            .onTapGesture {
+                if let idx = self.listViewModel.indexOfFirstSession(on: date, in: self.sessions) {
+                    let session = self.sessions[idx]
+                    self.listViewModel.selectedDate = calendar.startOfDay(for: date)
+                    self.navigationPath.append(session.id)
+                }
+            }
+    }
+
+    private func generateMonthRange() -> [Date] {
+        let calendar = Calendar.current
+        let today = Date()
+
+        guard let oldestSession = self.sessions.last,
+              let newestSession = self.sessions.first else {
+            return [calendar.startOfMonth(for: today)]
         }
 
-        self.calendarCenterOnMonth = nil
+        let startMonth = calendar.startOfMonth(for: oldestSession.sessionDate)
+        let endMonth = calendar.startOfMonth(for: max(newestSession.sessionDate, today))
+
+        var months: [Date] = []
+        var currentMonth = startMonth
+
+        while currentMonth <= endMonth {
+            months.append(currentMonth)
+            guard let nextMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) else {
+                break
+            }
+            currentMonth = nextMonth
+        }
+
+        return months.reversed()
+    }
+
+    private func generateGridDaysForMonth(_ monthStart: Date) -> [Date?] {
+        let calendar = Calendar.current
+
+        // Get the weekday of the first day of the month (1 = Sunday, 2 = Monday, etc.)
+        let firstWeekday = calendar.component(.weekday, from: monthStart)
+
+        // Calculate offset: how many empty cells before the 1st
+        let offset = (firstWeekday - calendar.firstWeekday + 7) % 7
+
+        // Get number of days in the month
+        let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)?.count ?? 30
+
+        var gridDays: [Date?] = []
+
+        // Add empty cells for offset
+        for _ in 0..<offset {
+            gridDays.append(nil)
+        }
+
+        // Add actual dates
+        for day in 0..<daysInMonth {
+            if let date = calendar.date(byAdding: .day, value: day, to: monthStart) {
+                gridDays.append(date)
+            }
+        }
+
+        return gridDays
     }
 
     @ViewBuilder private func sessionList() -> some View {
@@ -125,9 +212,11 @@ struct SessionListSection: View {
             .listStyle(.plain)
             .scrollBounceBehavior(.basedOnSize)
             .coordinateSpace(name: "listScroll")
-            .simultaneousGesture(self.calendarCollapseGesture())
             .toolbarBackground(.visible, for: .automatic)
             .scrollDismissesKeyboard(.immediately)
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 88)
+            }
             .onChange(of: self.scrollTarget) { _, target in
                 guard let target else { return }
                 withAnimation(.easeInOut(duration: DesignConstants.Animation.standardDuration)) {
@@ -135,97 +224,21 @@ struct SessionListSection: View {
                 }
             }
             .onPreferenceChange(TopVisibleDatePreferenceKey.self) { date in
-                self.handleTopVisibleDateChange(date)
+                if let date {
+                    let normalized = Calendar.current.startOfDay(for: date)
+                    Task { @MainActor in
+                        self.listViewModel.selectedDate = normalized
+                    }
+                }
             }
             .onAppear {
                 if let firstSession = self.sessions.first {
                     self.scrollTarget = firstSession.id
                 }
             }
-            .onChange(of: self.calendarMonth) { _, _ in
-                if self.pendingCalendarMonth == nil {
-                    self.suppressListSync = true
-                }
-            }
-            .onChange(of: self.calendarMode) { old, new in
-                self.handleCalendarModeChange(old: old, new: new)
-            }
         }
     }
 
-    private func calendarCollapseGesture() -> some Gesture {
-        DragGesture(minimumDistance: 30)
-            .onEnded { value in
-                let velocity = value.translation.height
-
-                if velocity < -50, self.calendarMode == .month {
-                    withAnimation(.easeInOut(duration: DesignConstants.Animation.standardDuration)) {
-                        self.calendarMode = .twoWeeks
-                    }
-                }
-            }
-    }
-
-    private func handleTopVisibleDateChange(_ date: Date?) {
-        guard let date else { return }
-
-        let normalized = Calendar.current.startOfDay(for: date)
-        self.listViewModel.selectedDate = normalized
-
-        let monthStart = Calendar.current.startOfMonth(for: normalized)
-
-        if self.calendarMode == .twoWeeks, self.collapsedHeaderSyncEnabled, monthStart != self.calendarMonth {
-            withAnimation(.easeInOut(duration: DesignConstants.Animation.quickDuration)) {
-                self.calendarMonth = monthStart
-            }
-        }
-
-        if let pending = self.pendingCalendarMonth,
-           Calendar.current.isDate(monthStart, equalTo: pending, toGranularity: .month) {
-            self.pendingCalendarMonth = nil
-            return
-        }
-
-        if self.pendingCalendarMonth != nil { return }
-
-        if monthStart != self.calendarMonth {
-            withAnimation(.easeInOut(duration: DesignConstants.Animation.quickDuration)) {
-                self.calendarMonth = monthStart
-            }
-        }
-    }
-
-    private func handleCalendarModeChange(
-        old: CollapsibleCalendarView.DisplayMode,
-        new: CollapsibleCalendarView.DisplayMode
-    ) {
-        guard old != new else { return }
-
-        if new == .month {
-            self.collapsedHeaderSyncEnabled = false
-        } else if new == .twoWeeks {
-            DispatchQueue.main.async {
-                self.collapsedHeaderSyncEnabled = true
-            }
-        }
-
-        if new == .month {
-            if let selected = self.listViewModel.selectedDate {
-                let normalized = Calendar.current.startOfDay(for: selected)
-                let monthStart = Calendar.current.startOfMonth(for: normalized)
-
-                self.pendingCalendarMonth = monthStart
-                self.suppressListSync = true
-                self.calendarMonth = monthStart
-
-                self.calendarCenterOnMonth = monthStart
-                if let idx = self.listViewModel.indexOfFirstSession(on: normalized, in: self.sessions) {
-                    let session = self.sessions[idx]
-                    self.scrollTarget = session.id
-                }
-            }
-        }
-    }
 
     private func buildSessionRow(session: TherapeuticSession, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -266,75 +279,70 @@ struct SessionListSection: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if !self.isSearchExpanded {
-            ToolbarItem(placement: .navigationBarLeading) {
+        ToolbarItem(placement: .navigationBarLeading) {
+            Menu {
+                Button {
+                    self.onOpenSettings()
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .accessibilityHint("Opens settings")
+                Button {
+                    self.onExport()
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .accessibilityHint("Exports your session data")
+                Button {
+                    self.onImport()
+                } label: {
+                    Label("Import", systemImage: "square.and.arrow.down")
+                }
+                .accessibilityHint("Imports session data from a file")
                 Menu {
                     Button {
-                        self.onOpenSettings()
+                        self.onExampleImport()
                     } label: {
-                        Label("Settings", systemImage: "gearshape")
+                        Label("Example Import", systemImage: "doc.badge.plus")
                     }
-                    .accessibilityHint("Opens settings")
-                    Button {
-                        self.onExport()
-                    } label: {
-                        Label("Export", systemImage: "square.and.arrow.up")
-                    }
-                    .accessibilityHint("Exports your session data")
-                    Button {
-                        self.onImport()
-                    } label: {
-                        Label("Import", systemImage: "square.and.arrow.down")
-                    }
-                    .accessibilityHint("Imports session data from a file")
-                    Menu {
-                        Button {
-                            self.onExampleImport()
-                        } label: {
-                            Label("Example Import", systemImage: "doc.badge.plus")
-                        }
-                        .accessibilityHint("Imports example session data")
-                    } label: {
-                        Label("Help", systemImage: "questionmark.circle")
-                    }
-                    #if DEBUG
-                        Divider()
-                        Button {
-                            self.onDebugNotification()
-                        } label: {
-                            Label("Test Notification (5s)", systemImage: "bell.badge")
-                        }
-                        .disabled(self.sessions.isEmpty)
-                        .accessibilityHint("Sends a test notification in 5 seconds")
-                    #endif
+                    .accessibilityHint("Imports example session data")
                 } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.title3)
-                        .padding(.horizontal, 2)
+                    Label("Help", systemImage: "questionmark.circle")
                 }
-                .accessibilityLabel("More options")
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack(spacing: DesignConstants.Spacing.medium) {
-                    FilterMenu(listViewModel: self.$listViewModel)
-
+                #if DEBUG
+                    Divider()
                     Button {
-                        self.isSearchExpanded.toggle()
+                        self.onDebugNotification()
                     } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.title3)
+                        Label("Test Notification (5s)", systemImage: "bell.badge")
                     }
-                    .accessibilityLabel("Search")
-                    .accessibilityHint("Opens the search bar to find sessions")
+                    .disabled(self.sessions.isEmpty)
+                    .accessibilityHint("Sends a test notification in 5 seconds")
+                #endif
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.title3)
+                    .padding(.horizontal, 2)
+            }
+            .accessibilityLabel("More options")
+        }
+        ToolbarItem(placement: .navigationBarTrailing) {
+            HStack(spacing: DesignConstants.Spacing.medium) {
+                FilterMenu(listViewModel: self.$listViewModel)
 
-                    Button(action: self.onAdd) {
-                        Image(systemName: "plus")
-                            .font(.title3.weight(.semibold))
+                Button {
+                    withAnimation(.spring(
+                        response: DesignConstants.Animation.springResponse,
+                        dampingFraction: DesignConstants.Animation.springDampingFraction
+                    )) {
+                        self.showCalendarView.toggle()
                     }
-                    .accessibilityIdentifier("addSessionButton")
-                    .accessibilityLabel("Add Session")
-                    .accessibilityHint("Opens a form to create a new session")
+                } label: {
+                    Image(systemName: self.showCalendarView ? "calendar.circle.fill" : "calendar")
+                        .font(.title3)
                 }
+                .accessibilityLabel(self.showCalendarView ? "Hide Calendar" : "Show Calendar")
+                .accessibilityHint("Toggles the calendar view")
             }
         }
     }
@@ -346,5 +354,61 @@ private struct TopVisibleDatePreferenceKey: PreferenceKey {
         if value == nil {
             value = nextValue()
         }
+    }
+}
+
+private struct BottomControls: View {
+    @Binding var searchText: String
+    let onAdd: () -> Void
+
+    var body: some View {
+        VStack(spacing: DesignConstants.Spacing.small) {
+            HStack(spacing: DesignConstants.Spacing.small) {
+                HStack(spacing: DesignConstants.Spacing.small) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField("Search", text: self.$searchText)
+                        .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true)
+                    if !self.searchText.isEmpty {
+                        Button {
+                            self.searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Clear search")
+                    }
+                }
+                .padding(.horizontal, DesignConstants.Spacing.medium)
+                .padding(.vertical, DesignConstants.Spacing.small)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                )
+
+                Button(action: self.onAdd) {
+                    Image(systemName: "plus")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.accentColor, in: Circle())
+                }
+                .accessibilityIdentifier("addSessionButton")
+                .accessibilityLabel("Add Session")
+            }
+            .padding(.horizontal, DesignConstants.Spacing.medium)
+        }
+        .padding(.bottom, 2)
+        .padding(.horizontal, DesignConstants.Spacing.medium)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.clear, Color(.systemBackground)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea(edges: .bottom)
+        )
     }
 }

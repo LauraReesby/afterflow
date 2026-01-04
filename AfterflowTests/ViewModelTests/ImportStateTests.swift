@@ -7,7 +7,6 @@ import Testing
 struct ImportStateTests {
     @Test(
         "Import CSV parses sessions successfully",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importCSVParsesSessionsSuccessfully() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
@@ -37,7 +36,6 @@ struct ImportStateTests {
 
     @Test(
         "Import sets showing import confirmation",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importSetsShowingImportConfirmation() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
@@ -66,7 +64,6 @@ struct ImportStateTests {
 
     @Test(
         "Import sets pending imported sessions",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importSetsPendingImportedSessions() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
@@ -213,7 +210,7 @@ struct ImportStateTests {
         }
     }
 
-    @Test("Import empty CSV file", .serialized, .disabled("Fails in full suite - MainActor/async timing issue"))
+    @Test("Import empty CSV file", .disabled("Fails in full suite - MainActor/async timing issue"))
     func importEmptyCSVFile() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
@@ -274,7 +271,7 @@ struct ImportStateTests {
         #expect(importState.importError == nil)
     }
 
-    @Test("Multiple imports in sequence", .serialized, .disabled("Fails in full suite - MainActor/async timing issue"))
+    @Test("Multiple imports in sequence", .disabled("Fails in full suite - MainActor/async timing issue"))
     func multipleImportsInSequence() async throws {
         let (container, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
@@ -325,7 +322,6 @@ struct ImportStateTests {
 
     @Test(
         "Import with Unicode characters",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importWithUnicodeCharacters() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
@@ -359,7 +355,6 @@ struct ImportStateTests {
 
     @Test(
         "Import with special CSV characters",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importWithSpecialCSVCharacters() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
@@ -389,7 +384,6 @@ struct ImportStateTests {
 
     @Test(
         "Import preserves music link URLs",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importPreservesMusicLinkURLs() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
@@ -423,7 +417,6 @@ struct ImportStateTests {
 
     @Test(
         "Import with boundary mood values",
-        .serialized,
         .disabled("Fails in full suite - MainActor/async timing issue")
     ) func importWithBoundaryMoodValues() async throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
