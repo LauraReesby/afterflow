@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-// swiftlint:disable:next type_body_length
+// swiftlint:disable type_body_length
 struct SessionListSection: View {
     let sessions: [TherapeuticSession]
     @Binding var listViewModel: SessionListViewModel
@@ -17,6 +17,7 @@ struct SessionListSection: View {
 
     @State private var scrollTarget: UUID?
     @State private var showCalendarView = false
+    @State private var isSearchExpanded = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -40,8 +41,10 @@ struct SessionListSection: View {
                 }
             }
 
-            BottomControls(
-                searchText: self.$listViewModel.searchText,
+            SearchControlBar(
+                listViewModel: self.$listViewModel,
+                showCalendarView: self.$showCalendarView,
+                isSearchExpanded: self.$isSearchExpanded,
                 onAdd: self.onAdd
             )
         }
@@ -85,7 +88,7 @@ struct SessionListSection: View {
 
         return VStack(spacing: 8) {
             LazyVGrid(columns: columns, spacing: 4) {
-                ForEach(0..<7, id: \.self) { index in
+                ForEach(0 ..< 7, id: \.self) { index in
                     let weekdayIndex = (calendar.firstWeekday + index - 1) % 7 + 1
                     let weekdaySymbol = calendar.veryShortWeekdaySymbols[weekdayIndex - 1]
                     Text(weekdaySymbol)
@@ -97,7 +100,7 @@ struct SessionListSection: View {
             }
 
             LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(0..<gridDays.count, id: \.self) { index in
+                ForEach(0 ..< gridDays.count, id: \.self) { index in
                     if let date = gridDays[index] {
                         self.dayCell(for: date, in: monthStart, markedDates: markedDates)
                     } else {
@@ -110,7 +113,8 @@ struct SessionListSection: View {
         .padding(.horizontal)
     }
 
-    private func dayCell(for date: Date, in monthStart: Date, markedDates: [Date: Color]) -> some View {
+    private func dayCell(for date: Date, in monthStart: Date, markedDates: [Date: Color])
+        -> some View {
         let calendar = Calendar.current
         let day = calendar.component(.day, from: date)
         let isToday = calendar.isDateInToday(date)
@@ -126,7 +130,10 @@ struct SessionListSection: View {
             )
             .overlay(
                 Circle()
-                    .stroke(isToday && markerColor == nil ? Color.accentColor : Color.clear, lineWidth: 1)
+                    .stroke(
+                        isToday && markerColor == nil ? Color.accentColor : Color.clear,
+                        lineWidth: 1
+                    )
             )
             .onTapGesture {
                 if let idx = self.listViewModel.indexOfFirstSession(on: date, in: self.sessions) {
@@ -142,7 +149,8 @@ struct SessionListSection: View {
         let today = Date()
 
         guard let oldestSession = self.sessions.last,
-              let newestSession = self.sessions.first else {
+              let newestSession = self.sessions.first
+        else {
             return [calendar.startOfMonth(for: today)]
         }
 
@@ -178,12 +186,12 @@ struct SessionListSection: View {
         var gridDays: [Date?] = []
 
         // Add empty cells for offset
-        for _ in 0..<offset {
+        for _ in 0 ..< offset {
             gridDays.append(nil)
         }
 
         // Add actual dates
-        for day in 0..<daysInMonth {
+        for day in 0 ..< daysInMonth {
             if let date = calendar.date(byAdding: .day, value: day, to: monthStart) {
                 gridDays.append(date)
             }
@@ -202,12 +210,14 @@ struct SessionListSection: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
-            .listRowInsets(.init(
-                top: DesignConstants.Spacing.small,
-                leading: DesignConstants.Spacing.large,
-                bottom: DesignConstants.Spacing.small,
-                trailing: DesignConstants.Spacing.large
-            ))
+            .listRowInsets(
+                .init(
+                    top: DesignConstants.Spacing.small,
+                    leading: DesignConstants.Spacing.large,
+                    bottom: DesignConstants.Spacing.small,
+                    trailing: DesignConstants.Spacing.large
+                )
+            )
             .listSectionSeparator(.hidden)
             .listStyle(.plain)
             .scrollBounceBehavior(.basedOnSize)
@@ -232,13 +242,14 @@ struct SessionListSection: View {
                 }
             }
             .onAppear {
-                if let firstSession = self.sessions.first {
-                    self.scrollTarget = firstSession.id
+                Task { @MainActor in
+                    if let firstSession = self.sessions.first {
+                        self.scrollTarget = firstSession.id
+                    }
                 }
             }
         }
     }
-
 
     private func buildSessionRow(session: TherapeuticSession, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -322,28 +333,11 @@ struct SessionListSection: View {
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.title3)
-                    .padding(.horizontal, 2)
+                    .foregroundStyle(.primary)
+                    .frame(width: 44, height: 44)
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("More options")
-        }
-        ToolbarItem(placement: .navigationBarTrailing) {
-            HStack(spacing: DesignConstants.Spacing.medium) {
-                FilterMenu(listViewModel: self.$listViewModel)
-
-                Button {
-                    withAnimation(.spring(
-                        response: DesignConstants.Animation.springResponse,
-                        dampingFraction: DesignConstants.Animation.springDampingFraction
-                    )) {
-                        self.showCalendarView.toggle()
-                    }
-                } label: {
-                    Image(systemName: self.showCalendarView ? "calendar.circle.fill" : "calendar")
-                        .font(.title3)
-                }
-                .accessibilityLabel(self.showCalendarView ? "Hide Calendar" : "Show Calendar")
-                .accessibilityHint("Toggles the calendar view")
-            }
         }
     }
 }
@@ -354,61 +348,5 @@ private struct TopVisibleDatePreferenceKey: PreferenceKey {
         if value == nil {
             value = nextValue()
         }
-    }
-}
-
-private struct BottomControls: View {
-    @Binding var searchText: String
-    let onAdd: () -> Void
-
-    var body: some View {
-        VStack(spacing: DesignConstants.Spacing.small) {
-            HStack(spacing: DesignConstants.Spacing.small) {
-                HStack(spacing: DesignConstants.Spacing.small) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
-                    TextField("Search", text: self.$searchText)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                    if !self.searchText.isEmpty {
-                        Button {
-                            self.searchText = ""
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Clear search")
-                    }
-                }
-                .padding(.horizontal, DesignConstants.Spacing.medium)
-                .padding(.vertical, DesignConstants.Spacing.small)
-                .background(
-                    RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                )
-
-                Button(action: self.onAdd) {
-                    Image(systemName: "plus")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.accentColor, in: Circle())
-                }
-                .accessibilityIdentifier("addSessionButton")
-                .accessibilityLabel("Add Session")
-            }
-            .padding(.horizontal, DesignConstants.Spacing.medium)
-        }
-        .padding(.bottom, 2)
-        .padding(.horizontal, DesignConstants.Spacing.medium)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [Color.clear, Color(.systemBackground)]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea(edges: .bottom)
-        )
     }
 }
