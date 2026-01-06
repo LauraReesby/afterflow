@@ -11,7 +11,7 @@ enum TestHelpers {
     }
 
     @MainActor static func makeExportState(sessionStore: SessionStore? = nil) throws -> ExportState {
-        let store = try sessionStore ?? self.makeTestEnvironment().1
+        _ = try sessionStore ?? self.makeTestEnvironment().1
         return ExportState()
     }
 

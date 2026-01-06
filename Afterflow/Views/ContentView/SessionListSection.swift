@@ -1,11 +1,10 @@
 import SwiftData
 import SwiftUI
 
-// swiftlint:disable type_body_length
 struct SessionListSection: View {
     let sessions: [TherapeuticSession]
     @Binding var listViewModel: SessionListViewModel
-    @Binding var navigationPath: NavigationPath
+    @Binding var selection: UUID?
     let sessionStore: SessionStore
     let onDelete: (IndexSet) -> Void
     let onAdd: () -> Void
@@ -21,25 +20,17 @@ struct SessionListSection: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            NavigationStack(path: self.$navigationPath) {
-                VStack(spacing: 0) {
-                    if self.showCalendarView {
-                        self.calendarScrollView()
-                    } else {
-                        self.sessionList()
-                    }
-                }
-                .navigationTitle("Sessions")
-                .toolbar { self.toolbarContent }
-                .toolbarBackground(.visible, for: .navigationBar)
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationDestination(for: UUID.self) { sessionID in
-                    if let session = self.sessions.first(where: { $0.id == sessionID }) {
-                        SessionDetailView(session: session)
-                            .environment(self.sessionStore)
-                    }
+            VStack(spacing: 0) {
+                if self.showCalendarView {
+                    self.calendarScrollView()
+                } else {
+                    self.sessionList()
                 }
             }
+            .navigationTitle("Sessions")
+            .toolbar { self.toolbarContent }
+            .toolbarBackground(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
 
             SearchControlBar(
                 listViewModel: self.$listViewModel,
@@ -139,7 +130,7 @@ struct SessionListSection: View {
                 if let idx = self.listViewModel.indexOfFirstSession(on: date, in: self.sessions) {
                     let session = self.sessions[idx]
                     self.listViewModel.selectedDate = calendar.startOfDay(for: date)
-                    self.navigationPath.append(session.id)
+                    self.selection = session.id
                 }
             }
     }
@@ -202,7 +193,7 @@ struct SessionListSection: View {
 
     @ViewBuilder private func sessionList() -> some View {
         ScrollViewReader { proxy in
-            List {
+            List(selection: self.$selection) {
                 ForEach(Array(self.sessions.enumerated()), id: \.element.id) { index, session in
                     self.buildSessionRow(session: session, index: index)
                 }
@@ -252,15 +243,12 @@ struct SessionListSection: View {
     }
 
     private func buildSessionRow(session: TherapeuticSession, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .leading) {
-                SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
-                    .padding(.vertical, -4)
-                    .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
-                NavigationLink(value: session.id) { EmptyView() }
-                    .opacity(0)
-            }
+        NavigationLink(value: session.id) {
+            SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
+                .padding(.vertical, -4)
         }
+        .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
+        .buttonStyle(.plain)
         .background(
             GeometryReader { geo in
                 let frame = geo.frame(in: .named("listScroll"))

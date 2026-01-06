@@ -27,14 +27,14 @@ struct ViewModifierTests {
 
     @Test("Error alert uses custom title") func errorAlertUsesCustomTitle() throws {
         let customTitle = "Custom Error Title"
-        var errorMessage: String? = "Error"
+        let errorMessage: String? = "Error"
 
         #expect(customTitle == "Custom Error Title")
         #expect(errorMessage != nil)
     }
 
     @Test("Error alert displays error message") func errorAlertDisplaysErrorMessage() throws {
-        var errorMessage: String? = "Detailed error message"
+        let errorMessage: String? = "Detailed error message"
 
         let message = errorMessage ?? ""
 
@@ -42,7 +42,7 @@ struct ViewModifierTests {
     }
 
     @Test("Error alert handles nil error gracefully") func errorAlertHandlesNilErrorGracefully() throws {
-        var errorMessage: String? = nil
+        let errorMessage: String? = nil
 
         let isPresented = errorMessage != nil
 

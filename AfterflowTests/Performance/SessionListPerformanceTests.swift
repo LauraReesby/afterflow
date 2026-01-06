@@ -7,7 +7,7 @@ import Testing
 struct SessionListPerformanceTests {
     @Test("View model filters 1k sessions quickly") func listViewModelPerformance() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: nil,
             sortOption: .moodChange
@@ -48,7 +48,7 @@ struct SessionListPerformanceTests {
 
     @Test("Filtering 10k sessions completes quickly") func filteringTenThousandSessions() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 10000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
             sortOption: .newestFirst
@@ -65,15 +65,14 @@ struct SessionListPerformanceTests {
 
     @Test("Searching through 1k sessions is fast") func searchingThousandSessions() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "healing",
             treatmentFilter: nil,
             sortOption: .newestFirst
         )
 
-        var filtered: [TherapeuticSession] = []
         let duration = measureTime {
-            filtered = viewModel.applyFilters(to: sessions)
+            _ = viewModel.applyFilters(to: sessions)
         }
 
         #expect(duration < 0.5)
@@ -81,15 +80,14 @@ struct SessionListPerformanceTests {
 
     @Test("Searching through 5k sessions stays performant") func searchingFiveThousandSessions() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 5000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "journey",
             treatmentFilter: nil,
             sortOption: .newestFirst
         )
 
-        var filtered: [TherapeuticSession] = []
         let duration = measureTime {
-            filtered = viewModel.applyFilters(to: sessions)
+            _ = viewModel.applyFilters(to: sessions)
         }
 
         #expect(duration < 1.5)
@@ -97,7 +95,7 @@ struct SessionListPerformanceTests {
 
     @Test("Sorting by date descending is fast") func sortByDateDescending() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: nil,
             sortOption: .newestFirst
@@ -118,7 +116,7 @@ struct SessionListPerformanceTests {
 
     @Test("Sorting by date ascending is fast") func sortByDateAscending() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: nil,
             sortOption: .oldestFirst
@@ -139,7 +137,7 @@ struct SessionListPerformanceTests {
 
     @Test("Sorting by mood change is fast") func sortByMoodChange() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: nil,
             sortOption: .moodChange
@@ -156,7 +154,7 @@ struct SessionListPerformanceTests {
 
     @Test("Cache hit provides fast results") func cacheHitPerformance() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
             sortOption: .newestFirst
@@ -189,9 +187,8 @@ struct SessionListPerformanceTests {
             sortOption: .newestFirst
         )
 
-        var filtered: [TherapeuticSession] = []
         let duration = measureTime {
-            filtered = viewModel.applyFilters(to: sessions)
+            _ = viewModel.applyFilters(to: sessions)
         }
 
         #expect(duration < 0.5)
@@ -263,7 +260,7 @@ struct SessionListPerformanceTests {
 
     @Test("Calendar with 365 marked dates renders quickly") func calendarRenderingPerformance() async throws {
         let sessions = SessionFixtureFactory.makeSessionsForCalendar(monthCount: 12)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: nil,
             sortOption: .newestFirst
@@ -281,15 +278,14 @@ struct SessionListPerformanceTests {
 
     @Test("Combined filtering and sorting with 5k sessions") func combinedOperationsPerformance() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 5000)
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "meditation",
             treatmentFilter: .psilocybin,
             sortOption: .moodChange
         )
 
-        var filtered: [TherapeuticSession] = []
         let duration = measureTime {
-            filtered = viewModel.applyFilters(to: sessions)
+            _ = viewModel.applyFilters(to: sessions)
         }
 
         #expect(duration < 1.5)

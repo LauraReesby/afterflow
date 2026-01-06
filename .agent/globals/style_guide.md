@@ -22,15 +22,24 @@ Applies to every agent touching Swift, Markdown, or automation scripts. Suppleme
 - SwiftLint config lives in `.swiftlint.yml`; run `./Scripts/run-swiftlint.sh` after formatting (CI uses the same settings).
 - Fix or document every violation—prefer refactoring over disabling rules inline.
 - When formatting or linting adds effort, update the corresponding configuration in the same change so the rule set stays versioned with the code.
+- **CRITICAL: Zero Swift warnings required for both app and test targets**
+  - After formatting and linting, verify with: `xcodebuild build-for-testing -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' 2>&1 | grep "\.swift.*warning:"`
+  - Expected output: (empty) — no Swift code warnings allowed
+  - System warnings (e.g., `appintentsmetadataprocessor`) are acceptable
+  - Fix unused variable warnings by replacing with `_` if truly unused
+  - Change `var` to `let` for variables that never mutate
 
 ## Documentation & Comments
 - Prefer expressive naming over comments; add a short comment only before non-obvious logic (e.g., privacy-sensitive persistence, data migrations).
 
 ## Testing Standards
-- Unit tests use the Swift Testing framework ( `import Testing`, `@Test` ) and should run headlessly via `xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16'`.
+- Unit tests use the **Swift Testing framework** (`import Testing`, `@Test`, `#expect`) and should run headlessly via `xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16'`.
 - Mirror production folders: `Afterflow/Models/Foo.swift` ↔ `AfterflowTests/ModelTests/FooTests.swift`.
-- Tests follow `test<Scenario><Expectation>` naming (e.g., `testSavingDraftRestoresLastInput`) and always start with a failing case (Red-Green-Refactor).
+- Tests follow descriptive function naming (e.g., `func sessionSavingRestoresLastInput()`) with `@Test` attribute; use `#expect()` for assertions.
+- All test structs must be marked `@MainActor` when testing SwiftUI components.
+- Tests always start with a failing case (Red-Green-Refactor).
 - Maintain ≥80% coverage overall and 100% for any new public API; capture coverage stats in the PR body.
+- **Test code must build with zero Swift warnings** — fix unused variables with `_`, change `var` to `let` when values don't mutate.
 - Use the in-memory `ModelContainer` scaffold when testing SwiftData interactions:
   ```swift
   @MainActor

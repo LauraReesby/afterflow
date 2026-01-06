@@ -99,7 +99,7 @@ enum SessionFixtureFactory {
             "https://example.com/music"
         }
 
-        var session = TherapeuticSession(
+        let session = TherapeuticSession(
             sessionDate: referenceDate,
             treatmentType: .psilocybin,
             administration: .oral,

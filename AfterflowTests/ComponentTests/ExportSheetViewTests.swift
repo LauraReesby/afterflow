@@ -22,7 +22,7 @@ struct ExportSheetViewTests {
     }
 
     @Test("Default format is CSV") func defaultFormatIsCSV() throws {
-        let exportSheet = ExportSheetView(
+        _ = ExportSheetView(
             availableTreatmentTypes: [],
             onCancel: {},
             onExport: { _ in }
@@ -61,7 +61,7 @@ struct ExportSheetViewTests {
         let now = Date()
         let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: now) ?? now
 
-        let exportSheet = ExportSheetView(
+        _ = ExportSheetView(
             availableTreatmentTypes: [],
             onCancel: {},
             onExport: { _ in }
@@ -103,7 +103,7 @@ struct ExportSheetViewTests {
     }
 
     @Test("Treatment picker has 'All Treatments' option") func treatmentPickerHasAllTreatmentsOption() throws {
-        let treatmentTypes = [PsychedelicTreatmentType.psilocybin]
+        _ = [PsychedelicTreatmentType.psilocybin]
         var selectedTreatment: PsychedelicTreatmentType?
 
         selectedTreatment = nil

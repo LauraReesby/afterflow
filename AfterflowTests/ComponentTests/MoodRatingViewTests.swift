@@ -22,7 +22,7 @@ struct MoodRatingViewTests {
             get: { moodValue },
             set: { moodValue = $0 }
         )
-        let moodView = MoodRatingView(
+        _ = MoodRatingView(
             value: binding,
             title: "Test Mood",
             accessibilityIdentifier: "testSlider"
@@ -45,7 +45,7 @@ struct MoodRatingViewTests {
     @Test("Slider handles minimum value") func sliderHandlesMinimumValue() throws {
         var moodValue = 1
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
-        let moodView = MoodRatingView(
+        _ = MoodRatingView(
             value: binding,
             title: "Mood",
             accessibilityIdentifier: "slider"
@@ -57,7 +57,7 @@ struct MoodRatingViewTests {
     @Test("Slider handles maximum value") func sliderHandlesMaximumValue() throws {
         var moodValue = 10
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
-        let moodView = MoodRatingView(
+        _ = MoodRatingView(
             value: binding,
             title: "Mood",
             accessibilityIdentifier: "slider"
@@ -83,7 +83,7 @@ struct MoodRatingViewTests {
         for value in 1 ... 10 {
             var moodValue = value
             let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
-            let moodView = MoodRatingView(
+            _ = MoodRatingView(
                 value: binding,
                 title: "Mood",
                 accessibilityIdentifier: "slider"
@@ -146,7 +146,7 @@ struct MoodRatingViewTests {
         let value = 7
         var moodValue = value
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
-        let moodView = MoodRatingView(
+        _ = MoodRatingView(
             value: binding,
             title: "Mood",
             accessibilityIdentifier: "slider"
@@ -209,13 +209,13 @@ struct MoodRatingViewTests {
         let bindingBefore = Binding(get: { moodBefore }, set: { moodBefore = $0 })
         let bindingAfter = Binding(get: { moodAfter }, set: { moodAfter = $0 })
 
-        let viewBefore = MoodRatingView(
+        _ = MoodRatingView(
             value: bindingBefore,
             title: "Before",
             accessibilityIdentifier: "before"
         )
 
-        let viewAfter = MoodRatingView(
+        _ = MoodRatingView(
             value: bindingAfter,
             title: "After",
             accessibilityIdentifier: "after"
@@ -244,7 +244,7 @@ struct MoodRatingViewTests {
     @Test("Value persistence across view updates") func valuePersistenceAcrossViewUpdates() throws {
         var moodValue = 7
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
-        let moodView = MoodRatingView(
+        _ = MoodRatingView(
             value: binding,
             title: "Mood",
             accessibilityIdentifier: "slider"

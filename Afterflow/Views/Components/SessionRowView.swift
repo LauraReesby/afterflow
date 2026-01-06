@@ -15,15 +15,10 @@ struct SessionRowView: View {
                         .font(.headline)
                         .lineLimit(1)
                     Spacer()
-                    HStack(spacing: 6) {
-                        Text(self.dateText)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                        Image(systemName: "chevron.right")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(Color(.tertiaryLabel))
-                    }
+                    Text(self.dateText)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
 
                 if self.session.status == .needsReflection {

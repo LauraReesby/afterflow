@@ -25,21 +25,7 @@ struct SessionListViewModel {
     var searchText: String = ""
     var selectedDate: Date?
 
-    private var cachedFilteredSessions: [TherapeuticSession] = []
-    private var lastSessionsHash: Int = 0
-    private var lastFilterHash: Int = 0
-
-    mutating func applyFilters(to sessions: [TherapeuticSession]) -> [TherapeuticSession] {
-        let currentSessionsHash = sessions.map(\.id).hashValue
-        let currentFilterHash = self.filterHash
-
-        if currentSessionsHash == self.lastSessionsHash, currentFilterHash == self.lastFilterHash {
-            return self.cachedFilteredSessions
-        }
-
-        self.lastSessionsHash = currentSessionsHash
-        self.lastFilterHash = currentFilterHash
-
+    func applyFilters(to sessions: [TherapeuticSession]) -> [TherapeuticSession] {
         var filtered = sessions
 
         if let treatmentFilter {
@@ -68,16 +54,7 @@ struct SessionListViewModel {
             }
         }
 
-        self.cachedFilteredSessions = filtered
         return filtered
-    }
-
-    private var filterHash: Int {
-        var hasher = Hasher()
-        hasher.combine(self.sortOption)
-        hasher.combine(self.treatmentFilter)
-        hasher.combine(self.searchText)
-        return hasher.finalize()
     }
 
     func markedDates(from sessions: [TherapeuticSession]) -> Set<Date> {

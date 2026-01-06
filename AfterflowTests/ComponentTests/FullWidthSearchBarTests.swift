@@ -10,7 +10,7 @@ struct FullWidthSearchBarTests {
         let searchTextBinding = Binding(get: { searchText }, set: { searchText = $0 })
         let isExpandedBinding = Binding(get: { isExpanded }, set: { isExpanded = $0 })
 
-        let searchBar = FullWidthSearchBar(
+        _ = FullWidthSearchBar(
             searchText: searchTextBinding,
             isExpanded: isExpandedBinding
         )

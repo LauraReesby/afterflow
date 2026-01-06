@@ -43,6 +43,9 @@ Our mission is to provide a safe, private, and intuitive space for users to reco
 ## Shared Expectations
 - All agents must report how they satisfied the Constitution.
 - Use the automation scripts in `/Scripts` for consistency (format, lint, build, run, and test all wrap `xcodebuild` with the right defaults).
-- Format with `./Scripts/run-swiftformat.sh`, then lint with `./Scripts/run-swiftlint.sh` before marking tasks complete.
-- Tests (`xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16'`) run before marking tasks complete.
-- Privacy and offline guarantees trump velocity—escalate if a request violates them.
+- Run quality checks in order:
+  1. `./Scripts/run-swiftformat.sh` — format code
+  2. `./Scripts/run-swiftlint.sh` — lint code (must show 0 violations)
+  3. `xcodebuild build-for-testing -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' 2>&1 | grep "\.swift.*warning:"` — verify zero Swift warnings (must return empty)
+  4. `xcodebuild test -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16'` — run tests
+- All quality checks must pass before marking tasks complete.

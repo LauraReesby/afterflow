@@ -20,7 +20,7 @@ struct ViewModelIntegrationTests {
         let descriptor = FetchDescriptor<TherapeuticSession>(sortBy: [SortDescriptor(\.sessionDate, order: .reverse)])
         let fetchedSessions = try context.fetch(descriptor)
 
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: nil,
             sortOption: .newestFirst
@@ -61,7 +61,7 @@ struct ViewModelIntegrationTests {
         let descriptor = FetchDescriptor<TherapeuticSession>()
         let allSessions = try context.fetch(descriptor)
 
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
             sortOption: .newestFirst
@@ -105,7 +105,7 @@ struct ViewModelIntegrationTests {
         let descriptor = FetchDescriptor<TherapeuticSession>()
         let allSessions = try context.fetch(descriptor)
 
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "healing",
             treatmentFilter: nil,
             sortOption: .newestFirst
@@ -145,7 +145,7 @@ struct ViewModelIntegrationTests {
 
         try? FileManager.default.removeItem(at: csvURL)
 
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
             sortOption: .newestFirst
@@ -160,7 +160,7 @@ struct ViewModelIntegrationTests {
     @Test("Filter sessions then export") func filterThenExportWorkflow() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 20)
 
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
             treatmentFilter: .psilocybin,
             sortOption: .newestFirst
@@ -207,7 +207,7 @@ struct ViewModelIntegrationTests {
             )
         ]
 
-        var viewModel = TestHelpers.makeSessionListViewModel(
+        let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "healing",
             treatmentFilter: .psilocybin,
             sortOption: .newestFirst

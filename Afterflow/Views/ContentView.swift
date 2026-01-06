@@ -16,7 +16,6 @@ struct ContentView: View {
     @State private var listViewModel = SessionListViewModel()
 
     @State private var selectedSessionID: UUID?
-    @State private var navigationPath = NavigationPath()
     @State private var deepLinkAlert: (title: String, message: String)?
 
     @State private var sessionPendingDeletion: (session: TherapeuticSession, index: Int)?
@@ -131,8 +130,6 @@ struct ContentView: View {
                 if case let .openSession(sessionID) = action {
                     await MainActor.run {
                         self.selectedSessionID = sessionID
-                        self.navigationPath = NavigationPath()
-                        self.navigationPath.append(sessionID)
                         self.notificationHandler.clearPendingDeepLink()
                     }
                 } else {
@@ -159,7 +156,7 @@ private extension ContentView {
             SessionListSection(
                 sessions: self.filteredSessions,
                 listViewModel: self.$listViewModel,
-                navigationPath: self.$navigationPath,
+                selection: self.$selectedSessionID,
                 sessionStore: self.sessionStore,
                 onDelete: self.deleteSessions,
                 onAdd: { self.showingSessionForm = true },

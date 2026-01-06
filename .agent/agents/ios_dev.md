@@ -19,7 +19,12 @@ Afterflow is a **privacy-first, offline-first therapeutic session logging app**.
 1. **Sync Context** – Read the project README and any relevant issues; summarize user intent before coding.
 2. **Plan First** – Produce a change plan describing touched files and tests.
 3. **Implement with Privacy Guardrails** – No networked dependencies without approval; keep therapeutic data local and avoid logging secrets.
-4. **Format, Lint & Test** – Run `./Scripts/run-swiftformat.sh` and `./Scripts/run-swiftlint.sh` before executing `./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'`; add focused `-only-testing:` runs while iterating.
+4. **Format, Lint & Test** – Run quality checks in this order:
+   - `./Scripts/run-swiftformat.sh` — format code
+   - `./Scripts/run-swiftlint.sh` — lint code
+   - **Verify zero Swift warnings**: `xcodebuild build-for-testing -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' 2>&1 | grep "\.swift.*warning:"` (must return empty)
+   - `./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'` — run tests
+   - Add focused `-only-testing:` runs while iterating
 5. **Document & Commit** – Use descriptive commit messages (e.g., `feat(session): add mood slider focus`) and capture coverage evidence in PR descriptions.
 
 ## Coding Notes
@@ -31,7 +36,9 @@ Afterflow is a **privacy-first, offline-first therapeutic session logging app**.
 ## Checklists
 - [ ] Constitution reviewed for this change.
 - [ ] Project README and relevant issues consulted.
-- [ ] `./Scripts/run-swiftformat.sh` + `./Scripts/run-swiftlint.sh` executed successfully.
+- [ ] `./Scripts/run-swiftformat.sh` executed successfully.
+- [ ] `./Scripts/run-swiftlint.sh` executed successfully (0 violations).
+- [ ] **Zero Swift warnings verified** (app + tests).
 - [ ] Tests written/updated before implementation.
 - [ ] `xcodebuild test ...` executed successfully.
 - [ ] Privacy/offline impact noted in PR body.

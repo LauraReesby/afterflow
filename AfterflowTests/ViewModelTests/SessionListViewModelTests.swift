@@ -111,7 +111,7 @@ struct SessionListViewModelTests {
     }
 
     @Test("Index of first session finds correct index") func indexOfFirstSessionFindsCorrectIndex() async throws {
-        let calendar = Calendar.current
+        _ = Calendar.current
         let date1 = TestHelpers.dateComponents(year: 2024, month: 12, day: 10)
         let date2 = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
         let date3 = TestHelpers.dateComponents(year: 2024, month: 12, day: 20)
@@ -206,7 +206,7 @@ struct SessionListViewModelTests {
 
     @Test("Cache hit when inputs unchanged") func cacheHitWhenInputsUnchanged() async throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 10)
-        var viewModel = SessionListViewModel()
+        let viewModel = SessionListViewModel()
 
         let result1 = viewModel.applyFilters(to: sessions)
         let result2 = viewModel.applyFilters(to: sessions)
@@ -218,7 +218,7 @@ struct SessionListViewModelTests {
     @Test("Cache miss when sessions change") func cacheMissWhenSessionsChange() async throws {
         let sessions1 = SessionFixtureFactory.makeSessions(count: 5)
         let sessions2 = SessionFixtureFactory.makeSessions(count: 10)
-        var viewModel = SessionListViewModel()
+        let viewModel = SessionListViewModel()
 
         let result1 = viewModel.applyFilters(to: sessions1)
         let result2 = viewModel.applyFilters(to: sessions2)
