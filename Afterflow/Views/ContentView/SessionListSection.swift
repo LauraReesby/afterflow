@@ -131,6 +131,7 @@ struct SessionListSection: View {
                     let session = self.sessions[idx]
                     self.listViewModel.selectedDate = calendar.startOfDay(for: date)
                     self.selection = session.id
+                    self.showCalendarView = false
                 }
             }
     }

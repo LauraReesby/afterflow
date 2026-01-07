@@ -1,53 +1,196 @@
-# Repository Guidelines
+# Contributor Guide
 
-This guide captures the expectations for contributors extending Afterflow’s privacy-first iOS app. Automation agents should also load `.agent/README.md` for workflow- and tool-specific context.
+Welcome to Afterflow! This guide helps human contributors understand the project and get started.
 
-## Project Structure & Module Organization
-- `Afterflow/Models`, `Services`, `Views`, and `ViewModels` implement SwiftData entities, persistence, SwiftUI surfaces, and state layers respectively; keep new modules inside these folders so Swift Package targets remain predictable.
-- `Resources/Assets.xcassets` holds app colors and icons; any additional assets or localized strings belong here.
-- Product requirements and UX notes live in the project README; consult it before large feature work.
+**For AI agents**: See `.agent/README.md` for complete guidance.
 
-## Build, Test, and Development Commands
-- `./Scripts/run-swiftformat.sh` — repository-wide SwiftFormat pass.
-- `./Scripts/run-swiftlint.sh` — SwiftLint using `.swiftlint.yml`.
-- `./Scripts/build-app.sh [--destination <value>]` — wraps `xcodebuild build`; omit `--destination` to let Xcode choose an available target or provide a simulator/device spec.
-- `./Scripts/run-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'` — build, install, and launch Afterflow in a specific simulator (override `--bundle-id`, `--device`, etc., as needed).
-- `./Scripts/test-app.sh [--destination <value>]` — wraps `xcodebuild test`; provide `--destination 'id=<DEVICE-UDID>'` when running on hardware.
-- `open Afterflow.xcodeproj` — launch Xcode; select the `Afterflow` scheme when debugging interactively.
+## Quick Start
 
-## Coding Style & Naming Conventions
-- Follow Swift API Design Guidelines: types `PascalCase`, properties/functions `camelCase`, constants prefixed with context (e.g., `sessionFetchRequest`).
-- Use 4-space indentation and target files under ~300 lines (300-400 acceptable if cohesive; above 400 requires refactoring); extract SwiftUI subviews into `Views/Components` when bodies exceed ~80 lines.
-- Large feature sections can be extracted to `Views/<ParentView>/` subdirectories (e.g., `SessionListSection.swift` in `Views/ContentView/`).
-- Keep view models `Observable` structs/classes with clearly named `@Published` fields (`formState`, `validationErrors`); avoid single-letter abbreviations.
-- **Follow established patterns** (see `.agent/globals/style_guide.md` for details):
-  - Extract complex state to dedicated `@Observable` managers (e.g., `ExportState`, `ImportState`)
-  - Create reusable view modifiers for repeated UI patterns (e.g., `ErrorAlertModifier`)
-  - Use `DesignConstants` for all spacing, animation, and styling values
-- Run Xcode's "Re-Indent" or `Editor > Structure > Reformat` before committing; SwiftFormat and SwiftLint enforce shared rules but manual cleanup keeps diffs readable.
-- **CRITICAL: Zero Swift warnings required** — Enforce with:
-  1. `./Scripts/run-swiftformat.sh` — format code
-  2. `./Scripts/run-swiftlint.sh` — lint code (0 violations required)
-  3. `xcodebuild build-for-testing -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' 2>&1 | grep "\.swift.*warning:"` — verify zero Swift warnings (must return empty)
-  All three must pass cleanly before opening a pull request.
+1. **Clone and build**
+   ```bash
+   git clone <repo-url>
+   cd afterflow
+   open Afterflow.xcodeproj
+   ```
 
-## Testing Guidelines
-- **Swift Testing framework** is the standard: use `import Testing`, `@Test` attributes, and `#expect()` for assertions (not XCTest).
-- Add unit tests beside source counterparts (e.g., `Models/TherapeuticSession.swift` pairs with `ModelTests/TherapeuticSessionTests.swift`).
-- New code must maintain ≥80% coverage; prioritize descriptive function names (e.g., `func savingDraftRestoresLastInput()`).
-- All test structs must be marked `@MainActor` when testing SwiftUI components.
-- **Test code must build with zero Swift warnings**:
-  - Fix unused variable warnings by replacing with `_` if truly unused
-  - Change `var` to `let` for variables that never mutate
-  - Verify test builds cleanly before committing
-- UI or performance regressions belong in `AfterflowUITests/`; create fixtures under `AfterflowTests/Resources` when stateful data is required.
-- Always run `xcodebuild test -scheme Afterflow ...` on the latest simulator listed in README before opening a pull request.
+2. **Run the app**
+   ```bash
+   ./Scripts/run-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
+   ```
 
-## Commit & Pull Request Guidelines
-- Match existing history: concise, present-tense subjects (`session tasks completed`, `clean up`) without prefixes; squash micro commits locally.
-- Tag reviewers who own the touched area (`Models`, `Services`, etc.).
+3. **Run tests**
+   ```bash
+   ./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
+   ```
 
-## Security & Configuration Notes
-- Treat all features as offline-first: no new network calls or third-party SDKs without explicit approval.
-- Respect automatic code signing; if you must change bundle IDs or entitlements, document the rationale and reset to project defaults before merging.
-- Sensitive data never leaves the device; confirm encryption or local-only storage in PR notes whenever persistence logic changes.
+## Project Overview
+
+Afterflow is a **privacy-first, offline-first therapeutic session logging app** for iOS. Built with SwiftUI and SwiftData, it helps users track psychedelic-assisted therapy sessions with absolute privacy.
+
+### Core Principles
+
+1. **Privacy First**: All data stays on-device by default
+2. **Offline First**: Core functionality works without internet
+3. **Therapeutic Value**: Every feature serves healing and integration
+4. **Native Excellence**: Premium iOS experience with SwiftUI/SwiftData
+
+### Technology Stack
+
+- SwiftUI for all interfaces
+- SwiftData for local persistence
+- Swift Testing framework for tests
+- Minimum iOS 17.6
+
+## Development Workflow
+
+### Before You Commit
+
+Run these checks in order (all must pass):
+
+```bash
+# 1. Format code
+./Scripts/run-swiftformat.sh
+
+# 2. Lint code (0 violations required)
+./Scripts/run-swiftlint.sh
+
+# 3. Verify zero Swift warnings (must return empty)
+xcodebuild build-for-testing -scheme Afterflow \
+  -destination 'platform=iOS Simulator,name=iPhone 16' 2>&1 | \
+  grep "\.swift.*warning:"
+
+# 4. Run tests
+./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
+```
+
+### Code Style
+
+- Follow Swift API Design Guidelines
+- 4-space indentation
+- Keep files under ~300 lines (400 max)
+- Extract large SwiftUI views to components
+- Use `DesignConstants` for all spacing/animation values
+
+See `.agent/globals/style_guide.md` for detailed standards.
+
+### Testing Requirements
+
+- Write tests BEFORE implementation (Red-Green-Refactor)
+- Minimum 80% code coverage
+- 100% coverage for public APIs
+- Use Swift Testing framework: `@Test`, `#expect()`
+- Test structs must be `@MainActor` when testing SwiftUI
+
+See `.agent/globals/style_guide.md` for testing patterns.
+
+### Privacy & Security
+
+- No cloud sync by default
+- No external analytics or tracking
+- No network calls without approval
+- Never log therapeutic content
+- Respect offline-first architecture
+
+See `.agent/globals/constitution.md` for complete privacy requirements.
+
+## Project Structure
+
+```
+Afterflow/
+├── Models/           # SwiftData models
+├── Views/            # SwiftUI views
+│   └── Components/   # Reusable UI components
+├── ViewModels/       # View state management
+├── Services/         # Business logic
+└── Utilities/        # Extensions and helpers
+
+AfterflowTests/
+├── ComponentTests/   # UI component tests
+├── ViewModelTests/   # View model tests
+├── IntegrationTests/ # Integration tests
+└── Performance/      # Performance tests
+
+.agent/               # AI agent guidance (also useful for humans!)
+├── README.md         # Complete development guide
+├── globals/          # Universal standards
+├── agents/           # Agent-specific workflows
+└── workflows/        # Implementation workflows
+```
+
+## Useful Scripts
+
+All scripts are in the `Scripts/` directory:
+
+```bash
+# Build
+./Scripts/build-app.sh
+
+# Run in simulator
+./Scripts/run-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
+
+# Test
+./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
+
+# Test specific suite
+./Scripts/test-app.sh -only-testing:AfterflowTests/ModelTests
+
+# Format
+./Scripts/run-swiftformat.sh
+
+# Lint
+./Scripts/run-swiftlint.sh
+```
+
+## Common Patterns
+
+### State Management
+Extract complex state to `@Observable` classes:
+```swift
+@Observable
+final class ExportState {
+    var isExporting = false
+    var exportError: String?
+}
+```
+
+### View Modifiers
+Create reusable modifiers for repeated patterns:
+```swift
+struct ErrorAlertModifier: ViewModifier { ... }
+```
+
+### Design Constants
+Centralize magic numbers:
+```swift
+enum DesignConstants {
+    enum Spacing {
+        static let small: CGFloat = 8
+    }
+}
+```
+
+See `.agent/agents/ios_dev.md` for SwiftUI/SwiftData examples.
+
+## Pull Request Guidelines
+
+- Write clear, present-tense commit messages
+- Reference related issues
+- Include test coverage in PR description
+- Ensure all quality checks pass
+- Document privacy/offline impact if applicable
+
+## Getting Help
+
+- **Detailed Guidance**: See `.agent/` directory
+- **Constitution**: `.agent/globals/constitution.md`
+- **Style Guide**: `.agent/globals/style_guide.md`
+- **iOS Workflows**: `.agent/agents/ios_dev.md`
+- **Issues**: GitHub Issues
+
+## License
+
+See LICENSE file for details.
+
+---
+
+**For comprehensive guidance**, explore the `.agent/` directory — it contains everything you need to know about contributing to Afterflow.
