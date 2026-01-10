@@ -17,9 +17,10 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 - **🔒 Privacy-First**: All data stays on your device. No cloud sync, tracking, or external data collection
 - **📱 Native iOS**: Built with SwiftUI and SwiftData for optimal performance on iPhone and iPad
 - **🌐 Offline-First**: Core functionality works without internet connection
+- **📅 Calendar View**: Visual calendar with session markers, toggle between list and calendar views
 - **🎵 Music Links**: Playlist/track/album previews for oEmbed-capable providers (Spotify, YouTube, SoundCloud, Tidal), plus link-only fallbacks for Apple Music/Podcasts and Bandcamp
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
-- **📚 History Filters**: Sort/search the session list, filter by treatment type
+- **📚 History Filters**: Sort/search the session list, filter by treatment type via floating toolbar
 - **⏰ Reflection Reminders**: Optional reminders to add post session mood and reflections
 - **📤 Data Export**: On-device CSV or PDF exports with date/treatment filters and progress feedback
 
@@ -154,7 +155,8 @@ Resolve all violations (or document intentional suppressions) so CI stays clean.
 ```
 Afterflow/
 ├── Models/
-│   └── TherapeuticSession.swift
+│   ├── TherapeuticSession.swift
+│   └── TreatmentTypeAppearance.swift    # Treatment type colors and initials
 ├── Services/
 │   ├── SessionStore.swift
 │   ├── ReminderScheduler.swift
@@ -164,41 +166,58 @@ Afterflow/
 │   ├── CSVImportService.swift
 │   ├── CSVExportService.swift
 │   └── PDFExportService.swift
+├── Support/
+│   ├── CalendarGridHelper.swift         # Calendar month/grid generation logic
+│   ├── CollapsibleCalendarSupport.swift # Calendar extension helpers
+│   ├── MarkdownRenderer.swift
+│   ├── RelativeDateHelper.swift
+│   └── SeedDataFactory.swift
 ├── ViewModels/
-│   ├── ExportState.swift                 # Centralized export state management
-│   ├── ImportState.swift                 # Centralized import state management
+│   ├── ExportState.swift                # Centralized export state management
+│   ├── ImportState.swift                # Centralized import state management
 │   ├── FormValidation.swift
 │   ├── MoodRatingScale.swift
 │   ├── ReminderOption.swift
-│   └── SessionListViewModel.swift        # With performance optimization (memoization)
+│   └── SessionListViewModel.swift       # With performance optimization (memoization)
 ├── Views/
-│   ├── ContentView.swift                 # Main view (refactored from 1,077 to 403 lines)
+│   ├── ContentView.swift                # Main NavigationSplitView container
 │   ├── ContentView/
-│   │   └── SessionListSection.swift     # Extracted session list component
+│   │   └── SessionListSection.swift     # Session list and calendar views
 │   ├── SessionFormView.swift
 │   ├── SessionDetailView.swift
+│   ├── CollapsibleCalendarView.swift
 │   ├── Components/
+│   │   ├── SearchControlBar.swift       # Floating bottom toolbar (search/calendar/add)
+│   │   ├── ExpandableSearchView.swift   # Expandable search and filter panel
 │   │   ├── FullWidthSearchBar.swift     # Search UI component
-│   │   ├── FilterMenu.swift             # Filter/sort menu
 │   │   ├── SessionRowView.swift         # Session list row
+│   │   ├── TreatmentAvatar.swift        # Treatment type avatar component
 │   │   ├── MoodRatingView.swift
 │   │   ├── MusicLinkSummaryCard.swift
-│   │   └── ValidationErrorView.swift
-│   └── Modifiers/
-│       ├── NavigationAlertsModifier.swift
-│       ├── ExportFlowsModifier.swift
-│       ├── ImportFlowsModifier.swift
-│       ├── SettingsAlertModifier.swift
-│       └── ErrorAlertModifier.swift     # Reusable error alert modifier
+│   │   ├── MusicLinkMetadataPreview.swift
+│   │   ├── MusicLinkRawPreview.swift
+│   │   ├── RichTextEditor.swift
+│   │   └── ExportSheetView.swift
+│   ├── Modifiers/
+│   │   ├── NavigationAlertsModifier.swift
+│   │   ├── ExportFlowsModifier.swift
+│   │   ├── ImportFlowsModifier.swift
+│   │   ├── SettingsAlertModifier.swift
+│   │   └── ErrorAlertModifier.swift     # Reusable error alert modifier
+│   └── Shared/
+│       └── TreatmentAvatar.swift
 ├── Utilities/
-│   └── DesignConstants.swift            # Centralized design constants
+│   ├── DesignConstants.swift            # Centralized design constants
+│   └── ViewExtensions.swift             # View modifier extensions
 └── Resources/
     ├── Assets.xcassets/
     └── LaunchScreen.storyboard
 
 AfterflowTests/
 ├── Helpers/
-│   └── SessionFixtureFactory.swift
+│   ├── SessionFixtureFactory.swift
+│   ├── ErrorFixtureFactory.swift
+│   └── TestHelpers.swift
 ├── ModelTests/
 │   └── TherapeuticSessionTests.swift
 ├── ServiceTests/
@@ -210,20 +229,34 @@ AfterflowTests/
 │   ├── CSVImportServiceTests.swift
 │   ├── CSVExportServiceTests.swift
 │   └── PDFExportServiceTests.swift
+├── SupportTests/
+│   ├── CalendarGridHelperTests.swift    # Calendar logic unit tests
+│   ├── CollapsibleCalendarSupportTests.swift
+│   ├── MarkdownRendererTests.swift
+│   └── RelativeDateHelperTests.swift
 ├── ViewModelTests/
+│   ├── ExportStateTests.swift
+│   ├── ImportStateTests.swift
 │   ├── FormValidationTests.swift
 │   ├── MoodRatingScaleTests.swift
 │   ├── ReminderOptionTests.swift
 │   └── SessionListViewModelTests.swift
+├── ComponentTests/
+│   ├── SearchControlBarTests.swift
+│   ├── ExpandableSearchViewTests.swift
+│   ├── FullWidthSearchBarTests.swift
+│   ├── SessionRowViewTests.swift
+│   ├── MoodRatingViewTests.swift
+│   └── ExportSheetViewTests.swift
+├── UtilityTests/
+│   └── ViewExtensionsTests.swift
+├── ModifierTests/
+│   └── ViewModifierTests.swift
+├── IntegrationTests/
+│   ├── ExportImportIntegrationTests.swift
+│   └── ViewModelIntegrationTests.swift
 ├── Performance/
 │   └── SessionListPerformanceTests.swift
-└── UITests/
-
-specs/
-├── 001-core-session-logging/
-├── 002-music-links/
-├── 003-data-export/
-└── 004-advanced-notifications/
 ```
 
 ## Architecture
@@ -236,16 +269,20 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI with strong
 - **Views**: Modular SwiftUI components organized by feature
 - **Utilities**: Shared constants and helper functions
 
-### Architectural Improvements (Dec 2024)
+### Architectural Improvements
 
 Recent refactoring has significantly improved code quality and maintainability:
 
+- **Calendar View**: Full calendar grid with session markers, month navigation, and date selection
+- **Floating Toolbar**: Bottom pill-shaped toolbar with search, calendar/list toggle, and add buttons
 - **State Management**: Centralized export/import state into dedicated `@Observable` managers
-- **Component Extraction**: Reduced ContentView from 1,077 to 403 lines by extracting reusable components
+- **Component Extraction**: Modular view components with dedicated test coverage
+- **Calendar Logic**: Extracted testable `CalendarGridHelper` for month range and grid generation
 - **Performance**: Added memoization to SessionListViewModel for efficient filtering/sorting
 - **Accessibility**: Comprehensive VoiceOver support with hints on all interactive elements
 - **Error Handling**: User-facing errors now display helpful alerts instead of failing silently
 - **Design System**: Centralized design constants (animations, spacing, shadows, etc.)
+- **Adaptive Layout**: NavigationSplitView with proper compact/regular size class handling
 
 ### Key Principles
 
@@ -290,10 +327,17 @@ Recent refactoring has significantly improved code quality and maintainability:
 - [x] Delete, VoiceOver-friendly filter menu
 - [x] Large dataset fixtures + performance tests (<200 ms scroll for 1k sessions)
 
-### 🎵 Phase 7+: Music Links & Data Export
+### ✅ Phase 7: Music Links & Data Export
 - [x] Playlist link previews (Spotify/YouTube oEmbed, link-only fallback)
 - [x] CSV/PDF export flows with filters and offline file export
 - [x] Governance and privacy review for exports (on-device only)
+
+### ✅ Phase 8: Calendar View & UI Polish
+- [x] Calendar grid view with session markers by treatment type
+- [x] Toggle between list and calendar views via floating toolbar
+- [x] Expandable search panel with filters
+- [x] Adaptive layout for iPhone and iPad (NavigationSplitView)
+- [x] Calendar navigation preserves selection in split view
 
 ## Export Usage
 - Open the Sessions list, tap **Export**, choose CSV or PDF, and optionally filter by date range or treatment type.
