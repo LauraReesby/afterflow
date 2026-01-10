@@ -33,18 +33,18 @@ struct SearchControlBar: View {
                 self.calendarButton
                 self.addButton
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
         }
-        .glassPillBackground(cornerRadius: 25)
+        .glassPillBackground(cornerRadius: 22)
         .shadow(
             color: .black.opacity(DesignConstants.Shadow.standardOpacity),
             radius: DesignConstants.Shadow.standardRadius,
             x: DesignConstants.Shadow.standardX,
             y: DesignConstants.Shadow.standardY
         )
-        .padding(.horizontal, DesignConstants.Spacing.medium)
-        .padding(.bottom, DesignConstants.Spacing.medium)
+        .padding(.horizontal, DesignConstants.Spacing.small)
+        .padding(.bottom, DesignConstants.Spacing.small)
         .animation(
             .easeInOut(duration: DesignConstants.Animation.standardDuration),
             value: self.isSearchExpanded

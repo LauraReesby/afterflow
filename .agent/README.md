@@ -71,8 +71,8 @@ Run these commands **in order** before every commit:
 # 3. Verify zero Swift warnings (must return empty)
 xcodebuild build-for-testing -scheme Afterflow -destination 'platform=iOS Simulator,name=iPhone 16' 2>&1 | grep "\.swift.*warning:"
 
-# 4. Run tests
-./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
+# 4. Run unit tests (skip UI tests for faster verification)
+./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16' --unit-only
 ```
 
 **All four checks must pass cleanly.**
@@ -86,8 +86,11 @@ xcodebuild build-for-testing -scheme Afterflow -destination 'platform=iOS Simula
 # Run app in simulator
 ./Scripts/run-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
 
-# Run tests
-./Scripts/test-app.sh [--destination <value>]
+# Run unit tests only (recommended for AI agents)
+./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16' --unit-only
+
+# Run all tests (unit + UI)
+./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16'
 
 # Run specific test
 ./Scripts/test-app.sh --destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:AfterflowTests/ModelTests
@@ -110,6 +113,12 @@ open Afterflow.xcodeproj
 - 100% coverage for all public APIs
 - Use Swift Testing framework: `@Test`, `#expect()`, `@MainActor`
 - All test structs must be `@MainActor` when testing SwiftUI components
+
+### Test Maintenance (MANDATORY)
+- **Add unit tests** for any new or modified code that lacks test coverage
+- **Remove tests** when the corresponding code is deleted—do not leave orphaned tests
+- Keep tests in sync with implementation changes
+- Focus on unit tests; UI tests are maintained separately by humans
 
 ### Privacy & Offline First
 - All data stays on-device by default
@@ -137,8 +146,9 @@ Before marking any task complete, verify:
 - [ ] Code formatted (`./Scripts/run-swiftformat.sh`)
 - [ ] Code linted with 0 violations (`./Scripts/run-swiftlint.sh`)
 - [ ] Zero Swift warnings verified (app + tests)
-- [ ] Tests written before implementation
-- [ ] All tests pass (`./Scripts/test-app.sh`)
+- [ ] Unit tests added for new/modified code lacking coverage
+- [ ] Orphaned tests removed if code was deleted
+- [ ] All unit tests pass (`./Scripts/test-app.sh --unit-only`)
 - [ ] Coverage maintained ≥80%
 - [ ] Changes documented in commit message
 
@@ -183,5 +193,5 @@ enum DesignConstants {
 
 ---
 
-**Last Updated**: 2026-01-07
+**Last Updated**: 2026-01-09
 **Maintainer**: Afterflow Development Team

@@ -17,6 +17,10 @@ struct SessionListSection: View {
     @State private var scrollTarget: UUID?
     @State private var showCalendarView = false
     @State private var isSearchExpanded = false
+    @State private var navigateToSessionFromCalendar = false
+    @State private var pendingCalendarSelection = false
+
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -39,35 +43,54 @@ struct SessionListSection: View {
                 onAdd: self.onAdd
             )
         }
+        .onChange(of: self.showCalendarView) { wasCalendar, isCalendar in
+            // In compact mode, when switching from calendar to list after having
+            // navigated from calendar, clear selection to prevent auto-navigation
+            if wasCalendar, !isCalendar, self.pendingCalendarSelection {
+                self.selection = nil
+                self.pendingCalendarSelection = false
+            }
+        }
     }
 
     private func calendarMarkers() -> [Date: Color] {
-        let calendar = Calendar.current
-        return self.sessions.reduce(into: [:]) { result, session in
-            let day = calendar.startOfDay(for: session.sessionDate)
-            if result[day] == nil {
-                result[day] = session.treatmentType.accentColor
-            }
-        }
+        CalendarGridHelper.calendarMarkers(from: self.sessions)
     }
 
     private func calendarScrollView() -> some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                ForEach(self.generateMonthRange(), id: \.self) { monthStart in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(monthStart, format: .dateTime.month(.wide).year())
-                            .font(.headline)
-                            .padding(.horizontal)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach(self.generateMonthRange(), id: \.self) { monthStart in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(monthStart, format: .dateTime.month(.wide).year())
+                                .font(.headline)
+                                .padding(.horizontal)
 
-                        self.monthGrid(for: monthStart)
+                            self.monthGrid(for: monthStart)
+                        }
+                        .id(monthStart)
                     }
                 }
+                .padding(.vertical)
             }
-            .padding(.vertical)
-        }
-        .safeAreaInset(edge: .bottom) {
-            Color.clear.frame(height: 88)
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 88)
+            }
+            .onAppear {
+                if let selectedDate = self.listViewModel.selectedDate {
+                    let calendar = Calendar.current
+                    let monthStart = calendar.startOfMonth(for: selectedDate)
+                    proxy.scrollTo(monthStart, anchor: .top)
+                }
+            }
+            .navigationDestination(isPresented: self.$navigateToSessionFromCalendar) {
+                if let sessionID = self.selection,
+                   let session = self.sessions.first(where: { $0.id == sessionID }) {
+                    SessionDetailView(session: session)
+                        .environment(self.sessionStore)
+                }
+            }
         }
     }
 
@@ -109,10 +132,19 @@ struct SessionListSection: View {
         let calendar = Calendar.current
         let day = calendar.component(.day, from: date)
         let isToday = calendar.isDateInToday(date)
-        let markerColor = markedDates[calendar.startOfDay(for: date)]
+        let normalizedDate = calendar.startOfDay(for: date)
+        let markerColor = markedDates[normalizedDate]
+
+        let isSelected: Bool = {
+            guard let selectedID = self.selection,
+                  let selectedSession = self.sessions.first(where: { $0.id == selectedID })
+            else { return false }
+            return calendar.startOfDay(for: selectedSession.sessionDate) == normalizedDate
+        }()
 
         return Text("\(day)")
             .font(.body)
+            .fontWeight(isSelected ? .semibold : .regular)
             .foregroundColor(markerColor != nil ? .white : .primary)
             .frame(width: 36, height: 36)
             .background(
@@ -126,70 +158,23 @@ struct SessionListSection: View {
                         lineWidth: 1
                     )
             )
+            .overlay(
+                Circle()
+                    .stroke(isSelected ? Color.primary : Color.clear, lineWidth: 2)
+                    .padding(-2)
+            )
             .onTapGesture {
                 if let idx = self.listViewModel.indexOfFirstSession(on: date, in: self.sessions) {
                     let session = self.sessions[idx]
-                    self.listViewModel.selectedDate = calendar.startOfDay(for: date)
+                    self.listViewModel.selectedDate = normalizedDate
                     self.selection = session.id
-                    self.showCalendarView = false
+                    // In compact mode, trigger navigation while keeping calendar visible
+                    if self.horizontalSizeClass == .compact {
+                        self.navigateToSessionFromCalendar = true
+                        self.pendingCalendarSelection = true
+                    }
                 }
             }
-    }
-
-    private func generateMonthRange() -> [Date] {
-        let calendar = Calendar.current
-        let today = Date()
-
-        guard let oldestSession = self.sessions.last,
-              let newestSession = self.sessions.first
-        else {
-            return [calendar.startOfMonth(for: today)]
-        }
-
-        let startMonth = calendar.startOfMonth(for: oldestSession.sessionDate)
-        let endMonth = calendar.startOfMonth(for: max(newestSession.sessionDate, today))
-
-        var months: [Date] = []
-        var currentMonth = startMonth
-
-        while currentMonth <= endMonth {
-            months.append(currentMonth)
-            guard let nextMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) else {
-                break
-            }
-            currentMonth = nextMonth
-        }
-
-        return months.reversed()
-    }
-
-    private func generateGridDaysForMonth(_ monthStart: Date) -> [Date?] {
-        let calendar = Calendar.current
-
-        // Get the weekday of the first day of the month (1 = Sunday, 2 = Monday, etc.)
-        let firstWeekday = calendar.component(.weekday, from: monthStart)
-
-        // Calculate offset: how many empty cells before the 1st
-        let offset = (firstWeekday - calendar.firstWeekday + 7) % 7
-
-        // Get number of days in the month
-        let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)?.count ?? 30
-
-        var gridDays: [Date?] = []
-
-        // Add empty cells for offset
-        for _ in 0 ..< offset {
-            gridDays.append(nil)
-        }
-
-        // Add actual dates
-        for day in 0 ..< daysInMonth {
-            if let date = calendar.date(byAdding: .day, value: day, to: monthStart) {
-                gridDays.append(date)
-            }
-        }
-
-        return gridDays
     }
 
     @ViewBuilder private func sessionList() -> some View {
@@ -212,6 +197,7 @@ struct SessionListSection: View {
             )
             .listSectionSeparator(.hidden)
             .listStyle(.plain)
+            .tint(.clear)
             .scrollBounceBehavior(.basedOnSize)
             .coordinateSpace(name: "listScroll")
             .toolbarBackground(.visible, for: .automatic)
@@ -241,40 +227,6 @@ struct SessionListSection: View {
                 }
             }
         }
-    }
-
-    private func buildSessionRow(session: TherapeuticSession, index: Int) -> some View {
-        NavigationLink(value: session.id) {
-            SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
-                .padding(.vertical, -4)
-        }
-        .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
-        .buttonStyle(.plain)
-        .background(
-            GeometryReader { geo in
-                let frame = geo.frame(in: .named("listScroll"))
-                let isCandidate = frame.minY > 0 && frame.minY < 300
-                let candidateDate: Date? = isCandidate ? session.sessionDate : nil
-
-                Color.clear
-                    .preference(key: TopVisibleDatePreferenceKey.self, value: candidateDate)
-            }
-        )
-        .id("session-\(session.id.uuidString)")
-        .contextMenu {
-            Button(role: .destructive) {
-                self.onDelete(IndexSet(integer: index))
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-            .accessibilityHint("Deletes this session permanently")
-        } preview: {
-            SessionDetailView(session: session)
-                .frame(width: 350, height: 600)
-                .environment(self.sessionStore)
-        }
-        .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
-        .listRowSeparator(.visible, edges: .bottom)
     }
 
     @ToolbarContentBuilder
@@ -328,6 +280,55 @@ struct SessionListSection: View {
             .buttonStyle(.plain)
             .accessibilityLabel("More options")
         }
+    }
+}
+
+private extension SessionListSection {
+    func buildSessionRow(session: TherapeuticSession, index: Int) -> some View {
+        let isSelected = self.selection == session.id
+
+        return NavigationLink(value: session.id) {
+            SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
+                .padding(.vertical, -4)
+        }
+        .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
+        .buttonStyle(.plain)
+        .background(
+            GeometryReader { geo in
+                let frame = geo.frame(in: .named("listScroll"))
+                let isCandidate = frame.minY > 0 && frame.minY < 300
+                let candidateDate: Date? = isCandidate ? session.sessionDate : nil
+
+                Color.clear
+                    .preference(key: TopVisibleDatePreferenceKey.self, value: candidateDate)
+            }
+        )
+        .id("session-\(session.id.uuidString)")
+        .listRowBackground(isSelected ? Color(uiColor: .systemGroupedBackground) : Color(.systemBackground))
+        .contextMenu {
+            Button(role: .destructive) {
+                self.onDelete(IndexSet(integer: index))
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+            .accessibilityHint("Deletes this session permanently")
+        } preview: {
+            SessionDetailView(session: session)
+                .frame(width: 350, height: 600)
+                .environment(self.sessionStore)
+        }
+        .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
+        .listRowSeparator(.visible, edges: .bottom)
+    }
+}
+
+private extension SessionListSection {
+    func generateMonthRange() -> [Date] {
+        CalendarGridHelper.generateMonthRange(from: self.sessions)
+    }
+
+    func generateGridDaysForMonth(_ monthStart: Date) -> [Date?] {
+        CalendarGridHelper.generateGridDaysForMonth(monthStart)
     }
 }
 

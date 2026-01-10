@@ -13,11 +13,12 @@ struct SessionRowView: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text(self.session.treatmentType.displayName)
                         .font(.headline)
+                        .foregroundColor(Color(uiColor: .label))
                         .lineLimit(1)
                     Spacer()
                     Text(self.dateText)
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(Color(uiColor: .secondaryLabel))
                         .lineLimit(1)
                 }
 
@@ -52,7 +53,7 @@ struct SessionRowView: View {
                 if !self.session.intention.isEmpty {
                     Text(self.session.intention)
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(uiColor: .secondaryLabel))
                         .lineLimit(2)
                 }
             }
