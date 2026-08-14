@@ -31,7 +31,8 @@ enum ErrorFixtureFactory {
             code: NSFileReadNoPermissionError,
             userInfo: [
                 NSFilePathErrorKey: path,
-                NSLocalizedDescriptionKey: "The file \"\(path)\" couldn't be opened because you don't have permission to view it."
+                NSLocalizedDescriptionKey:
+                    "The file \"\(path)\" couldn't be opened because you don't have permission to view it."
             ]
         )
     }
@@ -101,7 +102,8 @@ enum ErrorFixtureFactory {
             domain: NSCocoaErrorDomain,
             code: NSFileReadInapplicableStringEncodingError,
             userInfo: [
-                NSLocalizedDescriptionKey: "The data couldn't be read because it isn't in the correct format (\(encoding))."
+                NSLocalizedDescriptionKey:
+                    "The data couldn't be read because it isn't in the correct format (\(encoding))."
             ]
         )
     }

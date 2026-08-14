@@ -6,11 +6,14 @@ if ! command -v swiftlint >/dev/null 2>&1; then
   exit 1
 fi
 
-CONFIG_FILE="$(git rev-parse --show-toplevel)/.swiftlint.yml"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-if [ ! -f "$CONFIG_FILE" ]; then
+if [ ! -f "$REPO_ROOT/.swiftlint.yml" ]; then
   echo "error: .swiftlint.yml not found at repo root" >&2
   exit 1
 fi
 
-swiftlint lint --no-cache --config "$CONFIG_FILE" "$@"
+# Run from the repo root without --config so SwiftLint discovers the root
+# configuration AND the nested test-target overrides.
+cd "$REPO_ROOT"
+swiftlint lint --no-cache "$@"

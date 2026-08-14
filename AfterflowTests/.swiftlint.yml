@@ -1,0 +1,9 @@
+# Test-target overrides.
+# Size limits don't apply: long, explicit test methods and large suites are
+# legitimate here. Force unwrap/try are the idiomatic fail-loud style in tests.
+disabled_rules:
+  - type_body_length
+  - function_body_length
+  - file_length
+  - force_unwrapping
+  - force_try

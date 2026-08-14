@@ -115,27 +115,6 @@ struct SessionFormView: View {
         return self.validator.validateForm(formData)
     }
 
-    private var navigationTitle: String {
-        self.mode.isEditing ? "Edit Session" : "New session"
-    }
-
-    private var statusTitle: String {
-        if let session = self.mode.session {
-            return "\(session.treatmentType.displayName) • \(session.status.displayName)"
-        }
-        return "Set an intention"
-    }
-
-    private var statusSubtitle: String {
-        self.mode.isEditing ? "Update details and tap Done when finished." : "Mood and reflections can come later."
-    }
-
-    private var primaryButtonTitle: String {
-        self.mode.isEditing ? "Done" : "Save"
-    }
-
-    private var editingSession: TherapeuticSession? { self.mode.session }
-
     @ViewBuilder
     private var moodSection: some View {
         if self.mode.isEditing {
@@ -347,6 +326,27 @@ struct SessionFormView: View {
 }
 
 extension SessionFormView {
+    private var navigationTitle: String {
+        self.mode.isEditing ? "Edit Session" : "New session"
+    }
+
+    private var statusTitle: String {
+        if let session = self.mode.session {
+            return "\(session.treatmentType.displayName) • \(session.status.displayName)"
+        }
+        return "Set an intention"
+    }
+
+    private var statusSubtitle: String {
+        self.mode.isEditing ? "Update details and tap Done when finished." : "Mood and reflections can come later."
+    }
+
+    private var primaryButtonTitle: String {
+        self.mode.isEditing ? "Done" : "Save"
+    }
+
+    private var editingSession: TherapeuticSession? { self.mode.session }
+
     private var trimmedMusicLinkInput: String {
         self.musicLinkInput.trimmingCharacters(in: .whitespacesAndNewlines)
     }

@@ -163,13 +163,13 @@ struct MarkdownRendererTests {
     @Test("render handles only asterisks") func renderHandlesOnlyAsterisks() {
         let result = MarkdownRenderer.render("***")
 
-        #expect(result.characters.count >= 0)
+        #expect(!result.characters.isEmpty)
     }
 
     @Test("render handles only hashes") func renderHandlesOnlyHashes() {
         let result = MarkdownRenderer.render("###")
 
-        #expect(result.characters.count >= 0)
+        #expect(!result.characters.isEmpty)
     }
 
     @Test("hasFormatting with whitespace only returns false") func hasFormattingWithWhitespaceOnlyReturnsFalse() {

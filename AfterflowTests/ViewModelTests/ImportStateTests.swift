@@ -28,7 +28,7 @@ struct ImportStateTests {
             timeout: 10.0
         )
 
-        #expect(importState.pendingImportedSessions.count > 0)
+        #expect(!importState.pendingImportedSessions.isEmpty)
         #expect(importState.importError == nil)
 
         try? FileManager.default.removeItem(at: tempURL)

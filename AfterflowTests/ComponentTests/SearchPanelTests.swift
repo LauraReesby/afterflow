@@ -16,7 +16,7 @@ struct SearchPanelTests {
             onCollapse: {}
         )
 
-        #expect(searchView.searchText == "")
+        #expect(searchView.searchText.isEmpty)
     }
 
     @Test("Search text binding updates") func searchTextBindingUpdates() throws {
@@ -29,7 +29,7 @@ struct SearchPanelTests {
             onCollapse: {}
         )
 
-        #expect(searchView.searchText == "")
+        #expect(searchView.searchText.isEmpty)
 
         searchText = "healing journey"
         #expect(searchText == "healing journey")
@@ -157,7 +157,7 @@ struct SearchPanelTests {
             onCollapse: {}
         )
 
-        #expect(searchView.searchText == "")
+        #expect(searchView.searchText.isEmpty)
         #expect(searchView.treatmentFilter == nil)
         #expect(searchView.sortOption == .newestFirst)
 

@@ -60,7 +60,7 @@ struct SessionListPerformanceTests {
         }
 
         #expect(duration < 2.0)
-        #expect(filtered.count > 0)
+        #expect(!filtered.isEmpty)
     }
 
     @Test("Searching through 1k sessions is fast") func searchingThousandSessions() async throws {
@@ -168,7 +168,7 @@ struct SessionListPerformanceTests {
         }
 
         #expect(duration < 0.1)
-        #expect(filtered.count > 0)
+        #expect(!filtered.isEmpty)
     }
 
     @Test("Cache miss with filter change is acceptable") func cacheMissPerformance() async throws {
@@ -271,7 +271,7 @@ struct SessionListPerformanceTests {
             markedDates = viewModel.markedDates(from: sessions)
         }
 
-        #expect(markedDates.count > 0)
+        #expect(!markedDates.isEmpty)
 
         #expect(duration < 0.5)
     }

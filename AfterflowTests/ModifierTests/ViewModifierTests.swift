@@ -73,7 +73,7 @@ struct ViewModifierTests {
 
     @Test("Export error alert presentation controlled by error")
     func exportErrorAlertPresentationControlledByError() throws {
-        var exportError: String? = nil
+        var exportError: String?
 
         exportError = "Export failed"
         let isPresented = exportError != nil
@@ -132,7 +132,7 @@ struct ViewModifierTests {
     }
 
     @Test("File exporter failure sets error") func fileExporterFailureSetsError() throws {
-        var exportError: String? = nil
+        var exportError: String?
         let testError = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "File export failed"])
 
         exportError = testError.localizedDescription
@@ -176,7 +176,7 @@ struct ViewModifierTests {
 
     @Test("Import error alert presentation controlled by error")
     func importErrorAlertPresentationControlledByError() throws {
-        var importError: String? = nil
+        var importError: String?
 
         importError = "Import failed"
         let isPresented = importError != nil
@@ -232,7 +232,7 @@ struct ViewModifierTests {
     }
 
     @Test("File importer failure sets error") func fileImporterFailureSetsError() throws {
-        var importError: String? = nil
+        var importError: String?
         let testError = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "File selection failed"])
 
         importError = testError.localizedDescription
@@ -248,8 +248,8 @@ struct ViewModifierTests {
     }
 
     @Test("Multiple modifiers can be applied to same view") func multipleModifiersCanBeAppliedToSameView() throws {
-        var exportError: String? = nil
-        var importError: String? = nil
+        var exportError: String?
+        var importError: String?
 
         exportError = "Export error"
         importError = "Import error"

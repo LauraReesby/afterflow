@@ -189,7 +189,7 @@ struct SessionListViewModelTests {
 
         viewModel.clearFilters()
 
-        #expect(viewModel.searchText == "")
+        #expect(viewModel.searchText.isEmpty)
         #expect(viewModel.sortOption == .newestFirst)
     }
 
