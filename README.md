@@ -12,17 +12,20 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 
 ### Key Features
 
-- **📊 Mood Tracking**: Before and after session mood ratings with visual feedback
+- **📊 Mood Tracking**: Before and after session mood on a tappable ten-step scale; the after-mood stays "not recorded" until you actually log it
 - **📝 Comprehensive Logging**: Capture treatment type, intentions, and reflections (editable later in Session Detail)
+- **🪞 Reflection Entry**: A dedicated screen for settling in after a session — mood-now scale, gentle writing prompts, and free text
+- **📈 Trends**: On-device mood-over-time chart, stat tiles, lift by treatment, and recurring words from your own reflections
 - **🔒 Privacy-First**: All data stays on your device. No cloud sync, tracking, or external data collection
 - **📱 Native iOS**: Built with SwiftUI and SwiftData for optimal performance on iPhone and iPad
-- **🌐 Offline-First**: Core functionality works without internet connection
-- **📅 Calendar View**: Visual calendar with session markers, toggle between list and calendar views
+- **🌐 Offline-First**: Core functionality works without internet connection (bundled fonts, no runtime fetches)
+- **📅 Calendar View**: List ⇄ Calendar segmented toggle; month grids with treatment-colored day markers, newest month first
 - **🎵 Music Links**: Playlist/track/album previews for oEmbed-capable providers (Spotify, YouTube, SoundCloud, Tidal), plus link-only fallbacks for Apple Music/Podcasts and Bandcamp
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
-- **📚 History Filters**: Sort/search the session list, filter by treatment type via floating toolbar
-- **⏰ Reflection Reminders**: Optional reminders to add post session mood and reflections
+- **📚 History Filters**: In-place search over intentions and reflections (with matching passages quoted in results), treatment filter chips, and sort options
+- **⏰ Reflection Reminders**: Optional reminders that open straight into the reflection screen
 - **📤 Data Export**: On-device CSV or PDF exports with date/treatment filters and progress feedback
+- **🎨 Organic Design System**: Warm token-driven palette (terracotta/sage/cream), Caprasimo + Figtree type, full dark-mode support
 
 ### Therapeutic Value
 
@@ -40,8 +43,8 @@ Afterflow helps users:
 ## Requirements
 
 - **iOS 17.6+** (iPhone and iPad)
-- **Xcode 16.0+** for development
-- **macOS 14.0+** for development environment
+- **Xcode 26.0+** for development
+- **macOS 15.0+** for development environment
 
 ## Getting Started
 
@@ -122,9 +125,9 @@ Current test coverage includes:
   - CSVExportService: RFC-4180 compliant CSV generation, injection guards
   - PDFExportService: PDF generation, pagination, formatting
   - ReminderScheduler: Notification scheduling and cancellation
-  - ReflectionQueue: Queued reflection persistence and replay
-  - NotificationHandler: Deep link routing, session validation, reflection processing
-- **UI Tests**: Session form validation, keyboard navigation, mood sliders (VoiceOver + Dynamic Type), reflections editing, delete
+  - NotificationHandler: Deep link routing and session validation
+- **ViewModel Tests** also cover TrendsViewModel aggregates (ranges, mood series, lift by treatment, word frequencies)
+- **UI Tests**: Session form validation, keyboard navigation, mood scale (VoiceOver + Dynamic Type), reflections editing, delete, and a full-app screenshot tour
 - **Performance Tests**: Large dataset filtering/fetching (1k+ sessions) and app launch instrumentation
 
 **Coverage Target**: 80% minimum (currently achieved)
@@ -141,7 +144,7 @@ Current test coverage includes:
 SwiftFormat and SwiftLint enforce consistent style across the app and test targets.
 
 1. Install the tools if necessary: `brew install swiftformat swiftlint`
-2. **Important:** Recent changes were checked in without running these scripts. Make sure to run them now _and_ before any future commits so CI stays clean:
+2. Run both before committing so CI stays clean:
 
 ```bash
 ./Scripts/run-swiftformat.sh
@@ -156,11 +159,10 @@ Resolve all violations (or document intentional suppressions) so CI stays clean.
 Afterflow/
 ├── Models/
 │   ├── TherapeuticSession.swift
-│   └── TreatmentTypeAppearance.swift    # Treatment type colors and initials
+│   └── TreatmentTypeAppearance.swift    # Treatment earth-tone colors and initials
 ├── Services/
 │   ├── SessionStore.swift
 │   ├── ReminderScheduler.swift
-│   ├── ReflectionQueue.swift
 │   ├── NotificationHandler.swift
 │   ├── MusicLinkMetadataService.swift
 │   ├── CSVImportService.swift
@@ -178,21 +180,22 @@ Afterflow/
 │   ├── FormValidation.swift
 │   ├── MoodRatingScale.swift
 │   ├── ReminderOption.swift
-│   └── SessionListViewModel.swift       # With performance optimization (memoization)
+│   ├── SessionListViewModel.swift       # Filter/sort/search with memoization
+│   └── TrendsViewModel.swift            # On-device mood/trend aggregates
 ├── Views/
 │   ├── ContentView.swift                # Main NavigationSplitView container
 │   ├── ContentView/
-│   │   └── SessionListSection.swift     # Session list and calendar views
+│   │   ├── SessionListSection.swift     # List surface: header, search, nudge, rows
+│   │   └── CalendarSection.swift        # Calendar surface (newest month first)
 │   ├── SessionFormView.swift
 │   ├── SessionDetailView.swift
-│   ├── CollapsibleCalendarView.swift
+│   ├── ReflectionEntryView.swift        # Dedicated reflection entry screen
+│   ├── TrendsView.swift                 # Mood-over-time charts and stats
 │   ├── Components/
-│   │   ├── SearchControlBar.swift       # Floating bottom toolbar (search/calendar/add)
-│   │   ├── ExpandableSearchView.swift   # Expandable search and filter panel
-│   │   ├── FullWidthSearchBar.swift     # Search UI component
+│   │   ├── SearchPanel.swift            # In-place search, filter chips, sort
 │   │   ├── SessionRowView.swift         # Session list row
-│   │   ├── TreatmentAvatar.swift        # Treatment type avatar component
-│   │   ├── MoodRatingView.swift
+│   │   ├── MoodBars.swift               # Tappable ten-step mood scale
+│   │   ├── MoodRatingView.swift         # Titled wrapper around MoodBars
 │   │   ├── MusicLinkSummaryCard.swift
 │   │   ├── MusicLinkMetadataPreview.swift
 │   │   ├── MusicLinkRawPreview.swift
@@ -205,12 +208,19 @@ Afterflow/
 │   │   ├── SettingsAlertModifier.swift
 │   │   └── ErrorAlertModifier.swift     # Reusable error alert modifier
 │   └── Shared/
-│       └── TreatmentAvatar.swift
+│       ├── AFSegmentedControl.swift     # Capsule segmented control
+│       ├── ChipRow.swift                # FlowLayout + AFChip
+│       ├── KickerLabel.swift            # Uppercase section labels
+│       ├── StatusTag.swift              # Complete/Reflect/Draft tags
+│       ├── TokenCard.swift              # Standard content card
+│       └── TreatmentAvatar.swift        # Flat treatment-color avatar
 ├── Utilities/
-│   ├── DesignConstants.swift            # Centralized design constants
-│   └── ViewExtensions.swift             # View modifier extensions
+│   ├── DesignConstants.swift            # Spacing, radii, shadows, animation values
+│   ├── DesignTokens.swift               # AF color/typography tokens + button styles
+│   └── FontRegistrar.swift              # Registers bundled fonts at launch
 └── Resources/
-    ├── Assets.xcassets/
+    ├── Assets.xcassets/                 # Incl. Theme/ + Treatment/ color namespaces
+    ├── Fonts/                           # Caprasimo + Figtree (bundled, offline)
     └── LaunchScreen.storyboard
 
 AfterflowTests/
@@ -223,7 +233,6 @@ AfterflowTests/
 ├── ServiceTests/
 │   ├── SessionStoreTests.swift
 │   ├── ReminderSchedulerTests.swift
-│   ├── ReflectionQueueTests.swift
 │   ├── NotificationHandlerTests.swift
 │   ├── MusicLinkMetadataServiceTests.swift
 │   ├── CSVImportServiceTests.swift
@@ -240,16 +249,15 @@ AfterflowTests/
 │   ├── FormValidationTests.swift
 │   ├── MoodRatingScaleTests.swift
 │   ├── ReminderOptionTests.swift
-│   └── SessionListViewModelTests.swift
+│   ├── SessionListViewModelTests.swift
+│   └── TrendsViewModelTests.swift
 ├── ComponentTests/
-│   ├── SearchControlBarTests.swift
-│   ├── ExpandableSearchViewTests.swift
-│   ├── FullWidthSearchBarTests.swift
+│   ├── SearchPanelTests.swift
 │   ├── SessionRowViewTests.swift
 │   ├── MoodRatingViewTests.swift
 │   └── ExportSheetViewTests.swift
 ├── UtilityTests/
-│   └── ViewExtensionsTests.swift
+│   └── FontRegistrarTests.swift
 ├── ModifierTests/
 │   └── ViewModifierTests.swift
 ├── IntegrationTests/
@@ -268,21 +276,6 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI with strong
 - **ViewModels**: Observable state management with dedicated state objects
 - **Views**: Modular SwiftUI components organized by feature
 - **Utilities**: Shared constants and helper functions
-
-### Architectural Improvements
-
-Recent refactoring has significantly improved code quality and maintainability:
-
-- **Calendar View**: Full calendar grid with session markers, month navigation, and date selection
-- **Floating Toolbar**: Bottom pill-shaped toolbar with search, calendar/list toggle, and add buttons
-- **State Management**: Centralized export/import state into dedicated `@Observable` managers
-- **Component Extraction**: Modular view components with dedicated test coverage
-- **Calendar Logic**: Extracted testable `CalendarGridHelper` for month range and grid generation
-- **Performance**: Added memoization to SessionListViewModel for efficient filtering/sorting
-- **Accessibility**: Comprehensive VoiceOver support with hints on all interactive elements
-- **Error Handling**: User-facing errors now display helpful alerts instead of failing silently
-- **Design System**: Centralized design constants (animations, spacing, shadows, etc.)
-- **Adaptive Layout**: NavigationSplitView with proper compact/regular size class handling
 
 ### Key Principles
 
@@ -304,43 +297,8 @@ Recent refactoring has significantly improved code quality and maintainability:
 - **Branding**: Provider logos stored in `Assets.xcassets/Brands` with light/dark variants; UI falls back to a music note when unavailable.
 - **Privacy**: No playback or authentication; only lightweight metadata fetches for oEmbed-capable providers.
 
-## Development Roadmap
-
-### ✅ Phase 1: Foundation (Complete)
-- [x] Core data model (TherapeuticSession)
-- [x] Persistence layer (SessionStore + SwiftData)
-- [x] Comprehensive test suite
-- [x] Basic session list view
-
-### ✅ Phase 2: Session Form UI
-- [x] SessionFormView for creating/editing sessions
-- [x] Form validation, inline errors, and keyboard navigation
-- [x] Date/treatment type pickers with auto-save/draft recovery
-
-### ✅ Phase 3–5: Enhanced UI Components
-- [x] Music link preview card + “attach link” flow
-- [x] Mood rating sliders with emoji map + accessibility tests
-- [x] Session detail view with editable reflections and persistence error handling
-
-### ✅ Phase 6: History List
-- [x] SessionListViewModel (sort/filter/search)
-- [x] Delete, VoiceOver-friendly filter menu
-- [x] Large dataset fixtures + performance tests (<200 ms scroll for 1k sessions)
-
-### ✅ Phase 7: Music Links & Data Export
-- [x] Playlist link previews (Spotify/YouTube oEmbed, link-only fallback)
-- [x] CSV/PDF export flows with filters and offline file export
-- [x] Governance and privacy review for exports (on-device only)
-
-### ✅ Phase 8: Calendar View & UI Polish
-- [x] Calendar grid view with session markers by treatment type
-- [x] Toggle between list and calendar views via floating toolbar
-- [x] Expandable search panel with filters
-- [x] Adaptive layout for iPhone and iPad (NavigationSplitView)
-- [x] Calendar navigation preserves selection in split view
-
 ## Export Usage
-- Open the Sessions list, tap **Export**, choose CSV or PDF, and optionally filter by date range or treatment type.
+- Open the Sessions list, tap the **⋯ menu → Export**, choose CSV or PDF, and optionally filter by date range or treatment type.
 - Exports run locally and present the iOS file exporter/share sheet; temporary files are cleaned after completion.
 - CSVs use RFC‑4180 quoting and injection guards; PDFs include session summaries with optional cover pages.
 
@@ -368,7 +326,7 @@ Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,
 | **Administration** | Text | `Intravenous (IV)`, `Intramuscular (IM)`, `Oral`, `Nasal`, `Other` | `Oral` |
 | **Intention** | Text | Any non-empty string | `To explore creativity` |
 | **Mood Before** | Integer | 1-10 | `5` |
-| **Mood After** | Integer | 1-10 | `8` |
+| **Mood After** | Integer or empty | 1-10, or empty when not yet recorded | `8` |
 | **Reflections** | Text | Any string (can be empty) | `Felt peaceful and connected` |
 | **Music Link URL** | URL | Any valid URL or empty | `https://open.spotify.com/playlist/...` |
 
@@ -423,7 +381,7 @@ Afterflow automatically protects against CSV injection attacks:
 1. Prepare your CSV file following the format above
 2. Transfer the file to your iOS device (via AirDrop, Files app, email, etc.)
 3. Open Afterflow
-4. Navigate to Settings → Import Data
+4. Tap the **⋯ menu → Import**
 5. Select your CSV file
 6. Review the import summary
 7. Confirm to add the sessions
@@ -437,8 +395,8 @@ Afterflow automatically protects against CSV injection attacks:
 **"Invalid row" error:**
 - Check the date format matches exactly (Medium date + short time)
 - Verify Treatment Type and Administration values match the valid options
-- Ensure Mood Before/After are integers between 1-10
-- Make sure all required fields (Date through Mood After) have values
+- Ensure Mood Before is an integer between 1-10, and Mood After is 1-10 or empty
+- Make sure all required fields (Date through Mood Before) have values
 
 **"Data is not UTF-8 encoded" error:**
 - Re-save your CSV file with UTF-8 encoding
@@ -449,12 +407,6 @@ Afterflow automatically protects against CSV injection attacks:
 
 This is a personal therapeutic app project. While the code is public for transparency, direct contributions are not currently accepted. However, feedback and suggestions are welcome through Issues.
 
-### Development Setup
-
-1. **Constitutional Compliance**: All changes must align with privacy-first principles
-2. **Test-Driven Development**: New features require accompanying tests
-3. **Accessibility**: All UI components must support VoiceOver and Dynamic Type
-
 ## Privacy & Data
 
 ### Data Collection: None
@@ -462,7 +414,7 @@ Afterflow collects **zero** personal data. All information stays on your device.
 
 ### Data Storage
 - **Local Only**: SwiftData with SQLite backing
-- **Optional CloudKit**: User-controlled sync (planned)
+- **No Cloud Sync**: Data never leaves the device
 - **No Analytics**: No usage tracking or crash reporting
 
 ### Data Export
