@@ -37,9 +37,9 @@ final class SessionDetailViewUITests: XCTestCase {
 
         XCTAssertFalse(doneButton.waitForExistence(timeout: 3))
 
-        let detailList = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch
+        // The detail screen is a non-lazy ScrollView, so off-screen content is
+        // still present in the accessibility tree — no scrolling needed.
         let reflectionText = app.staticTexts["Gentle integration notes for testing."]
-        detailList.scrollTo(element: reflectionText)
         XCTAssertTrue(reflectionText.waitForExistence(timeout: 5), "Reflection should appear on detail view")
     }
 
