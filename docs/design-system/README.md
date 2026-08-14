@@ -1,5 +1,13 @@
 # Handoff: Afterflow redesign (iOS)
 
+> **Note (Aug 2026):** This redesign has been fully implemented — tokens live in
+> `Afterflow/Resources/Assets.xcassets` (`Theme/`, `Treatment/`) and
+> `Afterflow/Utilities/DesignTokens.swift`. This document is kept as the design
+> spec of record (token tables, dark-mode remap, type scale, rationale). The
+> interactive prototype bundle it references ("Files in this bundle" below) was
+> removed from the working tree; recover it from git history if needed:
+> `git show d81e89e:"design_handoff_afterflow_redesign/Afterflow Redesign.dc.html"`.
+
 ## Overview
 
 A visual and interaction redesign of Afterflow's six existing surfaces — sessions list, search, calendar, session detail, new-session form — plus two new surfaces the team asked for: a **Trends** view (mood over time) and a dedicated **Reflection entry** screen. Information architecture is unchanged from what ships today; what changes is the visual system, the arrangement of the primary controls, and two additions.
