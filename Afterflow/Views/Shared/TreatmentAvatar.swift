@@ -2,60 +2,28 @@ import SwiftUI
 
 struct TreatmentAvatar: View {
     let type: PsychedelicTreatmentType
+    let size: CGFloat
 
-    init(type: PsychedelicTreatmentType) {
+    init(type: PsychedelicTreatmentType, size: CGFloat = 38) {
         self.type = type
+        self.size = size
     }
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(self.type.accentColor.opacity(0.85))
+        // Flat fill is intentional per the Organic design system — no gradients or overlays.
+        Circle()
+            .fill(self.type.accentColor)
+            .overlay {
+                Text(self.type.initials)
+                    .font(.afterflowBody(self.initialsSize, weight: .bold))
+                    .foregroundStyle(Color("Treatment/ink"))
+                    .accessibilityHidden(true)
+            }
+            .frame(width: self.size, height: self.size)
+            .accessibilityIdentifier("treatmentAvatar")
+    }
 
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.22),
-                            Color.white.opacity(0.0)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .blendMode(.softLight)
-
-            Text(self.type.initials)
-                .font(.system(size: 14, weight: .heavy, design: .rounded))
-                .foregroundStyle(Color.white.opacity(0.92))
-                .shadow(color: .black.opacity(0.08), radius: 1, x: 0, y: 1)
-                .accessibilityHidden(true)
-
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.28),
-                            Color.white.opacity(0.06)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .blendMode(.screen)
-                .opacity(0.6)
-        }
-        .overlay(
-            Circle()
-                .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
-                .blendMode(.overlay)
-        )
-        .overlay(
-            Circle()
-                .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5)
-        )
-        .frame(width: 36, height: 36)
-        .compositingGroup()
-        .accessibilityIdentifier("treatmentAvatar")
+    private var initialsSize: CGFloat {
+        self.size >= 52 ? 17 : 13
     }
 }

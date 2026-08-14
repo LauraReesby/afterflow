@@ -52,6 +52,7 @@ struct AfterflowApp: App {
     private let isUITesting: Bool = ProcessInfo.processInfo.arguments.contains("-ui-testing")
 
     init() {
+        FontRegistrar.registerBundledFonts()
         if ProcessInfo.processInfo.arguments.contains("-ui-musiclink-fixtures") {
             let delegate = self.appDelegate
             DispatchQueue.main.async {

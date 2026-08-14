@@ -375,8 +375,7 @@ private struct SessionSummarySection: View {
     }
 
     private var hasAfterMood: Bool {
-        let reflectionSet = !self.session.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return reflectionSet || self.session.moodAfter != 5
+        self.session.hasAfterMood
     }
 
     private var summaryBadge: some View {
@@ -450,8 +449,7 @@ private struct SessionMoodSection: View {
     }
 
     private var hasAfterMood: Bool {
-        let reflectionSet = !self.session.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return reflectionSet || self.session.moodAfter != 5
+        self.session.hasAfterMood
     }
 
     private func moodRow(title: String, value: Int) -> some View {

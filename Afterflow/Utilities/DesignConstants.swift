@@ -22,6 +22,14 @@ enum DesignConstants {
         static let small: CGFloat = 8
         static let medium: CGFloat = 12
         static let large: CGFloat = 16
+
+        // Organic design-system scale (1.10× density)
+        static let xxs: CGFloat = 4.4
+        static let xs: CGFloat = 8.8
+        static let sm: CGFloat = 13.2
+        static let md: CGFloat = 17.6
+        static let lg: CGFloat = 26.4
+        static let xl: CGFloat = 35.2
     }
 
     enum CornerRadius {
@@ -29,6 +37,9 @@ enum DesignConstants {
         static let medium: CGFloat = 10
         static let large: CGFloat = 16
         static let searchBar: CGFloat = 18
+
+        // Organic design-system card radius; buttons/chips/inputs use Capsule
+        static let card: CGFloat = 28
     }
 
     enum Opacity {

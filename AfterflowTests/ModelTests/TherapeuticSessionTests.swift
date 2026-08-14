@@ -93,6 +93,28 @@ struct TherapeuticSessionTests {
         #expect(sessionWithPlaylist.hasMusicLink == true)
     }
 
+    @Test("After-mood detection uses the sentinel heuristic") func testHasAfterMood() async throws {
+        let untouched = TherapeuticSession()
+        #expect(untouched.hasAfterMood == false)
+
+        let moodOnly = TherapeuticSession()
+        moodOnly.moodAfter = 7
+        #expect(moodOnly.hasAfterMood == true)
+
+        let reflectionOnly = TherapeuticSession()
+        reflectionOnly.reflections = "Felt grounded afterwards."
+        #expect(reflectionOnly.hasAfterMood == true)
+
+        let sentinelFiveWithReflection = TherapeuticSession()
+        sentinelFiveWithReflection.moodAfter = 5
+        sentinelFiveWithReflection.reflections = "A genuine after-mood of 5."
+        #expect(sentinelFiveWithReflection.hasAfterMood == true)
+
+        let whitespaceReflection = TherapeuticSession()
+        whitespaceReflection.reflections = "   \n  "
+        #expect(whitespaceReflection.hasAfterMood == false)
+    }
+
     @Test("Valid session validation") func validSessionValidation() async throws {
         let validSession = TherapeuticSession(
             treatmentType: .psilocybin,

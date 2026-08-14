@@ -1,17 +1,19 @@
 import SwiftUI
 
 extension PsychedelicTreatmentType {
+    /// Muted earth tones from the Organic design system (`Treatment/` asset namespace).
+    /// Same values in light and dark mode.
     var accentColor: Color {
         switch self {
-        case .ketamine: Color.cyan
-        case .psilocybin: Color.purple
-        case .lsd: Color.indigo
-        case .mdma: Color.orange
-        case .dmt: Color.teal
-        case .ayahuasca: Color.brown
-        case .mescaline: Color.green
-        case .cannabis: Color.mint
-        case .other: Color.gray
+        case .ketamine: Color("Treatment/ketamine")
+        case .psilocybin: Color("Treatment/psilocybin")
+        case .lsd: Color("Treatment/lsd")
+        case .mdma: Color("Treatment/mdma")
+        case .dmt: Color("Treatment/dmt")
+        case .ayahuasca: Color("Treatment/ayahuasca")
+        case .mescaline: Color("Treatment/mescaline")
+        case .cannabis: Color("Treatment/cannabis")
+        case .other: Color("Treatment/other")
         }
     }
 
