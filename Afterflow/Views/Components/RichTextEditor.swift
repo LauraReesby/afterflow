@@ -34,7 +34,7 @@ import SwiftUI
                         .padding(8)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Color(.secondarySystemBackground))
+                                .fill(AF.neutral(200))
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
@@ -93,7 +93,7 @@ import SwiftUI
                 Image(systemName: self.symbol)
                     .font(.body)
                     .frame(width: 32, height: 32)
-                    .background(Color(.tertiarySystemBackground))
+                    .background(AF.neutral(200))
                     .cornerRadius(6)
             }
         }

@@ -99,7 +99,7 @@ struct SessionListSection: View {
                 self.searchArea
                     .padding(.top, DesignConstants.Spacing.medium)
 
-                if self.hasActiveQuery {
+                if self.hasActiveQuery, !self.sessions.isEmpty {
                     self.resultLine
                         .padding(.top, DesignConstants.Spacing.medium)
                 } else if self.shouldShowNudge {
@@ -345,6 +345,31 @@ struct SessionListSection: View {
         )
     }
 
+    // MARK: - Empty state
+
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if self.hasActiveQuery {
+                let query = self.listViewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+                Text("No matches for \u{201C}\(query)\u{201D}")
+                    .font(.afterflowDisplay(20))
+                    .foregroundStyle(AF.text)
+                Text("Try another word, or clear the search.")
+                    .font(.afterflowBody(14))
+                    .foregroundStyle(AF.neutral(600))
+            } else {
+                Text("No sessions yet")
+                    .font(.afterflowDisplay(20))
+                    .foregroundStyle(AF.text)
+                Text("Tap + to log your first.")
+                    .font(.afterflowBody(14))
+                    .foregroundStyle(AF.neutral(600))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, DesignConstants.Spacing.lg)
+    }
+
     // MARK: - Floating add button
 
     private var addButton: some View {
@@ -381,6 +406,13 @@ struct SessionListSection: View {
                         )
                     )
                     .selectionDisabled(true)
+
+                if self.sessions.isEmpty {
+                    self.emptyState
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .selectionDisabled(true)
+                }
 
                 ForEach(Array(self.sessions.enumerated()), id: \.element.id) { index, session in
                     self.buildSessionRow(session: session, index: index)

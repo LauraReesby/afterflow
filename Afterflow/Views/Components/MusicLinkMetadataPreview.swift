@@ -17,7 +17,7 @@ struct MusicLinkMetadataPreview: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial)
+        .background(AF.neutral(200))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("musicLinkPreview")

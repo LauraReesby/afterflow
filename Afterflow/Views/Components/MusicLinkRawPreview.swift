@@ -15,7 +15,7 @@ struct MusicLinkRawPreview: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground))
+        .background(AF.neutral(200))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityIdentifier("musicLinkRawPreview")
     }
