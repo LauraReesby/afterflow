@@ -112,18 +112,18 @@ struct SessionFormView: View {
     }
 
     private var navigationTitle: String {
-        self.mode.isEditing ? "Edit Session" : "New Session"
+        self.mode.isEditing ? "Edit Session" : "New session"
     }
 
     private var statusTitle: String {
         if let session = self.mode.session {
             return "\(session.treatmentType.displayName) • \(session.status.displayName)"
         }
-        return "Draft • Capture your intention"
+        return "Set an intention"
     }
 
     private var statusSubtitle: String {
-        self.mode.isEditing ? "Update details and tap Done when finished." : "You can add mood and reflections later."
+        self.mode.isEditing ? "Update details and tap Done when finished." : "Mood and reflections can come later."
     }
 
     private var primaryButtonTitle: String {
@@ -135,7 +135,7 @@ struct SessionFormView: View {
     @ViewBuilder
     private var moodSection: some View {
         if self.mode.isEditing {
-            Section("Mood") {
+            Section {
                 VStack(alignment: .leading, spacing: 16) {
                     MoodRatingView(
                         value: self.$moodBefore,
@@ -154,9 +154,12 @@ struct SessionFormView: View {
                 .onChange(of: self.moodAfter) { _, _ in
                     self.scheduleDraftSave()
                 }
+                .listRowBackground(AF.neutral(100))
+            } header: {
+                KickerLabel("Mood")
             }
         } else {
-            Section("Mood before") {
+            Section {
                 VStack(alignment: .leading, spacing: 8) {
                     MoodRatingView(
                         value: self.$moodBefore,
@@ -167,6 +170,9 @@ struct SessionFormView: View {
                 .onChange(of: self.moodBefore) { _, _ in
                     self.scheduleDraftSave()
                 }
+                .listRowBackground(AF.neutral(100))
+            } header: {
+                KickerLabel("Mood before")
             }
         }
     }
@@ -174,7 +180,7 @@ struct SessionFormView: View {
     @ViewBuilder
     private var reflectionSection: some View {
         if self.mode.isEditing {
-            Section("Reflection") {
+            Section {
                 RichTextEditor(
                     text: self.$reflectionText,
                     isFocused: Binding(
@@ -189,24 +195,29 @@ struct SessionFormView: View {
                     ),
                     accessibilityIdentifier: "reflectionEditor"
                 )
+                .listRowBackground(AF.neutral(100))
 
                 Text("Use formatting to emphasize key insights or organize your thoughts.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .font(.afterflowBody(12))
+                    .foregroundStyle(AF.neutral(600))
+                    .listRowBackground(AF.neutral(100))
+            } header: {
+                KickerLabel("Reflection")
             }
         } else {
-            Section("Reflection") {
+            Section {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Reflections are for after your session.")
-                        .font(.subheadline)
+                        .font(.afterflowBody(15))
+                        .foregroundStyle(AF.text)
                     Text("We'll remind you gently when you're ready.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .font(.afterflowBody(12))
+                        .foregroundStyle(AF.neutral(600))
                 }
-                .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .listRowBackground(AF.neutral(100))
+            } header: {
+                KickerLabel("Reflection")
             }
         }
     }
@@ -272,18 +283,29 @@ struct SessionFormView: View {
                 Button("Cancel") {
                     self.cancel()
                 }
+                .font(.afterflowBody(15))
+                .foregroundStyle(AF.neutral(700))
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button(self.primaryButtonTitle) {
+                Button {
                     self.saveSession()
+                } label: {
+                    Text(self.primaryButtonTitle)
+                        .font(.afterflowBody(14, weight: .semibold))
+                        .foregroundStyle(AF.onAccent)
+                        .padding(.vertical, 9)
+                        .padding(.horizontal, 18)
+                        .background(Capsule().fill(AF.accent))
                 }
+                .buttonStyle(.plain)
+                .opacity(self.isLoading || !self.isFormValid ? 0.45 : 1)
                 .disabled(self.isLoading || !self.isFormValid)
             }
             ToolbarItemGroup(placement: .keyboard) {}
         }
         .disabled(self.isLoading)
         .scrollContentBackground(.hidden)
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(AF.bg)
         .scrollDismissesKeyboard(.immediately)
         .alert("Error", isPresented: self.$showError) {
             Button("OK") {}
@@ -653,23 +675,20 @@ private struct FormStatusBanner: View {
 
     var body: some View {
         Section {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(self.statusTitle)
-                    .font(.headline)
+                    .font(.afterflowDisplay(28))
+                    .foregroundStyle(AF.text)
                 Text(self.statusSubtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.afterflowBody(14))
+                    .foregroundStyle(AF.neutral(600))
             }
-            .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
-            )
         }
         .accessibilityElement(children: .contain)
         .listRowBackground(Color.clear)
-        .listRowInsets(.init(top: 8, leading: 0, bottom: 0, trailing: 0))
+        .listRowSeparator(.hidden)
+        .listRowInsets(.init(top: 8, leading: 4, bottom: 0, trailing: 0))
     }
 }
 
@@ -681,23 +700,28 @@ private struct FormDateSection: View {
     let onDateChange: (Date, Date) -> Void
 
     var body: some View {
-        Section("When is this session?") {
+        Section {
             DatePicker(
                 "Date & Time",
                 selection: self.$sessionDate,
                 displayedComponents: [.date, .hourAndMinute]
             )
             .datePickerStyle(.compact)
+            .font(.afterflowBody(16))
             .onChange(of: self.sessionDate) { oldValue, newValue in
                 self.onDateChange(oldValue, newValue)
             }
             .inlineValidation(self.dateValidation)
+            .listRowBackground(AF.neutral(100))
 
             if self.showNormalizationHint, !self.normalizationMessage.isEmpty {
                 Text(self.normalizationMessage)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.afterflowBody(12))
+                    .foregroundStyle(AF.neutral(600))
+                    .listRowBackground(AF.neutral(100))
             }
+        } header: {
+            KickerLabel("When")
         }
         .accessibilityElement(children: .contain)
     }
@@ -710,16 +734,24 @@ private struct FormTreatmentSection: View {
     let onAdministrationChange: () -> Void
 
     var body: some View {
-        Section("Treatment") {
-            Picker("Treatment Type", selection: self.$treatmentType) {
+        Section {
+            FlowLayout(spacing: 7) {
                 ForEach(PsychedelicTreatmentType.allCases, id: \.self) { type in
-                    Text(type.displayName).tag(type)
+                    AFChip(
+                        label: type.displayName,
+                        isSelected: self.treatmentType == type,
+                        size: .medium
+                    ) {
+                        self.treatmentType = type
+                        self.onTreatmentChange()
+                    }
                 }
             }
-            .pickerStyle(.menu)
-            .onChange(of: self.treatmentType) { _, _ in
-                self.onTreatmentChange()
-            }
+            .padding(.vertical, 4)
+            .listRowBackground(AF.neutral(100))
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Treatment Type")
+            .accessibilityValue(self.treatmentType.displayName)
 
             Picker("Administration", selection: self.$administration) {
                 ForEach(AdministrationMethod.allCases, id: \.self) { method in
@@ -727,9 +759,14 @@ private struct FormTreatmentSection: View {
                 }
             }
             .pickerStyle(.menu)
+            .font(.afterflowBody(16))
+            .tint(AF.accent(700))
             .onChange(of: self.administration) { _, _ in
                 self.onAdministrationChange()
             }
+            .listRowBackground(AF.neutral(100))
+        } header: {
+            KickerLabel("Treatment")
         }
         .accessibilityElement(children: .contain)
     }
@@ -744,12 +781,13 @@ private struct FormIntentionSection: View {
     let onChange: () -> Void
 
     var body: some View {
-        Section("Intention") {
+        Section {
             TextField(
                 "What do you hope to explore or heal?",
                 text: self.$intention,
                 axis: .vertical
             )
+            .font(.afterflowBody(16))
             .lineLimit(3 ... 6)
             .focused(self.$focusedField, equals: .intention)
             .submitLabel(.done)
@@ -764,6 +802,9 @@ private struct FormIntentionSection: View {
             }
             .inlineValidation(self.validation)
             .accessibilityIdentifier("intentionField")
+            .listRowBackground(AF.neutral(100))
+        } header: {
+            KickerLabel("Intention")
         }
         .accessibilityElement(children: .contain)
     }
@@ -784,12 +825,12 @@ private struct FormMusicSection: View {
     let onRemoveLink: () -> Void
 
     var body: some View {
-        Section("Music") {
+        Section {
             VStack(alignment: .leading, spacing: 8) {
                 if self.shouldShowHelper {
                     Text("Paste a link from Spotify, YouTube, or SoundCloud.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .font(.afterflowBody(12))
+                        .foregroundStyle(AF.neutral(600))
 
                     #if canImport(UIKit)
                         Button {
@@ -841,6 +882,9 @@ private struct FormMusicSection: View {
                     .accessibilityIdentifier("removeMusicLinkButton")
                 }
             }
+            .listRowBackground(AF.neutral(100))
+        } header: {
+            KickerLabel("Music")
         }
         .accessibilityElement(children: .contain)
     }

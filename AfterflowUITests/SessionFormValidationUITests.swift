@@ -18,7 +18,7 @@ final class SessionFormValidationUITests: XCTestCase {
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2))
         intentionField.typeText("Grounding intention")
 
-        let saveButton = app.navigationBars["New Session"].buttons["Save"]
+        let saveButton = app.navigationBars["New session"].buttons["Save"]
         XCTAssertTrue(saveButton.waitForExistence(timeout: 2), "Save button should exist")
 
         let enabledPredicate = NSPredicate(format: "isEnabled == true")
@@ -33,7 +33,7 @@ final class SessionFormValidationUITests: XCTestCase {
         if app.buttons["In 3 hours"].waitForExistence(timeout: 1) {
             app.buttons["In 3 hours"].tap()
         }
-        XCTAssertFalse(app.navigationBars["New Session"].waitForExistence(timeout: 1))
+        XCTAssertFalse(app.navigationBars["New session"].waitForExistence(timeout: 1))
 
         let sessionCell = app.cells.containing(.staticText, identifier: "Grounding intention").firstMatch
         XCTAssertTrue(sessionCell.waitForExistence(timeout: 3), "Session should appear in list")
@@ -75,7 +75,7 @@ final class SessionFormValidationUITests: XCTestCase {
         intentionField.tap()
         intentionField.typeText("Grounding intention")
 
-        let saveButton = app.navigationBars["New Session"].buttons["Save"]
+        let saveButton = app.navigationBars["New session"].buttons["Save"]
         XCTAssertTrue(saveButton.waitForExistence(timeout: 2), "Save button should exist")
         let enabledPredicate = NSPredicate(format: "isEnabled == true")
         let enabledExpectation = XCTNSPredicateExpectation(predicate: enabledPredicate, object: saveButton)
@@ -93,7 +93,7 @@ final class SessionFormValidationUITests: XCTestCase {
         XCTAssertTrue(addSessionButton.waitForExistence(timeout: 5), "Add Session button should appear on launch")
         addSessionButton.tap()
 
-        let formNavBar = app.navigationBars["New Session"]
+        let formNavBar = app.navigationBars["New session"]
         XCTAssertTrue(formNavBar.waitForExistence(timeout: 3), "Session form should appear")
     }
 }

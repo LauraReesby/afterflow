@@ -21,7 +21,7 @@ extension View {
                 NavigationStack { SessionFormView() }
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
-                    .presentationCornerRadius(16)
+                    .presentationCornerRadius(DesignConstants.CornerRadius.card)
                     .toolbarBackground(.visible, for: .automatic)
             }
             .sheet(isPresented: config.showingExportSheet) {

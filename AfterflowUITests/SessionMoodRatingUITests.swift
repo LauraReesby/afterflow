@@ -11,14 +11,17 @@ final class SessionMoodRatingUITests: XCTestCase {
 
         self.revealMoodSection(in: app)
 
-        let beforeSlider = self.sliderElement("moodBeforeSlider", in: app)
-        XCTAssertTrue(beforeSlider.waitForExistence(timeout: 3), "Before mood slider should exist")
-        XCTAssertEqual(beforeSlider.label, "Before Session mood rating")
+        let beforeBars = self.moodElement("moodBeforeSlider", in: app)
+        XCTAssertTrue(beforeBars.waitForExistence(timeout: 3), "Before mood control should exist")
+        XCTAssertEqual(beforeBars.label, "Before Session mood rating")
 
-        XCTAssertFalse(app.sliders["moodAfterSlider"].exists, "After mood slider should be absent at creation")
+        XCTAssertFalse(
+            self.moodElement("moodAfterSlider", in: app).exists,
+            "After mood control should be absent at creation"
+        )
 
-        if beforeSlider.exists {
-            beforeSlider.adjust(toNormalizedSliderPosition: 0.8)
+        if beforeBars.isHittable {
+            beforeBars.coordinate(withNormalizedOffset: CGVector(dx: 0.75, dy: 0.5)).tap()
         }
     }
 
@@ -28,10 +31,13 @@ final class SessionMoodRatingUITests: XCTestCase {
 
         self.revealMoodSection(in: app)
 
-        let beforeSlider = self.sliderElement("moodBeforeSlider", in: app)
-        XCTAssertTrue(beforeSlider.waitForExistence(timeout: 3), "Before mood slider should remain visible")
+        let beforeBars = self.moodElement("moodBeforeSlider", in: app)
+        XCTAssertTrue(beforeBars.waitForExistence(timeout: 3), "Before mood control should remain visible")
 
-        XCTAssertFalse(app.sliders["moodAfterSlider"].exists, "After mood slider should not appear in creation form")
+        XCTAssertFalse(
+            self.moodElement("moodAfterSlider", in: app).exists,
+            "After mood control should not appear in creation form"
+        )
 
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "MoodSection-XXXL"
@@ -46,7 +52,7 @@ final class SessionMoodRatingUITests: XCTestCase {
         XCTAssertTrue(addSessionButton.waitForExistence(timeout: 5), "Add Session button should appear on launch")
         addSessionButton.tap()
 
-        let formNavBar = app.navigationBars["New Session"]
+        let formNavBar = app.navigationBars["New session"]
         XCTAssertTrue(formNavBar.waitForExistence(timeout: 3), "Session form should appear")
 
         guard let intentionField = app.waitForTextInput("intentionField") else {
@@ -66,14 +72,16 @@ final class SessionMoodRatingUITests: XCTestCase {
         }
 
         var attempts = 0
-        while !app.sliders["moodBeforeSlider"].exists, attempts < 40 {
+        while !self.moodElement("moodBeforeSlider", in: app).exists, attempts < 40 {
             container.swipeUp()
             RunLoop.current.run(until: Date().addingTimeInterval(0.15))
             attempts += 1
         }
     }
 
-    private func sliderElement(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
-        app.sliders[identifier]
+    private func moodElement(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@", identifier))
+            .firstMatch
     }
 }

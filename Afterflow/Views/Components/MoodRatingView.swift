@@ -5,13 +5,6 @@ struct MoodRatingView: View {
     let title: String
     let accessibilityIdentifier: String
 
-    private var sliderBinding: Binding<Double> {
-        Binding<Double>(
-            get: { Double(self.value) },
-            set: { self.value = Int($0.rounded()) }
-        )
-    }
-
     private var descriptor: String {
         MoodRatingScale.descriptor(for: self.value)
     }
@@ -24,36 +17,20 @@ struct MoodRatingView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(self.title)
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
+                    .font(.afterflowBody(15, weight: .semibold))
+                    .foregroundStyle(AF.text)
 
                 Spacer()
 
                 Text("\(self.emoji)  \(self.value)/10 • \(self.descriptor)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.afterflowBody(13))
+                    .foregroundStyle(AF.neutral(600))
                     .accessibilityHidden(true)
             }
 
-            Slider(
-                value: self.sliderBinding,
-                in: 1 ... 10,
-                step: 1
-            )
-            .tint(Color("AccentColor"))
-            .accessibilityLabel("\(self.title) mood rating")
-            .accessibilityValue("\(self.value) of 10, \(self.descriptor)")
-            .accessibilityAdjustableAction { direction in
-                switch direction {
-                case .increment:
-                    self.value = min(self.value + 1, 10)
-                case .decrement:
-                    self.value = max(self.value - 1, 1)
-                default:
-                    break
-                }
-            }
-            .accessibilityIdentifier(self.accessibilityIdentifier)
+            MoodBars(value: self.$value)
+                .accessibilityLabel("\(self.title) mood rating")
+                .accessibilityIdentifier(self.accessibilityIdentifier)
         }
         .padding(.vertical, 4)
     }
