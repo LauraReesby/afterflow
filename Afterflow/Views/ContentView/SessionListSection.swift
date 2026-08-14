@@ -27,7 +27,16 @@ struct SessionListSection: View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 if self.showCalendarView {
-                    self.calendarScrollView()
+                    CalendarSection(
+                        sessions: self.sessions,
+                        listViewModel: self.$listViewModel,
+                        selection: self.$selection,
+                        sessionStore: self.sessionStore,
+                        navigateToSession: self.$navigateToSessionFromCalendar,
+                        onDaySelected: { self.pendingCalendarSelection = true }
+                    ) {
+                        self.headerBlock(includeSearchAndNudge: false)
+                    }
                 } else {
                     self.sessionList()
                 }
@@ -174,6 +183,12 @@ struct SessionListSection: View {
             return "Nothing logged yet"
         }
         let count = SpelledNumber.text(for: self.totalSessionCount ?? self.sessions.count)
+
+        if self.showCalendarView {
+            let quarterCount = SpelledNumber.text(for: self.sessionsThisQuarter)
+            return "\(count.capitalized) logged · \(quarterCount) this quarter"
+        }
+
         let calendar = Calendar.current
         let lastText: String
         if calendar.isDateInToday(latest) {
@@ -186,6 +201,17 @@ struct SessionListSection: View {
             lastText = "last one \(formatter.localizedString(for: latest, relativeTo: Date()))"
         }
         return "\(count.capitalized) logged · \(lastText)"
+    }
+
+    private var sessionsThisQuarter: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        let currentYear = calendar.component(.year, from: now)
+        let currentQuarter = (calendar.component(.month, from: now) - 1) / 3
+        return self.sessions.count { session in
+            calendar.component(.year, from: session.sessionDate) == currentYear
+                && (calendar.component(.month, from: session.sessionDate) - 1) / 3 == currentQuarter
+        }
     }
 
     // MARK: - Search (expanded panel is replaced in the search phase)
@@ -303,133 +329,6 @@ struct SessionListSection: View {
         .accessibilityIdentifier("addSessionButton")
         .accessibilityLabel("Add Session")
         .accessibilityHint("Creates a new therapy session")
-    }
-
-    // MARK: - Calendar mode
-
-    private func calendarMarkers() -> [Date: Color] {
-        CalendarGridHelper.calendarMarkers(from: self.sessions)
-    }
-
-    private func calendarScrollView() -> some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    self.headerBlock(includeSearchAndNudge: false)
-                        .padding(.horizontal, DesignConstants.Spacing.large)
-
-                    ForEach(self.generateMonthRange(), id: \.self) { monthStart in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(monthStart, format: .dateTime.month(.wide).year())
-                                .font(.headline)
-                                .padding(.horizontal)
-
-                            self.monthGrid(for: monthStart)
-                        }
-                        .id(monthStart)
-                    }
-                }
-                .padding(.vertical)
-            }
-            .contentMargins(.bottom, 110, for: .scrollContent)
-            .onAppear {
-                if let selectedDate = self.listViewModel.selectedDate {
-                    let calendar = Calendar.current
-                    let monthStart = calendar.startOfMonth(for: selectedDate)
-                    proxy.scrollTo(monthStart, anchor: .top)
-                }
-            }
-            .navigationDestination(isPresented: self.$navigateToSessionFromCalendar) {
-                if let sessionID = self.selection,
-                   let session = self.sessions.first(where: { $0.id == sessionID }) {
-                    SessionDetailView(session: session)
-                        .environment(self.sessionStore)
-                }
-            }
-        }
-    }
-
-    private func monthGrid(for monthStart: Date) -> some View {
-        let calendar = Calendar.current
-        let gridDays = self.generateGridDaysForMonth(monthStart)
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
-        let markedDates = self.calendarMarkers()
-
-        return VStack(spacing: 8) {
-            LazyVGrid(columns: columns, spacing: 4) {
-                ForEach(0 ..< 7, id: \.self) { index in
-                    let weekdayIndex = (calendar.firstWeekday + index - 1) % 7 + 1
-                    let weekdaySymbol = calendar.veryShortWeekdaySymbols[weekdayIndex - 1]
-                    Text(weekdaySymbol)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-
-            LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(0 ..< gridDays.count, id: \.self) { index in
-                    if let date = gridDays[index] {
-                        self.dayCell(for: date, in: monthStart, markedDates: markedDates)
-                    } else {
-                        Color.clear
-                            .frame(width: 36, height: 36)
-                    }
-                }
-            }
-        }
-        .padding(.horizontal)
-    }
-
-    private func dayCell(for date: Date, in monthStart: Date, markedDates: [Date: Color])
-        -> some View {
-        let calendar = Calendar.current
-        let day = calendar.component(.day, from: date)
-        let isToday = calendar.isDateInToday(date)
-        let normalizedDate = calendar.startOfDay(for: date)
-        let markerColor = markedDates[normalizedDate]
-
-        let isSelected: Bool = {
-            guard let selectedID = self.selection,
-                  let selectedSession = self.sessions.first(where: { $0.id == selectedID })
-            else { return false }
-            return calendar.startOfDay(for: selectedSession.sessionDate) == normalizedDate
-        }()
-
-        return Text("\(day)")
-            .font(.body)
-            .fontWeight(isSelected ? .semibold : .regular)
-            .foregroundColor(markerColor != nil ? .white : .primary)
-            .frame(width: 36, height: 36)
-            .background(
-                Circle()
-                    .fill(markerColor ?? (isToday ? Color.accentColor.opacity(0.2) : Color.clear))
-            )
-            .overlay(
-                Circle()
-                    .stroke(
-                        isToday && markerColor == nil ? Color.accentColor : Color.clear,
-                        lineWidth: 1
-                    )
-            )
-            .overlay(
-                Circle()
-                    .stroke(isSelected ? Color.primary : Color.clear, lineWidth: 2)
-                    .padding(-2)
-            )
-            .onTapGesture {
-                if let idx = self.listViewModel.indexOfFirstSession(on: date, in: self.sessions) {
-                    let session = self.sessions[idx]
-                    self.listViewModel.selectedDate = normalizedDate
-                    self.selection = session.id
-                    // In compact mode, trigger navigation while keeping calendar visible
-                    if self.horizontalSizeClass == .compact {
-                        self.navigateToSessionFromCalendar = true
-                        self.pendingCalendarSelection = true
-                    }
-                }
-            }
     }
 
     // MARK: - List mode
@@ -578,16 +477,6 @@ private enum SpelledNumber {
     static func text(for value: Int) -> String {
         guard value >= 0, value < self.words.count else { return "\(value)" }
         return self.words[value]
-    }
-}
-
-private extension SessionListSection {
-    func generateMonthRange() -> [Date] {
-        CalendarGridHelper.generateMonthRange(from: self.sessions)
-    }
-
-    func generateGridDaysForMonth(_ monthStart: Date) -> [Date?] {
-        CalendarGridHelper.generateGridDaysForMonth(monthStart)
     }
 }
 
