@@ -125,17 +125,62 @@ extension View {
     }
 }
 
-// MARK: - Button style
+// MARK: - Button styles
+//
+// Pressed states step one ramp level ("accent" → "accentPressed",
+// tinted surfaces → next ramp step) — never the system default.
 
-/// Accent-filled pill button with a themed pressed state (one ramp step).
-struct AFAccentButtonStyle: ButtonStyle {
+/// Capsule-filled button; the fill lives in the style so pressing can swap it.
+struct AFCapsuleButtonStyle: ButtonStyle {
+    let fill: Color
+    let pressedFill: Color
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(configuration.isPressed ? AF.accentPressed : AF.accent)
-            .clipShape(Capsule())
+            .background(Capsule().fill(configuration.isPressed ? self.pressedFill : self.fill))
             .animation(
                 .easeInOut(duration: DesignConstants.Animation.quickDuration),
                 value: configuration.isPressed
             )
+    }
+}
+
+/// Circle-filled button (the floating Add button).
+struct AFCircleButtonStyle: ButtonStyle {
+    let fill: Color
+    let pressedFill: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(Circle().fill(configuration.isPressed ? self.pressedFill : self.fill))
+            .animation(
+                .easeInOut(duration: DesignConstants.Animation.quickDuration),
+                value: configuration.isPressed
+            )
+    }
+}
+
+/// Chip button: fill plus a hairline border for the unselected state.
+struct AFChipButtonStyle: ButtonStyle {
+    let fill: Color
+    let pressedFill: Color
+    let borderColor: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(Capsule().fill(configuration.isPressed ? self.pressedFill : self.fill))
+            .overlay(Capsule().strokeBorder(self.borderColor, lineWidth: 1))
+            .animation(
+                .easeInOut(duration: DesignConstants.Animation.quickDuration),
+                value: configuration.isPressed
+            )
+    }
+}
+
+/// Text-link button (Done, Clear, Add more): dims while pressed.
+struct AFLinkButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.55 : 1)
     }
 }

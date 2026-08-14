@@ -295,9 +295,8 @@ struct SessionFormView: View {
                         .foregroundStyle(AF.onAccent)
                         .padding(.vertical, 9)
                         .padding(.horizontal, 18)
-                        .background(Capsule().fill(AF.accent))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(AFCapsuleButtonStyle(fill: AF.accent, pressedFill: AF.accentPressed))
                 .opacity(self.isLoading || !self.isFormValid ? 0.45 : 1)
                 .disabled(self.isLoading || !self.isFormValid)
             }

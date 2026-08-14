@@ -26,6 +26,12 @@ struct CalendarSection<Header: View>: View {
                                 .foregroundStyle(AF.text)
 
                             self.monthGrid(for: monthStart)
+
+                            if !self.monthHasSessions(monthStart) {
+                                Text("No sessions this month")
+                                    .font(.afterflowBody(12))
+                                    .foregroundStyle(AF.neutral(500))
+                            }
                         }
                         .id(monthStart)
                     }
@@ -57,6 +63,13 @@ struct CalendarSection<Header: View>: View {
 
     private var markedDates: [Date: Color] {
         CalendarGridHelper.calendarMarkers(from: self.sessions)
+    }
+
+    private func monthHasSessions(_ monthStart: Date) -> Bool {
+        let calendar = Calendar.current
+        return self.sessions.contains {
+            calendar.isDate($0.sessionDate, equalTo: monthStart, toGranularity: .month)
+        }
     }
 
     private func monthGrid(for monthStart: Date) -> some View {

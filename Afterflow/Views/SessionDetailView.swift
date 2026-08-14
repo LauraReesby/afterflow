@@ -226,7 +226,7 @@ struct SessionDetailView: View {
                         .font(.afterflowBody(12, weight: .semibold))
                         .foregroundStyle(AF.accent(700))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(AFLinkButtonStyle())
                 .accessibilityIdentifier("addMoreReflectionButton")
                 .accessibilityHint("Adds to this session's reflection")
             }

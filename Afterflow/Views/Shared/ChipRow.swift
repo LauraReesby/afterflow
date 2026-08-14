@@ -86,15 +86,14 @@ struct AFChip: View {
                 .foregroundStyle(self.foreground)
                 .padding(.vertical, self.verticalPadding)
                 .padding(.horizontal, self.horizontalPadding)
-                .background(Capsule().fill(self.background))
-                .overlay(
-                    Capsule().strokeBorder(
-                        self.isSelected ? Color.clear : AF.neutral(300),
-                        lineWidth: 1
-                    )
-                )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(
+            AFChipButtonStyle(
+                fill: self.background,
+                pressedFill: self.pressedBackground,
+                borderColor: self.isSelected ? Color.clear : AF.neutral(300)
+            )
+        )
         .accessibilityAddTraits(self.isSelected ? [.isSelected] : [])
     }
 
@@ -115,6 +114,14 @@ struct AFChip: View {
         return switch self.style {
         case .accent: AF.accent
         case .sage: AF.accent2(200)
+        }
+    }
+
+    private var pressedBackground: Color {
+        guard self.isSelected else { return AF.neutral(200) }
+        return switch self.style {
+        case .accent: AF.accentPressed
+        case .sage: AF.accent2(300)
         }
     }
 

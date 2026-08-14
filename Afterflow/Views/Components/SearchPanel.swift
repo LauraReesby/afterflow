@@ -33,7 +33,7 @@ struct SearchPanel: View {
                         .font(.afterflowBody(13, weight: .semibold))
                         .foregroundStyle(AF.accent(700))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(AFLinkButtonStyle())
                 .accessibilityLabel("Done")
                 .accessibilityHint("Closes the search panel and keeps the current query")
             }

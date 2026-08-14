@@ -131,7 +131,7 @@ struct SessionListSection: View {
                     .font(.afterflowBody(12, weight: .semibold))
                     .foregroundStyle(AF.neutral(600))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(AFLinkButtonStyle())
             .accessibilityLabel("Clear search")
             .accessibilityHint("Empties the search query")
         }
@@ -203,9 +203,8 @@ struct SessionListSection: View {
             .foregroundStyle(AF.accent(800))
             .padding(.horizontal, 14)
             .frame(height: 40)
-            .background(Capsule().fill(AF.accent(200)))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(AFCapsuleButtonStyle(fill: AF.accent(200), pressedFill: AF.accent(300)))
         .accessibilityIdentifier("trendsButton")
         .accessibilityLabel("Trends")
         .accessibilityHint("Shows your mood over time")
@@ -285,9 +284,8 @@ struct SessionListSection: View {
                 }
                 .padding(.vertical, 10)
                 .padding(.horizontal, 14)
-                .background(Capsule().fill(AF.neutral(200)))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(AFCapsuleButtonStyle(fill: AF.neutral(200), pressedFill: AF.neutral(300)))
             .accessibilityLabel("Search sessions")
             .accessibilityHint("Tap to expand search and filter controls")
         }
@@ -331,9 +329,8 @@ struct SessionListSection: View {
                     .foregroundStyle(AF.neutral(100))
                     .padding(.vertical, 9)
                     .padding(.horizontal, 16)
-                    .background(Capsule().fill(AF.accent2(700)))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(AFCapsuleButtonStyle(fill: AF.accent2(700), pressedFill: AF.accent2(800)))
             .accessibilityIdentifier("reflectNudgeButton")
             .accessibilityHint("Opens the oldest session that still needs a reflection")
         }
@@ -378,9 +375,8 @@ struct SessionListSection: View {
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(AF.onAccent)
                 .frame(width: 60, height: 60)
-                .background(Circle().fill(AF.accent))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(AFCircleButtonStyle(fill: AF.accent, pressedFill: AF.accentPressed))
         .afShadow(.md)
         .padding(.trailing, 20)
         .padding(.bottom, 34)

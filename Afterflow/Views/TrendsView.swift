@@ -279,9 +279,13 @@ struct TrendsView: View {
                                 .foregroundStyle(self.wordForeground(rank: rank))
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 13)
-                                .background(Capsule().fill(self.wordBackground(rank: rank)))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(
+                            AFCapsuleButtonStyle(
+                                fill: self.wordBackground(rank: rank),
+                                pressedFill: self.wordPressedBackground(rank: rank)
+                            )
+                        )
                         .accessibilityHint("Searches your sessions for this word")
                     }
                 }
@@ -315,6 +319,14 @@ struct TrendsView: View {
         case 0: AF.accent(200)
         case 1: AF.accent2(200)
         default: AF.neutral(200)
+        }
+    }
+
+    private func wordPressedBackground(rank: Int) -> Color {
+        switch rank {
+        case 0: AF.accent(300)
+        case 1: AF.accent2(300)
+        default: AF.neutral(300)
         }
     }
 

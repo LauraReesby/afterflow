@@ -83,9 +83,8 @@ struct ReflectionEntryView: View {
                         .foregroundStyle(AF.onAccent)
                         .padding(.vertical, 9)
                         .padding(.horizontal, 18)
-                        .background(Capsule().fill(AF.accent))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(AFCapsuleButtonStyle(fill: AF.accent, pressedFill: AF.accentPressed))
                 .opacity(self.canSave ? 1 : 0.45)
                 .disabled(!self.canSave)
                 .accessibilityIdentifier("saveReflectionButton")
