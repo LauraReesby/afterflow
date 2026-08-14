@@ -1,6 +1,6 @@
 import Foundation
 
-struct CSVExportService: Sendable {
+struct CSVExportService {
     func export(
         sessions: [TherapeuticSession],
         dateRange: ClosedRange<Date>? = nil,

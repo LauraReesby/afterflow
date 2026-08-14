@@ -7,7 +7,7 @@ protocol URLSessioning: Sendable {
 
 extension URLSession: URLSessioning {}
 
-struct MusicLinkMetadata: Equatable, Sendable {
+struct MusicLinkMetadata: Equatable {
     let provider: MusicLinkProvider
     let originalURL: URL
     let canonicalURL: URL
@@ -24,7 +24,7 @@ final class MusicLinkMetadataService {
         case decodingFailed
     }
 
-    struct ClassificationResult: Sendable {
+    struct ClassificationResult {
         let provider: MusicLinkProvider
         let originalURL: URL
         let canonicalURL: URL

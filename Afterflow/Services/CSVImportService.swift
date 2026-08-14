@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-struct CSVImportService: Sendable {
+struct CSVImportService {
     enum CSVImportError: Error, LocalizedError {
         case invalidHeader
         case invalidRow(Int)

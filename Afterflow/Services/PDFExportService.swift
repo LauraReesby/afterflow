@@ -3,8 +3,8 @@ import Foundation
     import UIKit
 #endif
 
-struct PDFExportService: Sendable {
-    struct Options: Sendable {
+struct PDFExportService {
+    struct Options {
         var includeCoverPage: Bool = true
         var showPrivacyNote: Bool = true
     }
