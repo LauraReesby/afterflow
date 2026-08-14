@@ -75,16 +75,17 @@ struct ReflectionEntryView: View {
                     .foregroundStyle(AF.text)
             }
             ToolbarItem(placement: .confirmationAction) {
+                // The toolbar supplies its own capsule chrome; tint that directly
+                // instead of nesting a second capsule inside it.
                 Button {
                     self.save()
                 } label: {
                     Text("Save")
                         .font(.afterflowBody(14, weight: .semibold))
                         .foregroundStyle(AF.onAccent)
-                        .padding(.vertical, 9)
-                        .padding(.horizontal, 18)
                 }
-                .buttonStyle(AFCapsuleButtonStyle(fill: AF.accent, pressedFill: AF.accentPressed))
+                .buttonStyle(.borderedProminent)
+                .tint(AF.accent)
                 .opacity(self.canSave ? 1 : 0.45)
                 .disabled(!self.canSave)
                 .accessibilityIdentifier("saveReflectionButton")

@@ -292,16 +292,17 @@ struct SessionFormView: View {
                 .foregroundStyle(AF.neutral(700))
             }
             ToolbarItem(placement: .confirmationAction) {
+                // The toolbar supplies its own capsule chrome; tint that directly
+                // instead of nesting a second capsule inside it.
                 Button {
                     self.saveSession()
                 } label: {
                     Text(self.primaryButtonTitle)
                         .font(.afterflowBody(14, weight: .semibold))
                         .foregroundStyle(AF.onAccent)
-                        .padding(.vertical, 9)
-                        .padding(.horizontal, 18)
                 }
-                .buttonStyle(AFCapsuleButtonStyle(fill: AF.accent, pressedFill: AF.accentPressed))
+                .buttonStyle(.borderedProminent)
+                .tint(AF.accent)
                 .opacity(self.isLoading || !self.isFormValid ? 0.45 : 1)
                 .disabled(self.isLoading || !self.isFormValid)
             }
