@@ -169,7 +169,9 @@ struct MarkdownRendererTests {
     @Test("render handles only hashes") func renderHandlesOnlyHashes() {
         let result = MarkdownRenderer.render("###")
 
-        #expect(!result.characters.isEmpty)
+        // A bare ATX heading marker carries no text: it renders to empty output
+        // rather than crashing or echoing the marker.
+        #expect(result.characters.isEmpty)
     }
 
     @Test("hasFormatting with whitespace only returns false") func hasFormattingWithWhitespaceOnlyReturnsFalse() {
