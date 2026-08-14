@@ -7,7 +7,6 @@ import UserNotifications
 final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     enum DeepLinkAction: Equatable {
         case openSession(UUID)
-        case addReflection(sessionID: UUID, text: String)
     }
 
     enum NotificationError: Error, LocalizedError {
@@ -30,18 +29,10 @@ final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationC
     @Published var pendingDeepLink: DeepLinkAction?
 
     private let modelContext: ModelContext
-    private let reflectionQueue: ReflectionQueue
 
-    init(modelContext: ModelContext, skipQueueReplay: Bool = false) {
+    init(modelContext: ModelContext) {
         self.modelContext = modelContext
-        self.reflectionQueue = ReflectionQueue(modelContext: modelContext)
         super.init()
-
-        guard !skipQueueReplay else { return }
-
-        Task {
-            await self.reflectionQueue.replayQueuedReflections()
-        }
     }
 
     func handleNotificationResponse(_ response: UNNotificationResponse) {
@@ -53,15 +44,10 @@ final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationC
             return
         }
 
-        switch response.actionIdentifier {
-        case UNNotificationDefaultActionIdentifier:
+        // Tapping the notification is the only supported interaction; it opens
+        // the session (routing into the reflection screen when one is still due).
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
             self.pendingDeepLink = .openSession(sessionID)
-        case "QUICK_REFLECTION_ACTION":
-            if let textResponse = response as? UNTextInputNotificationResponse {
-                self.pendingDeepLink = .addReflection(sessionID: sessionID, text: textResponse.userText)
-            }
-        default:
-            break
         }
     }
 
@@ -77,14 +63,10 @@ final class NotificationHandler: NSObject, ObservableObject, UNUserNotificationC
         self.pendingDeepLink = nil
     }
 
-    var confirmations: ReflectionQueue { self.reflectionQueue }
-
     func processDeepLink(_ action: DeepLinkAction) async throws {
         switch action {
         case let .openSession(sessionID):
             _ = try self.validateSession(sessionID)
-        case let .addReflection(sessionID, text):
-            try await self.reflectionQueue.addReflection(sessionID: sessionID, text: text)
         }
     }
 

@@ -21,7 +21,7 @@ final class NotificationHandlerTests: XCTestCase {
         )
         try store.create(session)
 
-        let handler = NotificationHandler(modelContext: container.mainContext, skipQueueReplay: true)
+        let handler = NotificationHandler(modelContext: container.mainContext)
         do {
             try await handler.processDeepLink(.openSession(session.id))
         } catch {
@@ -29,36 +29,12 @@ final class NotificationHandlerTests: XCTestCase {
         }
     }
 
-    func testProcessDeepLinkAddReflectionPersistsText() async throws {
-        let container = try ModelContainer(
-            for: TherapeuticSession.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-        let store = SessionStore(modelContext: container.mainContext, owningContainer: container)
-        let session = TherapeuticSession(
-            sessionDate: Date(),
-            treatmentType: .psilocybin,
-            administration: .oral,
-            intention: "Add reflection",
-            moodBefore: 5,
-            moodAfter: 6
-        )
-        try store.create(session)
-
-        let handler = NotificationHandler(modelContext: container.mainContext, skipQueueReplay: true)
-        try await handler.processDeepLink(.addReflection(sessionID: session.id, text: "Noted from notification"))
-
-        let refreshed = try container.mainContext.fetch(FetchDescriptor<TherapeuticSession>()).first
-        XCTAssertEqual(refreshed?.id, session.id)
-        XCTAssertTrue(refreshed?.reflections.contains("Noted from notification") ?? false)
-    }
-
     func testValidateSessionThrowsForMissingSession() throws {
         let container = try ModelContainer(
             for: TherapeuticSession.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
-        let handler = NotificationHandler(modelContext: container.mainContext, skipQueueReplay: true)
+        let handler = NotificationHandler(modelContext: container.mainContext)
 
         let nonExistentID = UUID()
 
@@ -75,16 +51,6 @@ final class NotificationHandlerTests: XCTestCase {
         } catch {
             XCTFail("Wrong error type: \(error)")
         }
-    }
-
-    func testConfirmationsAccessorReturnsReflectionQueue() throws {
-        let container = try ModelContainer(
-            for: TherapeuticSession.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-        let handler = NotificationHandler(modelContext: container.mainContext, skipQueueReplay: true)
-
-        XCTAssertNotNil(handler.confirmations, "Should provide access to reflection queue")
     }
 
     func testNotificationErrorDescriptions() {
@@ -113,33 +79,5 @@ final class NotificationHandlerTests: XCTestCase {
 
         XCTAssertEqual(action1, action2, "Same session IDs should be equal")
         XCTAssertNotEqual(action1, action3, "Different session IDs should not be equal")
-
-        let reflectionAction1 = NotificationHandler.DeepLinkAction.addReflection(sessionID: sessionID, text: "test")
-        let reflectionAction2 = NotificationHandler.DeepLinkAction.addReflection(sessionID: sessionID, text: "test")
-        let reflectionAction3 = NotificationHandler.DeepLinkAction.addReflection(
-            sessionID: sessionID,
-            text: "different"
-        )
-
-        XCTAssertEqual(reflectionAction1, reflectionAction2, "Same reflection details should be equal")
-        XCTAssertNotEqual(reflectionAction1, reflectionAction3, "Different reflection text should not be equal")
-        XCTAssertNotEqual(action1, reflectionAction1, "Different action types should not be equal")
-    }
-
-    func testProcessDeepLinkAddReflectionQueuesWhenSessionMissing() async throws {
-        let container = try ModelContainer(
-            for: TherapeuticSession.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-        let handler = NotificationHandler(modelContext: container.mainContext, skipQueueReplay: true)
-
-        do {
-            try await handler.processDeepLink(.addReflection(sessionID: UUID(), text: "test"))
-
-        } catch {
-            XCTFail("Should queue reflection instead of throwing: \(error)")
-        }
-
-        XCTAssertGreaterThan(handler.confirmations.queuedCount, 0, "Should have queued the reflection")
     }
 }

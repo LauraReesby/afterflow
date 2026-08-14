@@ -36,32 +36,11 @@ final class ReminderScheduler {
 
     init(notificationCenter: NotificationCentering = UNUserNotificationCenter.current()) {
         self.notificationCenter = notificationCenter
-        Task {
-            await self.registerNotificationCategories()
+        // Notifications carry no custom actions: tapping one opens the session,
+        // which routes into the reflection screen when a reflection is still due.
+        if let realCenter = notificationCenter as? UNUserNotificationCenter {
+            realCenter.setNotificationCategories([])
         }
-    }
-
-    private func registerNotificationCategories() async {
-        guard let realCenter = notificationCenter as? UNUserNotificationCenter else {
-            return
-        }
-
-        let reflectionAction = UNTextInputNotificationAction(
-            identifier: "QUICK_REFLECTION_ACTION",
-            title: "Add Reflection",
-            options: [.authenticationRequired],
-            textInputButtonTitle: "Save",
-            textInputPlaceholder: "Share your thoughts"
-        )
-
-        let reminderCategory = UNNotificationCategory(
-            identifier: "THERAPEUTIC_SESSION_REMINDER",
-            actions: [reflectionAction],
-            intentIdentifiers: [],
-            options: [.customDismissAction]
-        )
-
-        realCenter.setNotificationCategories([reminderCategory])
     }
 
     func setReminder(
@@ -93,13 +72,12 @@ final class ReminderScheduler {
 
             let content = UNMutableNotificationContent()
             content.title = "Time to Reflect"
-            content.body = "Add thoughts about your recent session."
+            content.body = "Tap to reflect on your recent session."
             content.sound = .default
-            content.categoryIdentifier = "THERAPEUTIC_SESSION_REMINDER"
             content.userInfo = ["sessionID": session.id.uuidString]
 
             content.accessibilityLabel = "Reflection reminder"
-            content.accessibilityHint = "Double-tap to open session, or use Add Reflection to quickly save thoughts"
+            content.accessibilityHint = "Double-tap to open your session and add a reflection"
 
             let trigger = UNTimeIntervalNotificationTrigger(
                 timeInterval: targetDate.timeIntervalSince(now),
@@ -145,9 +123,8 @@ final class ReminderScheduler {
 
         let content = UNMutableNotificationContent()
         content.title = "🧪 Test Notification"
-        content.body = "Tap to open session or use 'Add Reflection' to test quick actions."
+        content.body = "Tap to open the session."
         content.sound = .default
-        content.categoryIdentifier = "THERAPEUTIC_SESSION_REMINDER"
         content.userInfo = ["sessionID": session.id.uuidString]
         content.accessibilityLabel = "Test reflection reminder"
 

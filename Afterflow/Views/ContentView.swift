@@ -132,26 +132,21 @@ struct ContentView: View {
             do {
                 try await self.notificationHandler.processDeepLink(action)
 
-                if case let .openSession(sessionID) = action {
-                    await MainActor.run {
-                        self.selectedSessionID = sessionID
-                        // Reminder notifications exist only for sessions awaiting
-                        // reflection — open those straight into the reflection screen.
-                        // Deferred one runloop so the fresh stack doesn't drop the push.
-                        if let session = self.allSessions.first(where: { $0.id == sessionID }),
-                           session.status == .needsReflection {
-                            DispatchQueue.main.async {
-                                self.detailPath = [.reflection(sessionID)]
-                            }
-                        } else {
-                            self.detailPath = []
+                guard case let .openSession(sessionID) = action else { return }
+                await MainActor.run {
+                    self.selectedSessionID = sessionID
+                    // Reminder notifications exist only for sessions awaiting
+                    // reflection — open those straight into the reflection screen.
+                    // Deferred one runloop so the fresh stack doesn't drop the push.
+                    if let session = self.allSessions.first(where: { $0.id == sessionID }),
+                       session.status == .needsReflection {
+                        DispatchQueue.main.async {
+                            self.detailPath = [.reflection(sessionID)]
                         }
-                        self.notificationHandler.clearPendingDeepLink()
+                    } else {
+                        self.detailPath = []
                     }
-                } else {
-                    await MainActor.run {
-                        self.notificationHandler.clearPendingDeepLink()
-                    }
+                    self.notificationHandler.clearPendingDeepLink()
                 }
             } catch {
                 await MainActor.run {
@@ -255,18 +250,8 @@ private extension ContentView {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
             #endif
-
-            if !self.notificationHandler.confirmations.recentConfirmations.isEmpty {
-                ForEach(self.notificationHandler.confirmations.recentConfirmations, id: \.self) { message in
-                    ReflectionConfirmationBanner(message: message)
-                }
-            }
         }
         .padding(.top, DesignConstants.Spacing.small)
-        .animation(
-            .easeInOut(duration: DesignConstants.Animation.standardDuration),
-            value: self.notificationHandler.confirmations.recentConfirmations
-        )
         .animation(
             .easeInOut(duration: DesignConstants.Animation.standardDuration),
             value: self.debugNotificationScheduled
@@ -318,51 +303,12 @@ private extension ContentView {
     }
 }
 
-private struct ReflectionConfirmationBanner: View {
-    let message: String
-
-    var body: some View {
-        HStack(spacing: DesignConstants.Spacing.small) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
-                .accessibilityHidden(true)
-
-            Text(self.message)
-                .font(.footnote)
-                .fontWeight(.medium)
-
-            Spacer()
-        }
-        .padding(.horizontal, DesignConstants.Spacing.large)
-        .padding(.vertical, DesignConstants.Spacing.medium)
-        .background(
-            RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)
-                .fill(.regularMaterial)
-                .shadow(
-                    color: .black.opacity(DesignConstants.Shadow.standardOpacity),
-                    radius: DesignConstants.Shadow.standardRadius,
-                    x: DesignConstants.Shadow.standardX,
-                    y: DesignConstants.Shadow.standardY
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.medium, style: .continuous)
-                .strokeBorder(Color.green.opacity(DesignConstants.Opacity.faint + 0.05), lineWidth: 1)
-        )
-        .padding(.horizontal, DesignConstants.Spacing.large)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Success: \(self.message)")
-        .accessibilityAddTraits(.isStaticText)
-        .transition(.move(edge: .top).combined(with: .opacity))
-    }
-}
-
 #Preview {
     let preview = makePreviewContainerAndStore()
     ContentView()
         .modelContainer(preview.container)
         .environment(preview.store)
-        .environmentObject(NotificationHandler(modelContext: preview.container.mainContext, skipQueueReplay: true))
+        .environmentObject(NotificationHandler(modelContext: preview.container.mainContext))
 }
 
 private func makePreviewContainerAndStore() -> (container: ModelContainer, store: SessionStore) {
