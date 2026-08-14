@@ -36,10 +36,9 @@ struct SessionListSection: View {
                         selection: self.$selection,
                         sessionStore: self.sessionStore,
                         navigateToSession: self.$navigateToSessionFromCalendar,
-                        onDaySelected: { self.pendingCalendarSelection = true }
-                    ) {
-                        self.headerBlock(includeSearchAndNudge: false)
-                    }
+                        onDaySelected: { self.pendingCalendarSelection = true },
+                        header: { self.headerBlock(includeSearchAndNudge: false) }
+                    )
                 } else {
                     self.sessionList()
                 }

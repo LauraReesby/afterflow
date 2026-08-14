@@ -19,7 +19,7 @@ struct CSVExportService: Sendable {
                 session.administration.displayName,
                 session.intention,
                 String(session.moodBefore),
-                String(session.moodAfter),
+                session.moodAfter.map(String.init) ?? "",
                 session.reflections,
                 session.musicLinkURL ?? session.musicLinkWebURL ?? ""
             ].map(Self.escape)

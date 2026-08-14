@@ -53,16 +53,20 @@ struct FormValidation {
 
         if let minute = components.minute {
             let roundedMinute = ((minute + 7) / 15) * 15
-            components.minute = roundedMinute >= 60 ? 0 : roundedMinute
-
-            if roundedMinute >= 60, let hour = components.hour {
-                components.hour = (hour + 1) % 24
+            if roundedMinute >= 60 {
+                // Rounding up past the hour: roll the whole date forward so day,
+                // month, and year boundaries carry correctly (23:53+ used to wrap
+                // the hour to 0 without advancing the day).
+                components.minute = 0
+                if let base = calendar.date(from: components) {
+                    return calendar.date(byAdding: .hour, value: 1, to: base) ?? date
+                }
+            } else {
+                components.minute = roundedMinute
             }
         }
 
-        let normalizedDate = calendar.date(from: components) ?? date
-
-        return normalizedDate
+        return calendar.date(from: components) ?? date
     }
 
     func getDateNormalizationMessage(originalDate: Date, normalizedDate: Date) -> String? {

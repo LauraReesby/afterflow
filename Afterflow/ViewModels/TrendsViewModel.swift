@@ -51,8 +51,9 @@ struct TrendsViewModel {
     /// After-mood series — only sessions with a recorded after-mood.
     func afterPoints(from sessions: [TherapeuticSession], now: Date = Date()) -> [(date: Date, mood: Int)] {
         self.filteredSessions(from: sessions, now: now)
-            .filter(\.hasAfterMood)
-            .map { ($0.sessionDate, $0.moodAfter) }
+            .compactMap { session in
+                session.moodAfter.map { (session.sessionDate, $0) }
+            }
     }
 
     func averageLift(from sessions: [TherapeuticSession], now: Date = Date()) -> Double? {
@@ -68,14 +69,15 @@ struct TrendsViewModel {
     func averageMoodAfter(from sessions: [TherapeuticSession], now: Date = Date()) -> Double? {
         let reflected = self.filteredSessions(from: sessions, now: now).filter(\.hasAfterMood)
         guard !reflected.isEmpty else { return nil }
-        return Double(reflected.reduce(0) { $0 + $1.moodAfter }) / Double(reflected.count)
+        let moods = reflected.compactMap(\.moodAfter)
+        return Double(moods.reduce(0, +)) / Double(moods.count)
     }
 
     func meanDaysBetween(from sessions: [TherapeuticSession], now: Date = Date()) -> Double? {
         let dates = self.filteredSessions(from: sessions, now: now).map(\.sessionDate)
         guard dates.count >= 2 else { return nil }
         let gaps = zip(dates.dropFirst(), dates).map { later, earlier in
-            later.timeIntervalSince(earlier) / 86_400
+            later.timeIntervalSince(earlier) / 86400
         }
         return gaps.reduce(0, +) / Double(gaps.count)
     }
@@ -98,7 +100,7 @@ struct TrendsViewModel {
             }
             .sorted { lhs, rhs in
                 switch (lhs.1, rhs.1) {
-                case let (l?, r?): l > r
+                case let (lhsLift?, rhsLift?): lhsLift > rhsLift
                 case (_?, nil): true
                 case (nil, _?): false
                 case (nil, nil): lhs.0.displayName < rhs.0.displayName

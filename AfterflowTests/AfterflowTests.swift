@@ -14,6 +14,6 @@ struct AfterflowSmokeTests {
 
         #expect(session.intention.isEmpty)
         #expect(session.moodBefore == 5)
-        #expect(session.moodAfter == 5)
+        #expect(session.moodAfter == nil)
     }
 }

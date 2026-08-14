@@ -276,7 +276,7 @@ struct MoodJourneyCard: View {
                         .foregroundStyle(AF.neutral(600))
                 }
 
-                if self.session.hasAfterMood {
+                if let moodAfter = self.session.moodAfter {
                     RisingArc()
                         .stroke(
                             AF.accent(400),
@@ -287,12 +287,12 @@ struct MoodJourneyCard: View {
                         .accessibilityHidden(true)
 
                     VStack(spacing: 4) {
-                        Text("\(self.session.moodAfter)")
+                        Text("\(moodAfter)")
                             .font(.afterflowBody(20, weight: .bold))
                             .foregroundStyle(AF.accent(800))
                             .frame(width: 52, height: 52)
                             .background(Circle().fill(AF.accent(200)))
-                        Text(MoodRatingScale.descriptor(for: self.session.moodAfter).lowercased())
+                        Text(MoodRatingScale.descriptor(for: moodAfter).lowercased())
                             .font(.afterflowBody(11))
                             .foregroundStyle(AF.neutral(600))
                     }
@@ -328,11 +328,11 @@ struct MoodJourneyCard: View {
     }
 
     private var accessibilitySummary: String {
-        if self.session.hasAfterMood {
+        if let moodAfter = self.session.moodAfter {
             let before = MoodRatingScale.descriptor(for: self.session.moodBefore)
-            let after = MoodRatingScale.descriptor(for: self.session.moodAfter)
+            let after = MoodRatingScale.descriptor(for: moodAfter)
             return "Mood before \(self.session.moodBefore), \(before). "
-                + "Mood after \(self.session.moodAfter), \(after)."
+                + "Mood after \(moodAfter), \(after)."
         }
         return "Mood before \(self.session.moodBefore). After mood not added yet."
     }

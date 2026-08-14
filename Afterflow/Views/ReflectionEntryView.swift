@@ -26,7 +26,7 @@ struct ReflectionEntryView: View {
 
     init(session: TherapeuticSession) {
         self.session = session
-        _moodNow = State(initialValue: session.hasAfterMood ? session.moodAfter : session.moodBefore)
+        _moodNow = State(initialValue: session.moodAfter ?? session.moodBefore)
     }
 
     var body: some View {

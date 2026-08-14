@@ -42,7 +42,34 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             UNUserNotificationCenter.current().delegate = self.notificationHandler
         }
 
+        self.migrateSentinelMoodAfterIfNeeded()
+
         return true
+    }
+
+    /// One-time disambiguation for data written before `moodAfter` became optional:
+    /// the old schema defaulted it to 5, so 5-with-no-reflections meant "not
+    /// recorded". Applies that reading once, then the sentinel never matters again.
+    /// (A legacy genuine after-mood of exactly 5 with no reflection text is
+    /// indistinguishable from the default and is reset — unrecoverable by design.)
+    private func migrateSentinelMoodAfterIfNeeded() {
+        let migrationKey = "afterflow.migration.moodAfterSentinelCleared"
+        guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
+
+        let context = self.sharedModelContainer.mainContext
+        do {
+            let sessions = try context.fetch(FetchDescriptor<TherapeuticSession>())
+            for session in sessions where session.moodAfter == 5
+                && session.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                session.moodAfter = nil
+            }
+            if context.hasChanges {
+                try context.save()
+            }
+            UserDefaults.standard.set(true, forKey: migrationKey)
+        } catch {
+            // Leave the flag unset so the cleanup retries on next launch.
+        }
     }
 }
 

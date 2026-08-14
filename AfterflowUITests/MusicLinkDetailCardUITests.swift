@@ -39,5 +39,4 @@ final class MusicLinkDetailCardUITests: XCTestCase {
         sessionCell.forceTap()
         XCTAssertTrue(app.buttons["Edit"].waitForExistence(timeout: 5))
     }
-
 }

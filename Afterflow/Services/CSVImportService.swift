@@ -31,6 +31,15 @@ struct CSVImportService: Sendable {
         return try self.import(from: csvString)
     }
 
+    /// An empty after-mood cell means "not recorded"; anything else must parse.
+    private static func parseMoodAfter(_ field: String, rowIndex: Int) throws -> Int? {
+        if field.isEmpty { return nil }
+        guard let parsed = Int(field) else {
+            throw CSVImportError.invalidRow(rowIndex + 1)
+        }
+        return parsed
+    }
+
     // swiftlint:disable:next function_body_length
     func `import`(from csvString: String) throws -> [TherapeuticSession] {
         let rows = try Self.parseCSV(csvString)
@@ -70,9 +79,11 @@ struct CSVImportService: Sendable {
                 throw CSVImportError.invalidRow(index + 1)
             }
 
-            guard let moodBefore = Int(moodBeforeString), let moodAfter = Int(moodAfterString) else {
+            guard let moodBefore = Int(moodBeforeString) else {
                 throw CSVImportError.invalidRow(index + 1)
             }
+
+            let moodAfter = try Self.parseMoodAfter(moodAfterString, rowIndex: index)
 
             let session = TherapeuticSession(
                 sessionDate: date,

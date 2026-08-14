@@ -84,7 +84,10 @@ struct PDFExportService: Sendable {
             self.drawBody("Date/Time: \(Self.dateTimeFormatter.string(from: session.sessionDate))", cursor: &cursor)
             self.drawBody("Treatment: \(session.treatmentType.displayName)", cursor: &cursor)
             self.drawBody("Administration: \(session.administration.displayName)", cursor: &cursor)
-            self.drawBody("Mood: \(session.moodBefore) → \(session.moodAfter)", cursor: &cursor)
+            self.drawBody(
+                "Mood: \(session.moodBefore) → \(session.moodAfter.map(String.init) ?? "not recorded")",
+                cursor: &cursor
+            )
             if !session.intention.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 self.drawBody("Intention: \(session.intention)", cursor: &cursor)
             }

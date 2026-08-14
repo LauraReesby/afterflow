@@ -9,8 +9,8 @@ enum FontRegistrar {
     private static var didRegister = false
 
     static func registerBundledFonts() {
-        guard !didRegister else { return }
-        didRegister = true
+        guard !self.didRegister else { return }
+        self.didRegister = true
 
         let fontNames = [
             "Caprasimo-Regular",

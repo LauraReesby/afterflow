@@ -50,7 +50,11 @@ final class SessionFormValidationUITests: XCTestCase {
         musicField.typeText("https://music.apple.com/us/playlist/calm/pl.u-123")
 
         let preview = app.descendants(matching: .any)
-            .matching(NSPredicate(format: "identifier == %@ OR identifier == %@", "musicLinkPreview", "musicLinkRawPreview"))
+            .matching(NSPredicate(
+                format: "identifier == %@ OR identifier == %@",
+                "musicLinkPreview",
+                "musicLinkRawPreview"
+            ))
             .firstMatch
         XCTAssertTrue(preview.waitForExistence(timeout: 8), "Preview should appear after entering a link")
 

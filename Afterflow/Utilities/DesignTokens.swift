@@ -3,7 +3,8 @@ import SwiftUI
 /// Design tokens for the "Organic" design system.
 /// Colors resolve through Assets.xcassets (`Theme/` and `Treatment/` namespaces),
 /// where light and dark values are both defined — views never branch on color scheme.
-enum AF {
+/// Deliberately terse: it prefixes nearly every color reference in the view layer.
+enum AF { // swiftlint:disable:this type_name
     // MARK: Roles
 
     static let bg = Color("Theme/bg")
@@ -44,12 +45,12 @@ enum AF {
 extension Font {
     /// Caprasimo display face. Weight 400 only — hierarchy is size and space, never boldness.
     static func afterflowDisplay(_ size: CGFloat) -> Font {
-        .custom("Caprasimo-Regular", size: size, relativeTo: displayTextStyle(for: size))
+        .custom("Caprasimo-Regular", size: size, relativeTo: self.displayTextStyle(for: size))
     }
 
     /// Figtree body/UI face.
     static func afterflowBody(_ size: CGFloat, weight: AFBodyWeight = .regular) -> Font {
-        .custom(weight.postScriptName, size: size, relativeTo: bodyTextStyle(for: size))
+        .custom(weight.postScriptName, size: size, relativeTo: self.bodyTextStyle(for: size))
     }
 
     private static func displayTextStyle(for size: CGFloat) -> TextStyle {
@@ -126,6 +127,7 @@ extension View {
 }
 
 // MARK: - Button styles
+
 //
 // Pressed states step one ramp level ("accent" → "accentPressed",
 // tinted surfaces → next ramp step) — never the system default.

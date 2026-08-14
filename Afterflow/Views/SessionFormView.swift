@@ -36,6 +36,8 @@ struct SessionFormView: View {
     @State private var intention: String
     @State private var moodBefore: Int
     @State private var moodAfter: Int
+    /// Whether the after-mood was ever recorded or adjusted; untouched saves persist nil.
+    @State private var moodAfterTouched: Bool
     @State private var reflectionText: String
     @State private var musicLinkInput: String
     @State private var musicLinkMetadata: MusicLinkMetadata?
@@ -75,7 +77,8 @@ struct SessionFormView: View {
             _selectedAdministration = State(initialValue: session.administration)
             _intention = State(initialValue: session.intention)
             _moodBefore = State(initialValue: session.moodBefore)
-            _moodAfter = State(initialValue: session.moodAfter)
+            _moodAfter = State(initialValue: session.moodAfter ?? 5)
+            _moodAfterTouched = State(initialValue: session.moodAfter != nil)
             _reflectionText = State(initialValue: session.reflections)
             _musicLinkInput = State(initialValue: session.musicLinkWebURL ?? session.musicLinkURL ?? "")
             _musicLinkMetadata = State(initialValue: SessionFormView.metadata(from: session))
@@ -91,6 +94,7 @@ struct SessionFormView: View {
             _intention = State(initialValue: "")
             _moodBefore = State(initialValue: 5)
             _moodAfter = State(initialValue: 5)
+            _moodAfterTouched = State(initialValue: false)
             _reflectionText = State(initialValue: "")
             _musicLinkInput = State(initialValue: "")
             _musicLinkMetadata = State(initialValue: nil)
@@ -152,6 +156,7 @@ struct SessionFormView: View {
                     self.scheduleDraftSave()
                 }
                 .onChange(of: self.moodAfter) { _, _ in
+                    self.moodAfterTouched = true
                     self.scheduleDraftSave()
                 }
                 .listRowBackground(AF.neutral(100))
@@ -561,7 +566,7 @@ private extension SessionFormView {
                 administration: self.selectedAdministration,
                 intention: trimmedIntention,
                 moodBefore: self.moodBefore,
-                moodAfter: self.moodAfter
+                moodAfter: nil
             )
             self.applyMusicLink(to: newSession)
 
@@ -589,7 +594,7 @@ private extension SessionFormView {
             session.administration = self.selectedAdministration
             session.intention = trimmedIntention
             session.moodBefore = self.moodBefore
-            session.moodAfter = self.moodAfter
+            session.moodAfter = self.moodAfterTouched ? self.moodAfter : nil
             session.reflections = self.reflectionText.trimmingCharacters(in: .whitespacesAndNewlines)
             self.applyMusicLink(to: session)
 
@@ -613,7 +618,7 @@ private extension SessionFormView {
         self.selectedAdministration = draft.administration
         self.intention = draft.intention
         self.moodBefore = draft.moodBefore
-        self.moodAfter = draft.moodAfter
+        self.moodAfter = draft.moodAfter ?? 5
         self.musicLinkInput = draft.musicLinkWebURL ?? draft.musicLinkURL ?? ""
         self.musicLinkMetadata = SessionFormView.metadata(from: draft)
         self.musicLinkError = nil
@@ -641,7 +646,7 @@ private extension SessionFormView {
             administration: self.selectedAdministration,
             intention: self.intention,
             moodBefore: self.moodBefore,
-            moodAfter: self.moodAfter
+            moodAfter: nil
         )
         self.applyMusicLink(to: draft)
         return draft

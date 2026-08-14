@@ -13,7 +13,7 @@ struct TherapeuticSessionTests {
         #expect(session.administration == .oral)
         #expect(session.intention == "")
         #expect(session.moodBefore == 5)
-        #expect(session.moodAfter == 5)
+        #expect(session.moodAfter == nil)
         #expect(session.reflections == "")
         #expect(session.status == .draft)
         #expect(session.reminderDate == nil)
@@ -93,26 +93,24 @@ struct TherapeuticSessionTests {
         #expect(sessionWithPlaylist.hasMusicLink == true)
     }
 
-    @Test("After-mood detection uses the sentinel heuristic") func testHasAfterMood() async throws {
+    @Test("After-mood is recorded only when moodAfter is set") func testHasAfterMood() async throws {
         let untouched = TherapeuticSession()
         #expect(untouched.hasAfterMood == false)
+        #expect(untouched.moodChange == 0)
 
         let moodOnly = TherapeuticSession()
         moodOnly.moodAfter = 7
         #expect(moodOnly.hasAfterMood == true)
 
+        // Reflections alone no longer imply an after-mood.
         let reflectionOnly = TherapeuticSession()
         reflectionOnly.reflections = "Felt grounded afterwards."
-        #expect(reflectionOnly.hasAfterMood == true)
+        #expect(reflectionOnly.hasAfterMood == false)
 
-        let sentinelFiveWithReflection = TherapeuticSession()
-        sentinelFiveWithReflection.moodAfter = 5
-        sentinelFiveWithReflection.reflections = "A genuine after-mood of 5."
-        #expect(sentinelFiveWithReflection.hasAfterMood == true)
-
-        let whitespaceReflection = TherapeuticSession()
-        whitespaceReflection.reflections = "   \n  "
-        #expect(whitespaceReflection.hasAfterMood == false)
+        // An explicit 5 is a genuine after-mood — no sentinel ambiguity anymore.
+        let explicitFive = TherapeuticSession()
+        explicitFive.moodAfter = 5
+        #expect(explicitFive.hasAfterMood == true)
     }
 
     @Test("Reflection entry save path flips status to complete") func reflectionSavePathFlipsStatus() async throws {

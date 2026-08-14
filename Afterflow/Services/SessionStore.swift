@@ -101,7 +101,7 @@ private struct SessionDraft: Codable {
     let administration: String
     let intention: String
     let moodBefore: Int
-    let moodAfter: Int
+    let moodAfter: Int?
     let reflections: String
     let musicLinkURL: String?
     let musicLinkWebURL: String?

@@ -108,7 +108,7 @@ enum SeedDataFactory {
                 administration: .oral,
                 intention: "Seeded Session \(i)",
                 moodBefore: (i % 10) + 1,
-                moodAfter: ((i + 2) % 10) + 1,
+                moodAfter: hasReflection ? ((i + 2) % 10) + 1 : nil,
                 reflections: reflection,
                 reminderDate: i % 3 == 0 ? now.addingTimeInterval(TimeInterval(i * 600)) : nil
             )

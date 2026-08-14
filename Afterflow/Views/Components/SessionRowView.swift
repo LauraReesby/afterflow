@@ -87,8 +87,8 @@ struct SessionRowView: View {
     }
 
     private var moodText: String {
-        if self.session.hasAfterMood {
-            "mood \(self.session.moodBefore) → \(self.session.moodAfter)"
+        if let moodAfter = self.session.moodAfter {
+            "mood \(self.session.moodBefore) → \(moodAfter)"
         } else {
             "mood \(self.session.moodBefore) · after not added"
         }

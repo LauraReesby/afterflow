@@ -158,7 +158,8 @@ final class TherapeuticSession {
 
     var moodBefore: Int
 
-    var moodAfter: Int
+    /// After-session mood; `nil` until the user actually records one.
+    var moodAfter: Int?
 
     var reflections: String
 
@@ -184,7 +185,7 @@ final class TherapeuticSession {
         administration: AdministrationMethod = .oral,
         intention: String = "",
         moodBefore: Int = 5,
-        moodAfter: Int = 5,
+        moodAfter: Int? = nil,
         reflections: String = "",
         reminderDate: Date? = nil
     ) {
@@ -215,8 +216,10 @@ extension TherapeuticSession {
         "\(self.treatmentType.displayName) • \(self.sessionDate.formatted(date: .abbreviated, time: .omitted))"
     }
 
+    /// Mood shift from before to after; 0 when no after-mood is recorded.
     var moodChange: Int {
-        self.moodAfter - self.moodBefore
+        guard let moodAfter else { return 0 }
+        return moodAfter - self.moodBefore
     }
 
     var hasMusicLink: Bool {
@@ -224,12 +227,8 @@ extension TherapeuticSession {
         return !url.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    /// Whether an after-session mood was actually recorded. `moodAfter` is non-optional
-    /// and defaults to 5, so 5-with-no-reflections is treated as "not recorded" — a
-    /// genuine after-mood of exactly 5 registers once any reflection text exists.
     var hasAfterMood: Bool {
-        let reflectionSet = !self.reflections.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return reflectionSet || self.moodAfter != 5
+        self.moodAfter != nil
     }
 
     var musicLinkProvider: MusicLinkProvider {
@@ -279,7 +278,7 @@ extension TherapeuticSession {
     var isValid: Bool {
         !self.intention.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
             self.moodBefore >= 1 && self.moodBefore <= 10 &&
-            self.moodAfter >= 1 && self.moodAfter <= 10
+            (self.moodAfter.map { (1 ... 10).contains($0) } ?? true)
     }
 
     var status: SessionLifecycleStatus {
