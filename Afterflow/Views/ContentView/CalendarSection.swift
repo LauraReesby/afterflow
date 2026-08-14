@@ -57,8 +57,10 @@ struct CalendarSection<Header: View>: View {
         }
     }
 
+    /// Newest month first — the current month sits at the top and older
+    /// months are reached by scrolling down.
     private var monthRange: [Date] {
-        CalendarGridHelper.generateMonthRange(from: self.sessions)
+        CalendarGridHelper.generateMonthRange(from: self.sessions).reversed()
     }
 
     private var markedDates: [Date: Color] {
