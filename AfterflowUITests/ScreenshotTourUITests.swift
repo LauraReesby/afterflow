@@ -50,7 +50,7 @@ final class ScreenshotTourUITests: XCTestCase {
         RunLoop.current.run(until: Date().addingTimeInterval(0.3))
         self.attach(app, name: "04-session-detail")
 
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        self.popWhileBackButtonExists(app)
         XCTAssertTrue(addButton.waitForExistence(timeout: 4), "Should return to sessions list")
 
         addButton.tap()
@@ -71,12 +71,9 @@ final class ScreenshotTourUITests: XCTestCase {
         RunLoop.current.run(until: Date().addingTimeInterval(0.4))
         self.attach(app, name: "06-reflection")
 
-        // Reflection sits on top of the session detail: two pops back to the list.
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        RunLoop.current.run(until: Date().addingTimeInterval(0.4))
-        if !addButton.exists {
-            app.navigationBars.buttons.element(boundBy: 0).tap()
-        }
+        // Compact width stacks reflection on top of the detail (two pops back to
+        // the list); regular width keeps the sidebar visible with fewer pushes.
+        self.popWhileBackButtonExists(app)
         XCTAssertTrue(addButton.waitForExistence(timeout: 4), "Should return to sessions list")
 
         let trendsButton = app.buttons["trendsButton"]
@@ -88,6 +85,20 @@ final class ScreenshotTourUITests: XCTestCase {
         )
         RunLoop.current.run(until: Date().addingTimeInterval(0.6))
         self.attach(app, name: "07-trends")
+    }
+
+    /// Pops pushed screens until none remain. Width-agnostic: compact width
+    /// pushes detail/reflection onto one stack; regular width may have nothing
+    /// pushed at all.
+    private func popWhileBackButtonExists(_ app: XCUIApplication) {
+        var attempts = 0
+        while attempts < 3 {
+            let back = app.buttons.matching(identifier: "BackButton").firstMatch
+            guard back.exists, back.isHittable else { break }
+            back.tap()
+            RunLoop.current.run(until: Date().addingTimeInterval(0.4))
+            attempts += 1
+        }
     }
 
     private func tapByLabel(_ app: XCUIApplication, _ label: String) {
