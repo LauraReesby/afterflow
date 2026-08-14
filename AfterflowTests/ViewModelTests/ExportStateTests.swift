@@ -98,7 +98,7 @@ struct ExportStateTests {
         #expect(exportState.isExporting == false)
     }
 
-    @Test("Cancel export clears isExporting") func cancelExportClearsIsExporting() async throws {
+    @Test("Cancel export clears isExporting") func cancelExportClearsIsExporting() {
         let exportState = ExportState()
         let sessions = SessionFixtureFactory.makeSessions(count: 500)
         let request = ExportRequest(format: .pdf, dateRange: nil, treatmentType: nil)
@@ -109,7 +109,7 @@ struct ExportStateTests {
         #expect(exportState.isExporting == false)
     }
 
-    @Test("Cancel export before start handled gracefully") func cancelExportBeforeStart() async throws {
+    @Test("Cancel export before start handled gracefully") func cancelExportBeforeStart() {
         let exportState = ExportState()
 
         exportState.cancelExport()

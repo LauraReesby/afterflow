@@ -275,15 +275,15 @@ struct TrendsView: View {
                             self.onWordSelected(entry.word)
                         } label: {
                             Text(entry.word)
-                                .font(.afterflowBody(self.wordFontSize(rank: rank), weight: .semibold))
-                                .foregroundStyle(self.wordForeground(rank: rank))
+                                .font(.afterflowBody(WordChipStyle.fontSize(rank: rank), weight: .semibold))
+                                .foregroundStyle(WordChipStyle.foreground(rank: rank))
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 13)
                         }
                         .buttonStyle(
                             AFCapsuleButtonStyle(
-                                fill: self.wordBackground(rank: rank),
-                                pressedFill: self.wordPressedBackground(rank: rank)
+                                fill: WordChipStyle.background(rank: rank),
+                                pressedFill: WordChipStyle.pressedBackground(rank: rank)
                             )
                         )
                         .accessibilityHint("Searches your sessions for this word")
@@ -304,7 +304,24 @@ struct TrendsView: View {
         .afShadow(.sm)
     }
 
-    private func wordFontSize(rank: Int) -> CGFloat {
+    /// Pure formatter; nonisolated so it can be passed to nonisolated closures
+    /// like Optional.map without tripping main-actor inference from View.
+    private nonisolated static func signedText(_ value: Double) -> String {
+        let formatted = String(format: "%.1f", abs(value))
+        if value > 0 {
+            return "+\(formatted)"
+        }
+        if value < 0 {
+            return "−\(formatted)"
+        }
+        return formatted
+    }
+}
+
+/// Rank-based sizing and tints for the "Words you return to" chips: the top
+/// word gets terracotta, the runner-up sage, the rest neutral.
+private enum WordChipStyle {
+    static func fontSize(rank: Int) -> CGFloat {
         switch rank {
         case 0: 16
         case 1: 15
@@ -314,7 +331,7 @@ struct TrendsView: View {
         }
     }
 
-    private func wordBackground(rank: Int) -> Color {
+    static func background(rank: Int) -> Color {
         switch rank {
         case 0: AF.accent(200)
         case 1: AF.accent2(200)
@@ -322,7 +339,7 @@ struct TrendsView: View {
         }
     }
 
-    private func wordPressedBackground(rank: Int) -> Color {
+    static func pressedBackground(rank: Int) -> Color {
         switch rank {
         case 0: AF.accent(300)
         case 1: AF.accent2(300)
@@ -330,21 +347,12 @@ struct TrendsView: View {
         }
     }
 
-    private func wordForeground(rank: Int) -> Color {
+    static func foreground(rank: Int) -> Color {
         switch rank {
         case 0: AF.accent(800)
         case 1: AF.accent2(800)
         default: AF.neutral(700)
         }
-    }
-
-    // Pure formatter; nonisolated so it can be passed to nonisolated closures
-    // like Optional.map without tripping main-actor inference from View.
-    private nonisolated static func signedText(_ value: Double) -> String {
-        let formatted = String(format: "%.1f", abs(value))
-        if value > 0 { return "+\(formatted)" }
-        if value < 0 { return "−\(formatted)" }
-        return formatted
     }
 }
 

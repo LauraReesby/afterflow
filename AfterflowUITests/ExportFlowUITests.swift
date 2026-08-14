@@ -6,7 +6,7 @@ final class ExportFlowUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testExportSheetAndProgress() throws {
+    func testExportSheetAndProgress() {
         let app = self.makeApp(arguments: ["-ui-testing"])
         app.launch()
 

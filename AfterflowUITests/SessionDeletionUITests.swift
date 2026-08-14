@@ -6,7 +6,7 @@ final class SessionDeletionUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testContextMenuDeleteRemovesSession() throws {
+    func testContextMenuDeleteRemovesSession() {
         let app = self.makeApp()
         app.launch()
 
@@ -30,7 +30,7 @@ final class SessionDeletionUITests: XCTestCase {
         )
     }
 
-    func testCancelDeleteKeepsSession() throws {
+    func testCancelDeleteKeepsSession() {
         let app = self.makeApp()
         app.launch()
 

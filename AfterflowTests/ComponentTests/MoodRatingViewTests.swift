@@ -4,7 +4,7 @@ import Testing
 
 @MainActor
 struct MoodRatingViewTests {
-    @Test("Mood rating view initializes with value binding") func moodRatingViewInitializesWithValueBinding() throws {
+    @Test("Mood rating view initializes with value binding") func moodRatingViewInitializesWithValueBinding() {
         var moodValue = 5
         let moodView = MoodRatingView(
             value: Binding(get: { moodValue }, set: { moodValue = $0 }),
@@ -16,7 +16,7 @@ struct MoodRatingViewTests {
         #expect(moodView.accessibilityIdentifier == "moodBeforeSlider")
     }
 
-    @Test("Value binding updates correctly") func valueBindingUpdatesCorrectly() throws {
+    @Test("Value binding updates correctly") func valueBindingUpdatesCorrectly() {
         var moodValue = 3
         let binding = Binding(
             get: { moodValue },
@@ -33,7 +33,7 @@ struct MoodRatingViewTests {
         #expect(binding.wrappedValue == 7)
     }
 
-    @Test("Slider rounds to integer") func sliderRoundsToInteger() throws {
+    @Test("Slider rounds to integer") func sliderRoundsToInteger() {
         var moodValue = 5
 
         let decimalValue = 5.7
@@ -42,7 +42,7 @@ struct MoodRatingViewTests {
         #expect(moodValue == 6)
     }
 
-    @Test("Slider handles minimum value") func sliderHandlesMinimumValue() throws {
+    @Test("Slider handles minimum value") func sliderHandlesMinimumValue() {
         var moodValue = 1
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
         _ = MoodRatingView(
@@ -54,7 +54,7 @@ struct MoodRatingViewTests {
         #expect(binding.wrappedValue == 1)
     }
 
-    @Test("Slider handles maximum value") func sliderHandlesMaximumValue() throws {
+    @Test("Slider handles maximum value") func sliderHandlesMaximumValue() {
         var moodValue = 10
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
         _ = MoodRatingView(
@@ -66,7 +66,7 @@ struct MoodRatingViewTests {
         #expect(binding.wrappedValue == 10)
     }
 
-    @Test("Displays title correctly") func displaysTitleCorrectly() throws {
+    @Test("Displays title correctly") func displaysTitleCorrectly() {
         let titles = ["Mood Before", "Mood After", "Current Mood", "How are you feeling?"]
 
         for title in titles {
@@ -79,7 +79,7 @@ struct MoodRatingViewTests {
         }
     }
 
-    @Test("Displays value out of ten") func displaysValueOutOfTen() throws {
+    @Test("Displays value out of ten") func displaysValueOutOfTen() {
         for value in 1 ... 10 {
             var moodValue = value
             let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
@@ -93,7 +93,7 @@ struct MoodRatingViewTests {
         }
     }
 
-    @Test("Displays mood descriptor") func displaysMoodDescriptor() throws {
+    @Test("Displays mood descriptor") func displaysMoodDescriptor() {
         for value in 1 ... 10 {
             let descriptor = MoodRatingScale.descriptor(for: value)
 
@@ -101,7 +101,7 @@ struct MoodRatingViewTests {
         }
     }
 
-    @Test("Displays mood emoji") func displaysMoodEmoji() throws {
+    @Test("Displays mood emoji") func displaysMoodEmoji() {
         for value in 1 ... 10 {
             let emoji = MoodRatingScale.emoji(for: value)
 
@@ -109,7 +109,7 @@ struct MoodRatingViewTests {
         }
     }
 
-    @Test("All mood values have unique descriptors") func allMoodValuesHaveUniqueDescriptors() throws {
+    @Test("All mood values have unique descriptors") func allMoodValuesHaveUniqueDescriptors() {
         var descriptors = Set<String>()
 
         for value in 1 ... 10 {
@@ -120,7 +120,7 @@ struct MoodRatingViewTests {
         #expect(descriptors.count >= 5)
     }
 
-    @Test("Mood descriptors are appropriate for values") func moodDescriptorsAreAppropriateForValues() throws {
+    @Test("Mood descriptors are appropriate for values") func moodDescriptorsAreAppropriateForValues() {
         let lowMoodDescriptor = MoodRatingScale.descriptor(for: 1)
         let midMoodDescriptor = MoodRatingScale.descriptor(for: 5)
         let highMoodDescriptor = MoodRatingScale.descriptor(for: 10)
@@ -132,7 +132,7 @@ struct MoodRatingViewTests {
         #expect(lowMoodDescriptor != highMoodDescriptor)
     }
 
-    @Test("Accessibility label includes title") func accessibilityLabelIncludesTitle() throws {
+    @Test("Accessibility label includes title") func accessibilityLabelIncludesTitle() {
         let moodView = MoodRatingView(
             value: .constant(5),
             title: "Mood Before",
@@ -142,7 +142,7 @@ struct MoodRatingViewTests {
         #expect(moodView.title == "Mood Before")
     }
 
-    @Test("Accessibility value includes descriptor") func accessibilityValueIncludesDescriptor() throws {
+    @Test("Accessibility value includes descriptor") func accessibilityValueIncludesDescriptor() {
         let value = 7
         var moodValue = value
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
@@ -157,7 +157,7 @@ struct MoodRatingViewTests {
         #expect(!descriptor.isEmpty)
     }
 
-    @Test("Accessibility identifier set correctly") func accessibilityIdentifierSetCorrectly() throws {
+    @Test("Accessibility identifier set correctly") func accessibilityIdentifierSetCorrectly() {
         let identifiers = ["moodBeforeSlider", "moodAfterSlider", "customSlider"]
 
         for identifier in identifiers {
@@ -170,7 +170,7 @@ struct MoodRatingViewTests {
         }
     }
 
-    @Test("Accessibility adjustable action increments") func accessibilityAdjustableActionIncrements() throws {
+    @Test("Accessibility adjustable action increments") func accessibilityAdjustableActionIncrements() {
         var moodValue = 5
 
         moodValue = min(moodValue + 1, 10)
@@ -178,7 +178,7 @@ struct MoodRatingViewTests {
         #expect(moodValue == 6)
     }
 
-    @Test("Accessibility adjustable action decrements") func accessibilityAdjustableActionDecrements() throws {
+    @Test("Accessibility adjustable action decrements") func accessibilityAdjustableActionDecrements() {
         var moodValue = 5
 
         moodValue = max(moodValue - 1, 1)
@@ -186,7 +186,7 @@ struct MoodRatingViewTests {
         #expect(moodValue == 4)
     }
 
-    @Test("Accessibility increment clamped at maximum") func accessibilityIncrementClampedAtMaximum() throws {
+    @Test("Accessibility increment clamped at maximum") func accessibilityIncrementClampedAtMaximum() {
         var moodValue = 10
 
         moodValue = min(moodValue + 1, 10)
@@ -194,7 +194,7 @@ struct MoodRatingViewTests {
         #expect(moodValue == 10)
     }
 
-    @Test("Accessibility decrement clamped at minimum") func accessibilityDecrementClampedAtMinimum() throws {
+    @Test("Accessibility decrement clamped at minimum") func accessibilityDecrementClampedAtMinimum() {
         var moodValue = 1
 
         moodValue = max(moodValue - 1, 1)
@@ -202,7 +202,7 @@ struct MoodRatingViewTests {
         #expect(moodValue == 1)
     }
 
-    @Test("Multiple mood views maintain independent state") func multipleMoodViewsMaintainIndependentState() throws {
+    @Test("Multiple mood views maintain independent state") func multipleMoodViewsMaintainIndependentState() {
         var moodBefore = 3
         var moodAfter = 8
 
@@ -229,7 +229,7 @@ struct MoodRatingViewTests {
         #expect(bindingBefore.wrappedValue != bindingAfter.wrappedValue)
     }
 
-    @Test("Rapid value changes handled correctly") func rapidValueChangesHandledCorrectly() throws {
+    @Test("Rapid value changes handled correctly") func rapidValueChangesHandledCorrectly() {
         var moodValue = 5
 
         for newValue in [6, 7, 4, 8, 3, 9, 2, 10, 1, 5] {
@@ -241,7 +241,7 @@ struct MoodRatingViewTests {
         #expect(moodValue == 5)
     }
 
-    @Test("Value persistence across view updates") func valuePersistenceAcrossViewUpdates() throws {
+    @Test("Value persistence across view updates") func valuePersistenceAcrossViewUpdates() {
         var moodValue = 7
         let binding = Binding(get: { moodValue }, set: { moodValue = $0 })
         _ = MoodRatingView(

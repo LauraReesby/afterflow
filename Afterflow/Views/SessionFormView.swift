@@ -11,7 +11,9 @@ struct SessionFormView: View {
         case edit(TherapeuticSession)
 
         var isEditing: Bool {
-            if case .edit = self { return true }
+            if case .edit = self {
+                return true
+            }
             return false
         }
 
@@ -345,7 +347,9 @@ extension SessionFormView {
         self.mode.isEditing ? "Done" : "Save"
     }
 
-    private var editingSession: TherapeuticSession? { self.mode.session }
+    private var editingSession: TherapeuticSession? {
+        self.mode.session
+    }
 
     private var trimmedMusicLinkInput: String {
         self.musicLinkInput.trimmingCharacters(in: .whitespacesAndNewlines)

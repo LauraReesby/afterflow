@@ -5,7 +5,7 @@ import Testing
 
 @MainActor
 struct SessionListPerformanceTests {
-    @Test("View model filters 1k sessions quickly") func listViewModelPerformance() async throws {
+    @Test("View model filters 1k sessions quickly") func listViewModelPerformance() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -23,7 +23,7 @@ struct SessionListPerformanceTests {
     }
 
     @Test("Fetching 1k sessions stays performant")
-    @MainActor func fetchPerformance() async throws {
+    @MainActor func fetchPerformance() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
@@ -46,7 +46,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 0.8)
     }
 
-    @Test("Filtering 10k sessions completes quickly") func filteringTenThousandSessions() async throws {
+    @Test("Filtering 10k sessions completes quickly") func filteringTenThousandSessions() {
         let sessions = SessionFixtureFactory.makeSessions(count: 10000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -63,7 +63,7 @@ struct SessionListPerformanceTests {
         #expect(!filtered.isEmpty)
     }
 
-    @Test("Searching through 1k sessions is fast") func searchingThousandSessions() async throws {
+    @Test("Searching through 1k sessions is fast") func searchingThousandSessions() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "healing",
@@ -78,7 +78,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 0.5)
     }
 
-    @Test("Searching through 5k sessions stays performant") func searchingFiveThousandSessions() async throws {
+    @Test("Searching through 5k sessions stays performant") func searchingFiveThousandSessions() {
         let sessions = SessionFixtureFactory.makeSessions(count: 5000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "journey",
@@ -93,7 +93,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 1.5)
     }
 
-    @Test("Sorting by date descending is fast") func sortByDateDescending() async throws {
+    @Test("Sorting by date descending is fast") func sortByDateDescending() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -114,7 +114,7 @@ struct SessionListPerformanceTests {
         }
     }
 
-    @Test("Sorting by date ascending is fast") func sortByDateAscending() async throws {
+    @Test("Sorting by date ascending is fast") func sortByDateAscending() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -135,7 +135,7 @@ struct SessionListPerformanceTests {
         }
     }
 
-    @Test("Sorting by mood change is fast") func sortByMoodChange() async throws {
+    @Test("Sorting by mood change is fast") func sortByMoodChange() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -152,7 +152,7 @@ struct SessionListPerformanceTests {
         #expect(filtered.count == 1000)
     }
 
-    @Test("Cache hit provides fast results") func cacheHitPerformance() async throws {
+    @Test("Cache hit provides fast results") func cacheHitPerformance() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -171,7 +171,7 @@ struct SessionListPerformanceTests {
         #expect(!filtered.isEmpty)
     }
 
-    @Test("Cache miss with filter change is acceptable") func cacheMissPerformance() async throws {
+    @Test("Cache miss with filter change is acceptable") func cacheMissPerformance() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         var viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -194,7 +194,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 0.5)
     }
 
-    @Test("CSV export of 1k sessions completes quickly") func csvExportPerformance() async throws {
+    @Test("CSV export of 1k sessions completes quickly") func csvExportPerformance() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let service = CSVExportService()
 
@@ -207,7 +207,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 2.0)
     }
 
-    @Test("CSV export of 5k sessions stays performant") func csvExportLargeDataset() async throws {
+    @Test("CSV export of 5k sessions stays performant") func csvExportLargeDataset() {
         let sessions = SessionFixtureFactory.makeSessions(count: 5000)
         let service = CSVExportService()
 
@@ -221,7 +221,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 8.0)
     }
 
-    @Test("PDF export of 100 sessions completes quickly") func pdfExportPerformance() async throws {
+    @Test("PDF export of 100 sessions completes quickly") func pdfExportPerformance() throws {
         #if canImport(PDFKit)
             let sessions = SessionFixtureFactory.makeSessions(count: 100)
             let service = PDFExportService()
@@ -238,7 +238,7 @@ struct SessionListPerformanceTests {
         #endif
     }
 
-    @Test("CSV import of 1k sessions is performant") func csvImportPerformance() async throws {
+    @Test("CSV import of 1k sessions is performant") func csvImportPerformance() {
         let sessions = SessionFixtureFactory.makeSessions(count: 1000)
         let exportService = CSVExportService()
         guard let csvURL = try? exportService.export(sessions: sessions) else {
@@ -258,7 +258,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 3.0)
     }
 
-    @Test("Calendar with 365 marked dates renders quickly") func calendarRenderingPerformance() async throws {
+    @Test("Calendar with 365 marked dates renders quickly") func calendarRenderingPerformance() {
         let sessions = SessionFixtureFactory.makeSessionsForCalendar(monthCount: 12)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "",
@@ -276,7 +276,7 @@ struct SessionListPerformanceTests {
         #expect(duration < 0.5)
     }
 
-    @Test("Combined filtering and sorting with 5k sessions") func combinedOperationsPerformance() async throws {
+    @Test("Combined filtering and sorting with 5k sessions") func combinedOperationsPerformance() {
         let sessions = SessionFixtureFactory.makeSessions(count: 5000)
         let viewModel = TestHelpers.makeSessionListViewModel(
             searchText: "meditation",

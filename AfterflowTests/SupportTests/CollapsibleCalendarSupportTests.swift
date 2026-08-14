@@ -3,7 +3,7 @@ import Foundation
 import Testing
 
 struct CollapsibleCalendarSupportTests {
-    @Test("Start of month returns first day of month") func startOfMonthReturnsFirstDayOfMonth() throws {
+    @Test("Start of month returns first day of month") func startOfMonthReturnsFirstDayOfMonth() {
         let calendar = Calendar.current
         let date = TestHelpers.dateComponents(year: 2024, month: 12, day: 15, hour: 14, minute: 30)
 
@@ -15,7 +15,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(components.day == 1)
     }
 
-    @Test("Start of month with leap year February") func startOfMonthWithLeapYear() throws {
+    @Test("Start of month with leap year February") func startOfMonthWithLeapYear() {
         let calendar = Calendar.current
         let date = TestHelpers.dateComponents(year: 2024, month: 2, day: 29)
 
@@ -27,7 +27,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(components.day == 1)
     }
 
-    @Test("Start of month at year boundary") func startOfMonthAtYearBoundary() throws {
+    @Test("Start of month at year boundary") func startOfMonthAtYearBoundary() {
         let calendar = Calendar.current
         let date = TestHelpers.dateComponents(year: 2024, month: 12, day: 31)
 
@@ -41,7 +41,7 @@ struct CollapsibleCalendarSupportTests {
 
     @Test("Start of month handles first day of month") func startOfMonthHandlesFirstDayOfMonth() throws {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         let date = TestHelpers.dateComponents(year: 2024, month: 6, day: 1)
 
         let monthStart = calendar.startOfMonth(for: date)
@@ -52,7 +52,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(components.day == 1)
     }
 
-    @Test("Start of week returns first day of week") func startOfWeekReturnsFirstDayOfWeek() throws {
+    @Test("Start of week returns first day of week") func startOfWeekReturnsFirstDayOfWeek() {
         let calendar = Calendar.current
         let date = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
 
@@ -62,7 +62,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(components.weekday == calendar.firstWeekday)
     }
 
-    @Test("Start of week at week boundary") func startOfWeekAtWeekBoundary() throws {
+    @Test("Start of week at week boundary") func startOfWeekAtWeekBoundary() {
         let calendar = Calendar.current
         let date = TestHelpers.dateComponents(year: 2024, month: 12, day: 1)
 
@@ -72,7 +72,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(components.weekday == calendar.firstWeekday)
     }
 
-    @Test("Start of week with different locales") func startOfWeekWithDifferentLocales() throws {
+    @Test("Start of week with different locales") func startOfWeekWithDifferentLocales() {
         var usCalendar = Calendar.current
         usCalendar.locale = Locale(identifier: "en_US")
 
@@ -92,7 +92,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(euComponents.weekday == euCalendar.firstWeekday)
     }
 
-    @Test("First grid date calculates correctly") func firstGridDateCalculatesCorrectly() throws {
+    @Test("First grid date calculates correctly") func firstGridDateCalculatesCorrectly() {
         let calendar = Calendar.current
         let monthStart = TestHelpers.dateComponents(year: 2024, month: 12, day: 1)
 
@@ -104,8 +104,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(weekday == calendar.firstWeekday)
     }
 
-    @Test("First grid date when month starts on first weekday")
-    func firstGridDateWhenMonthStartsOnFirstWeekday() throws {
+    @Test("First grid date when month starts on first weekday") func firstGridDateWhenMonthStartsOnFirstWeekday() {
         var testCalendar = Calendar.current
         testCalendar.firstWeekday = 1
 
@@ -119,7 +118,7 @@ struct CollapsibleCalendarSupportTests {
         }
     }
 
-    @Test("First grid date respects first weekday setting") func firstGridDateRespectsFirstWeekday() throws {
+    @Test("First grid date respects first weekday setting") func firstGridDateRespectsFirstWeekday() {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
 
@@ -131,7 +130,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(weekday == 2)
     }
 
-    @Test("First grid date at month boundaries") func firstGridDateAtMonthBoundaries() throws {
+    @Test("First grid date at month boundaries") func firstGridDateAtMonthBoundaries() {
         let calendar = Calendar.current
 
         let janStart = TestHelpers.dateComponents(year: 2024, month: 1, day: 1)
@@ -147,7 +146,7 @@ struct CollapsibleCalendarSupportTests {
 
     @Test("Accessibility label includes full date") func accessibilityLabelIncludesFullDate() throws {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         let date = TestHelpers.dateComponents(year: 2024, month: 12, day: 25)
 
         let label = AccessibilityLabelBuilder.label(for: date, calendar: calendar, marked: false)
@@ -161,7 +160,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(components.day == 25)
     }
 
-    @Test("Accessibility label includes marked status") func accessibilityLabelIncludesMarkedStatus() throws {
+    @Test("Accessibility label includes marked status") func accessibilityLabelIncludesMarkedStatus() {
         let calendar = Calendar.current
         let date = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
 
@@ -172,7 +171,7 @@ struct CollapsibleCalendarSupportTests {
         #expect(markedLabel.contains("has sessions"))
     }
 
-    @Test("Accessibility label formats correctly") func accessibilityLabelFormatsCorrectly() throws {
+    @Test("Accessibility label formats correctly") func accessibilityLabelFormatsCorrectly() {
         let calendar = Calendar.current
         let date = TestHelpers.dateComponents(year: 2024, month: 6, day: 1)
 

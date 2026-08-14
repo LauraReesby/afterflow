@@ -15,7 +15,11 @@ extension View {
         self
             .alert("Import Error", isPresented: Binding(
                 get: { config.importError.wrappedValue != nil },
-                set: { if !$0 { config.importError.wrappedValue = nil } }
+                set: {
+                    if !$0 {
+                        config.importError.wrappedValue = nil
+                    }
+                }
             )) {
                 Button("OK", role: .cancel) {}
             } message: {

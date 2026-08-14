@@ -97,7 +97,7 @@ struct ImportStateTests {
         try? FileManager.default.removeItem(at: tempURL)
     }
 
-    @Test("Confirm import adds sessions to store") func confirmImportAddsSessionsToStore() async throws {
+    @Test("Confirm import adds sessions to store") func confirmImportAddsSessionsToStore() throws {
         let (container, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -131,7 +131,7 @@ struct ImportStateTests {
         #expect(fetchedSessions.contains { $0.intention == "Test 2" })
     }
 
-    @Test("Confirm import clears pending sessions") func confirmImportClearsPendingSessions() async throws {
+    @Test("Confirm import clears pending sessions") func confirmImportClearsPendingSessions() throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -187,7 +187,7 @@ struct ImportStateTests {
         #expect(importState.pendingImportedSessions.isEmpty)
     }
 
-    @Test("Import error on store failure") func importErrorOnStoreFailure() async throws {
+    @Test("Import error on store failure") func importErrorOnStoreFailure() throws {
         let (_, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 
@@ -206,7 +206,7 @@ struct ImportStateTests {
         importState.confirmImport()
 
         if importState.importError != nil {
-            #expect(importState.importError!.contains("Failed to import"))
+            #expect(try #require(importState.importError?.contains("Failed to import")))
         }
     }
 
@@ -258,7 +258,7 @@ struct ImportStateTests {
         try? FileManager.default.removeItem(at: tempURL)
     }
 
-    @Test("Confirm import with empty pending sessions") func confirmImportWithEmptyPendingSessions() async throws {
+    @Test("Confirm import with empty pending sessions") func confirmImportWithEmptyPendingSessions() throws {
         let (container, store) = try TestHelpers.makeTestEnvironment()
         let importState = try TestHelpers.makeImportState(sessionStore: store)
 

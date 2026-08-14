@@ -6,7 +6,7 @@ final class SessionFormValidationUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testSaveButtonEnablesAfterValidInput() throws {
+    func testSaveButtonEnablesAfterValidInput() {
         let app = self.makeApp()
         self.presentSessionForm(app)
 
@@ -40,11 +40,17 @@ final class SessionFormValidationUITests: XCTestCase {
         sessionCell.waitForHittable()
     }
 
-    func testAttachAndRemoveMusicLink() throws {
+    func testAttachAndRemoveMusicLink() {
         let app = self.makeApp()
         self.presentSessionForm(app)
 
+        // The form is a lazy List; the music row below the fold isn't in the
+        // accessibility tree until scrolled into view.
+        let form = app.collectionViews.firstMatch
         let musicField = app.textFields["musicLinkField"]
+        if !musicField.waitForExistence(timeout: 2) {
+            form.scrollTo(element: musicField)
+        }
         XCTAssertTrue(musicField.waitForExistence(timeout: 2), "Playlist link field should exist")
         musicField.tap()
         musicField.typeText("https://music.apple.com/us/playlist/calm/pl.u-123")
@@ -56,7 +62,10 @@ final class SessionFormValidationUITests: XCTestCase {
                 "musicLinkRawPreview"
             ))
             .firstMatch
-        XCTAssertTrue(preview.waitForExistence(timeout: 8), "Preview should appear after entering a link")
+        if !preview.waitForExistence(timeout: 8) {
+            form.scrollTo(element: preview)
+        }
+        XCTAssertTrue(preview.waitForExistence(timeout: 2), "Preview should appear after entering a link")
 
         let removeButton = app.buttons["removeMusicLinkButton"]
         XCTAssertTrue(removeButton.waitForExistence(timeout: 2))
@@ -65,7 +74,7 @@ final class SessionFormValidationUITests: XCTestCase {
         XCTAssertFalse(preview.waitForExistence(timeout: 1), "Preview should disappear after removing link")
     }
 
-    func testInlineValidationOutlineUpdates() throws {
+    func testInlineValidationOutlineUpdates() {
         let app = self.makeApp()
         self.presentSessionForm(app)
 

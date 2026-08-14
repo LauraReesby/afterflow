@@ -6,7 +6,7 @@ final class ScreenshotTourUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testScreenshotTour() throws {
+    func testScreenshotTour() {
         let app = self.makeApp()
         app.launch()
 

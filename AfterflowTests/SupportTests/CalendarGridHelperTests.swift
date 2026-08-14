@@ -4,7 +4,7 @@ import Testing
 
 @MainActor
 struct CalendarGridHelperTests {
-    @Test("Month range with empty sessions returns current month") func monthRangeWithEmptySessions() throws {
+    @Test("Month range with empty sessions returns current month") func monthRangeWithEmptySessions() {
         let referenceDate = TestHelpers.dateComponents(year: 2024, month: 6, day: 15)
         let calendar = Calendar.current
 
@@ -15,7 +15,7 @@ struct CalendarGridHelperTests {
         #expect(months.first == expectedMonth)
     }
 
-    @Test("Month range spans from oldest to newest session") func monthRangeSpansOldestToNewest() throws {
+    @Test("Month range spans from oldest to newest session") func monthRangeSpansOldestToNewest() {
         let calendar = Calendar.current
         let oldDate = TestHelpers.dateComponents(year: 2024, month: 3, day: 10)
         let newDate = TestHelpers.dateComponents(year: 2024, month: 6, day: 20)
@@ -32,7 +32,7 @@ struct CalendarGridHelperTests {
         #expect(months.last == calendar.startOfMonth(for: newDate))
     }
 
-    @Test("Month range includes reference date if newer than sessions") func monthRangeIncludesReferenceDate() throws {
+    @Test("Month range includes reference date if newer than sessions") func monthRangeIncludesReferenceDate() {
         let calendar = Calendar.current
         let sessionDate = TestHelpers.dateComponents(year: 2024, month: 3, day: 10)
         let referenceDate = TestHelpers.dateComponents(year: 2024, month: 6, day: 15)
@@ -45,7 +45,7 @@ struct CalendarGridHelperTests {
         #expect(months.last == calendar.startOfMonth(for: referenceDate))
     }
 
-    @Test("Month range returns months in chronological order") func monthRangeReturnsChronologicalOrder() throws {
+    @Test("Month range returns months in chronological order") func monthRangeReturnsChronologicalOrder() {
         let oldDate = TestHelpers.dateComponents(year: 2024, month: 1, day: 5)
         let newDate = TestHelpers.dateComponents(year: 2024, month: 4, day: 20)
 
@@ -61,7 +61,7 @@ struct CalendarGridHelperTests {
         }
     }
 
-    @Test("Month range handles single session") func monthRangeHandlesSingleSession() throws {
+    @Test("Month range handles single session") func monthRangeHandlesSingleSession() {
         let calendar = Calendar.current
         let sessionDate = TestHelpers.dateComponents(year: 2024, month: 5, day: 15)
 
@@ -73,7 +73,7 @@ struct CalendarGridHelperTests {
         #expect(months.first == calendar.startOfMonth(for: sessionDate))
     }
 
-    @Test("Month range handles sessions spanning year boundary") func monthRangeHandlesYearBoundary() throws {
+    @Test("Month range handles sessions spanning year boundary") func monthRangeHandlesYearBoundary() {
         let oldDate = TestHelpers.dateComponents(year: 2023, month: 11, day: 10)
         let newDate = TestHelpers.dateComponents(year: 2024, month: 2, day: 20)
 
@@ -88,7 +88,7 @@ struct CalendarGridHelperTests {
     }
 
     @Test("Grid days includes offset cells for month not starting on first weekday")
-    func gridDaysIncludesOffsetCells() throws {
+    func gridDaysIncludesOffsetCells() {
         let calendar = Calendar.current
         // Use startOfMonth for a consistent month start in local timezone
         let referenceDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 15, hour: 12)
@@ -116,7 +116,7 @@ struct CalendarGridHelperTests {
         // Use startOfMonth to ensure we get a valid month start in local timezone
         let referenceDate = TestHelpers.dateComponents(year: 2024, month: 2, day: 15, hour: 12)
         let monthStart = calendar.startOfMonth(for: referenceDate)
-        let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)!.count
+        let daysInMonth = try #require(calendar.range(of: .day, in: .month, for: monthStart)?.count)
 
         let gridDays = CalendarGridHelper.generateGridDaysForMonth(monthStart)
         let nonNilDays = gridDays.compactMap { $0 }
@@ -133,24 +133,23 @@ struct CalendarGridHelperTests {
         let gridDays = CalendarGridHelper.generateGridDaysForMonth(monthStart)
         let firstActualDay = gridDays.compactMap { $0 }.first
 
-        #expect(calendar.isDate(firstActualDay!, inSameDayAs: monthStart))
+        #expect(try calendar.isDate(#require(firstActualDay), inSameDayAs: monthStart))
     }
 
     @Test("Grid days has last day as end of month") func gridDaysLastDayIsEndOfMonth() throws {
         let calendar = Calendar.current
         let referenceDate = TestHelpers.dateComponents(year: 2024, month: 6, day: 15, hour: 12)
         let monthStart = calendar.startOfMonth(for: referenceDate)
-        let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)!.count
+        let daysInMonth = try #require(calendar.range(of: .day, in: .month, for: monthStart)?.count)
 
         let gridDays = CalendarGridHelper.generateGridDaysForMonth(monthStart)
-        let lastActualDay = gridDays.compactMap { $0 }.last!
+        let lastActualDay = try #require(gridDays.compactMap { $0 }.last)
 
         let dayComponent = calendar.component(.day, from: lastActualDay)
         #expect(dayComponent == daysInMonth)
     }
 
-    @Test("Grid days handles month starting on first weekday")
-    func gridDaysHandlesMonthStartingOnFirstWeekday() throws {
+    @Test("Grid days handles month starting on first weekday") func gridDaysHandlesMonthStartingOnFirstWeekday() {
         var calendar = Calendar.current
         calendar.firstWeekday = 1 // Sunday
 
@@ -167,7 +166,7 @@ struct CalendarGridHelperTests {
         }
     }
 
-    @Test("Grid days handles 31-day month") func gridDaysHandles31DayMonth() throws {
+    @Test("Grid days handles 31-day month") func gridDaysHandles31DayMonth() {
         let calendar = Calendar.current
         let referenceDate = TestHelpers.dateComponents(year: 2024, month: 7, day: 15, hour: 12) // July
         let monthStart = calendar.startOfMonth(for: referenceDate)
@@ -178,7 +177,7 @@ struct CalendarGridHelperTests {
         #expect(nonNilDays.count == 31)
     }
 
-    @Test("Grid days handles 28-day month") func gridDaysHandles28DayMonth() throws {
+    @Test("Grid days handles 28-day month") func gridDaysHandles28DayMonth() {
         let calendar = Calendar.current
         let referenceDate = TestHelpers.dateComponents(year: 2023, month: 2, day: 15, hour: 12) // Non-leap year Feb
         let monthStart = calendar.startOfMonth(for: referenceDate)
@@ -189,13 +188,13 @@ struct CalendarGridHelperTests {
         #expect(nonNilDays.count == 28)
     }
 
-    @Test("Calendar markers returns empty for no sessions") func calendarMarkersEmptyForNoSessions() throws {
+    @Test("Calendar markers returns empty for no sessions") func calendarMarkersEmptyForNoSessions() {
         let markers = CalendarGridHelper.calendarMarkers(from: [])
 
         #expect(markers.isEmpty)
     }
 
-    @Test("Calendar markers maps each session date to color") func calendarMarkersMapsSessionDates() throws {
+    @Test("Calendar markers maps each session date to color") func calendarMarkersMapsSessionDates() {
         let date1 = TestHelpers.dateComponents(year: 2024, month: 6, day: 10)
         let date2 = TestHelpers.dateComponents(year: 2024, month: 6, day: 15)
 
@@ -214,7 +213,7 @@ struct CalendarGridHelperTests {
         let calendar = Calendar.current
         // Use noon to avoid timezone issues
         let date = TestHelpers.dateComponents(year: 2024, month: 6, day: 15, hour: 12)
-        let dateLater = calendar.date(byAdding: .hour, value: 3, to: date)!
+        let dateLater = try #require(calendar.date(byAdding: .hour, value: 3, to: date))
 
         let sessions = [
             makeSession(date: date, treatment: .psilocybin),
@@ -237,15 +236,14 @@ struct CalendarGridHelperTests {
 
         let markers = CalendarGridHelper.calendarMarkers(from: sessions)
 
-        let markerDate = markers.keys.first!
+        let markerDate = try #require(markers.keys.first)
         let components = calendar.dateComponents([.hour, .minute, .second], from: markerDate)
         #expect(components.hour == 0)
         #expect(components.minute == 0)
         #expect(components.second == 0)
     }
 
-    @Test("Calendar markers handles multiple sessions on different dates")
-    func calendarMarkersHandlesMultipleDates() throws {
+    @Test("Calendar markers handles multiple sessions on different dates") func calendarMarkersHandlesMultipleDates() {
         let sessions = SessionFixtureFactory.makeSessionsForCalendar(
             monthCount: 2,
             sessionsPerMonth: 3

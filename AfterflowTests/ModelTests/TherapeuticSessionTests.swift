@@ -4,8 +4,7 @@ import Testing
 
 @MainActor
 struct TherapeuticSessionTests {
-    @Test("TherapeuticSession initialization with default values")
-    func therapeuticSessionDefaultInitialization() async throws {
+    @Test("TherapeuticSession initialization with default values") func therapeuticSessionDefaultInitialization() {
         let session = TherapeuticSession()
 
         #expect(session.id != UUID())
@@ -29,8 +28,7 @@ struct TherapeuticSessionTests {
         #expect(session.updatedAt.timeIntervalSince(now) < 1.0)
     }
 
-    @Test("TherapeuticSession initialization with custom values")
-    func therapeuticSessionCustomInitialization() async throws {
+    @Test("TherapeuticSession initialization with custom values") func therapeuticSessionCustomInitialization() {
         let customDate = Date(timeIntervalSinceNow: -3600)
         let reminderDate = Date().addingTimeInterval(3600)
         let session = TherapeuticSession(
@@ -55,21 +53,21 @@ struct TherapeuticSessionTests {
         #expect(session.reminderDate == reminderDate)
     }
 
-    @Test("Display title without treatment type") func displayTitleEmptyTreatmentType() async throws {
+    @Test("Display title without treatment type") func displayTitleEmptyTreatmentType() {
         let session = TherapeuticSession(treatmentType: .psilocybin)
         let expectedFormat = session.sessionDate.formatted(date: .abbreviated, time: .omitted)
 
         #expect(session.displayTitle == "Psilocybin • \(expectedFormat)")
     }
 
-    @Test("Display title with treatment type") func displayTitleWithTreatmentType() async throws {
+    @Test("Display title with treatment type") func displayTitleWithTreatmentType() {
         let session = TherapeuticSession(treatmentType: .mdma)
         let expectedFormat = session.sessionDate.formatted(date: .abbreviated, time: .omitted)
 
         #expect(session.displayTitle == "MDMA • \(expectedFormat)")
     }
 
-    @Test("Mood change calculation") func testMoodChange() async throws {
+    @Test("Mood change calculation") func testMoodChange() {
         let sessionImproved = TherapeuticSession(moodBefore: 4, moodAfter: 8)
         #expect(sessionImproved.moodChange == 4)
 
@@ -80,7 +78,7 @@ struct TherapeuticSessionTests {
         #expect(sessionUnchanged.moodChange == 0)
     }
 
-    @Test("Music link detection") func testHasMusicLink() async throws {
+    @Test("Music link detection") func testHasMusicLink() {
         let sessionWithoutPlaylist = TherapeuticSession()
         #expect(sessionWithoutPlaylist.hasMusicLink == false)
 
@@ -93,7 +91,7 @@ struct TherapeuticSessionTests {
         #expect(sessionWithPlaylist.hasMusicLink == true)
     }
 
-    @Test("After-mood is recorded only when moodAfter is set") func testHasAfterMood() async throws {
+    @Test("After-mood is recorded only when moodAfter is set") func testHasAfterMood() {
         let untouched = TherapeuticSession()
         #expect(untouched.hasAfterMood == false)
         #expect(untouched.moodChange == 0)
@@ -113,7 +111,7 @@ struct TherapeuticSessionTests {
         #expect(explicitFive.hasAfterMood == true)
     }
 
-    @Test("Reflection entry save path flips status to complete") func reflectionSavePathFlipsStatus() async throws {
+    @Test("Reflection entry save path flips status to complete") func reflectionSavePathFlipsStatus() {
         let session = TherapeuticSession(
             intention: "Working through grief",
             moodBefore: 4
@@ -130,7 +128,7 @@ struct TherapeuticSessionTests {
         #expect(session.moodChange == 3)
     }
 
-    @Test("Valid session validation") func validSessionValidation() async throws {
+    @Test("Valid session validation") func validSessionValidation() {
         let validSession = TherapeuticSession(
             treatmentType: .psilocybin,
             administration: .oral,
@@ -142,7 +140,7 @@ struct TherapeuticSessionTests {
         #expect(validSession.isValid == true)
     }
 
-    @Test("Invalid session validation - empty intention") func invalidSessionEmptyIntention() async throws {
+    @Test("Invalid session validation - empty intention") func invalidSessionEmptyIntention() {
         let invalidSession = TherapeuticSession(
             treatmentType: .lsd,
             intention: "",
@@ -153,7 +151,7 @@ struct TherapeuticSessionTests {
         #expect(invalidSession.isValid == false)
     }
 
-    @Test("Invalid session validation - mood range") func invalidSessionMoodRange() async throws {
+    @Test("Invalid session validation - mood range") func invalidSessionMoodRange() {
         let invalidMoodBefore = TherapeuticSession(
             treatmentType: .ketamine,
             intention: "Valid intention",
@@ -205,7 +203,7 @@ struct TherapeuticSessionTests {
         #expect(session.updatedAt > originalUpdatedAt)
     }
 
-    @Test("Administration method enum values") func administrationMethodValues() async throws {
+    @Test("Administration method enum values") func administrationMethodValues() {
         let sessionIV = TherapeuticSession(treatmentType: .ketamine, administration: .intravenous)
         #expect(sessionIV.administration == .intravenous)
 
@@ -222,7 +220,7 @@ struct TherapeuticSessionTests {
         #expect(sessionOther.administration == .other)
     }
 
-    @Test("Extreme mood values") func extremeMoodValues() async throws {
+    @Test("Extreme mood values") func extremeMoodValues() {
         let session = TherapeuticSession(moodBefore: 1, moodAfter: 10)
 
         #expect(session.moodBefore == 1)
@@ -230,7 +228,7 @@ struct TherapeuticSessionTests {
         #expect(session.moodChange == 9)
     }
 
-    @Test("Long text fields") func longTextFields() async throws {
+    @Test("Long text fields") func longTextFields() {
         let longText = String(repeating: "A", count: 1000)
         let session = TherapeuticSession(
             treatmentType: .psilocybin,
@@ -246,7 +244,7 @@ struct TherapeuticSessionTests {
         #expect(session.isValid == true)
     }
 
-    @Test("Unicode and special characters") func unicodeSupport() async throws {
+    @Test("Unicode and special characters") func unicodeSupport() {
         let session = TherapeuticSession(
             treatmentType: .mdma,
             administration: .oral,

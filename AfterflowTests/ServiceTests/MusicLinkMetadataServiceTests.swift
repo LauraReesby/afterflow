@@ -12,7 +12,9 @@ struct MusicLinkMetadataServiceTests {
         }
 
         private var steps: [Step]
-        init(steps: [Step]) { self.steps = steps }
+        init(steps: [Step]) {
+            self.steps = steps
+        }
 
         func data(for request: URLRequest) async throws -> (Data, URLResponse) {
             guard !self.steps.isEmpty else { throw URLError(.badServerResponse) }
@@ -32,7 +34,7 @@ struct MusicLinkMetadataServiceTests {
         }
     }
 
-    @Test("Classifies Spotify deep link into canonical URL") func classifyDeepLink() async throws {
+    @Test("Classifies Spotify deep link into canonical URL") func classifyDeepLink() {
         let service = MusicLinkMetadataService()
         let result = service.classify(urlString: "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M")
         #expect(result?.provider == .spotify)
@@ -81,7 +83,7 @@ struct MusicLinkMetadataServiceTests {
         #expect(metadata.thumbnailURL == nil)
     }
 
-    @Test("Classifies YouTube short link into canonical URL") func classifyYouTubeShortLink() async throws {
+    @Test("Classifies YouTube short link into canonical URL") func classifyYouTubeShortLink() {
         let service = MusicLinkMetadataService()
         let result = service.classify(urlString: "https://youtu.be/abcd1234")
         #expect(result?.provider == .youtube)

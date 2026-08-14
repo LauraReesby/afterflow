@@ -11,7 +11,7 @@ struct TrendsViewModelTests {
         moodAfter: Int? = 5,
         reflections: String = ""
     ) -> TherapeuticSession {
-        let session = TherapeuticSession(
+        TherapeuticSession(
             sessionDate: Date().addingTimeInterval(TimeInterval(-daysAgo * 86400)),
             treatmentType: treatment,
             administration: .oral,
@@ -20,10 +20,9 @@ struct TrendsViewModelTests {
             moodAfter: moodAfter,
             reflections: reflections
         )
-        return session
     }
 
-    @Test("Range filtering keeps only recent sessions, ascending") func rangeFiltering() throws {
+    @Test("Range filtering keeps only recent sessions, ascending") func rangeFiltering() {
         let recent = self.makeSession(daysAgo: 10)
         let older = self.makeSession(daysAgo: 70)
         let ancient = self.makeSession(daysAgo: 400)
@@ -38,7 +37,7 @@ struct TrendsViewModelTests {
         #expect(viewModel.filteredSessions(from: [recent, ancient, older]).count == 3)
     }
 
-    @Test("After series excludes sessions without a recorded after-mood") func afterSeriesExcludesSentinels() throws {
+    @Test("After series excludes sessions without a recorded after-mood") func afterSeriesExcludesSentinels() {
         let reflected = self.makeSession(daysAgo: 5, moodAfter: 8, reflections: "Grounded.")
         let unreflected = self.makeSession(daysAgo: 3, moodAfter: nil)
 
@@ -73,7 +72,7 @@ struct TrendsViewModelTests {
         #expect(footnote.contains("LSD"))
     }
 
-    @Test("Average lift only counts reflected sessions") func averageLift() throws {
+    @Test("Average lift only counts reflected sessions") func averageLift() {
         let up = self.makeSession(daysAgo: 2, moodBefore: 4, moodAfter: 8, reflections: "x")
         let down = self.makeSession(daysAgo: 4, moodBefore: 6, moodAfter: 4, reflections: "y")
         let sentinel = self.makeSession(daysAgo: 6, moodBefore: 3, moodAfter: nil)
@@ -94,7 +93,7 @@ struct TrendsViewModelTests {
         #expect(viewModel.meanDaysBetween(from: [first]) == nil)
     }
 
-    @Test("Word frequencies are deterministic, stopword-free, on-device text only") func wordFrequencies() throws {
+    @Test("Word frequencies are deterministic, stopword-free, on-device text only") func wordFrequencies() {
         let one = self.makeSession(daysAgo: 1, reflections: "The grief moved through me. Grief takes time.")
         let two = self.makeSession(daysAgo: 2, reflections: "Openness and grief and warmth. Openness stayed.")
 

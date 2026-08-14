@@ -4,7 +4,7 @@ import Testing
 
 @MainActor
 struct SessionListViewModelTests {
-    @Test("Applies treatment filter and sorts newest first") func treatmentFilterAndSort() async throws {
+    @Test("Applies treatment filter and sorts newest first") func treatmentFilterAndSort() {
         let sessions = SessionFixtureFactory.makeSessions(count: 5)
         var viewModel = SessionListViewModel()
         viewModel.treatmentFilter = .psilocybin
@@ -15,7 +15,7 @@ struct SessionListViewModelTests {
         #expect(filtered == filtered.sorted { $0.sessionDate > $1.sessionDate })
     }
 
-    @Test("Sorts by mood change when requested") func sortByMoodChange() async throws {
+    @Test("Sorts by mood change when requested") func sortByMoodChange() {
         let sessions = SessionFixtureFactory.makeSessions(count: 10)
         sessions[0].moodBefore = 2
         sessions[0].moodAfter = 9
@@ -29,7 +29,7 @@ struct SessionListViewModelTests {
         #expect(sorted.first?.moodChange ?? 0 >= sorted.last?.moodChange ?? 0)
     }
 
-    @Test("Search text filters intentions") func searchFiltering() async throws {
+    @Test("Search text filters intentions") func searchFiltering() {
         let sessions = SessionFixtureFactory.makeSessions(count: 6)
         var viewModel = SessionListViewModel()
         viewModel.searchText = "Fixture Session 3"
@@ -39,11 +39,11 @@ struct SessionListViewModelTests {
         #expect(filtered.first?.intention.contains("3") == true)
     }
 
-    @Test("Marked dates returns unique start of days") func markedDatesReturnsUniqueStartOfDays() async throws {
+    @Test("Marked dates returns unique start of days") func markedDatesReturnsUniqueStartOfDays() throws {
         let calendar = Calendar.current
         let baseDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
 
-        let sessions = [
+        let sessions = try [
             TherapeuticSession(
                 sessionDate: baseDate,
                 treatmentType: .psilocybin,
@@ -53,7 +53,7 @@ struct SessionListViewModelTests {
                 moodAfter: 8
             ),
             TherapeuticSession(
-                sessionDate: calendar.date(byAdding: .hour, value: 5, to: baseDate)!,
+                sessionDate: #require(calendar.date(byAdding: .hour, value: 5, to: baseDate)),
                 treatmentType: .psilocybin,
                 administration: .oral,
                 intention: "Test 2",
@@ -61,7 +61,7 @@ struct SessionListViewModelTests {
                 moodAfter: 8
             ),
             TherapeuticSession(
-                sessionDate: calendar.date(byAdding: .day, value: 1, to: baseDate)!,
+                sessionDate: #require(calendar.date(byAdding: .day, value: 1, to: baseDate)),
                 treatmentType: .lsd,
                 administration: .oral,
                 intention: "Test 3",
@@ -75,10 +75,14 @@ struct SessionListViewModelTests {
 
         #expect(markedDates.count == 2)
         #expect(markedDates.contains(calendar.startOfDay(for: baseDate)))
-        #expect(markedDates.contains(calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: baseDate)!)))
+        #expect(try markedDates.contains(calendar.startOfDay(for: #require(calendar.date(
+            byAdding: .day,
+            value: 1,
+            to: baseDate
+        )))))
     }
 
-    @Test("Marked dates normalizes to midnight") func markedDatesNormalizesToMidnight() async throws {
+    @Test("Marked dates normalizes to midnight") func markedDatesNormalizesToMidnight() throws {
         let calendar = Calendar.current
         let dateWithTime = TestHelpers.dateComponents(year: 2024, month: 12, day: 15, hour: 14, minute: 30)
 
@@ -96,21 +100,21 @@ struct SessionListViewModelTests {
         let viewModel = SessionListViewModel()
         let markedDates = viewModel.markedDates(from: sessions)
 
-        let markedDate = markedDates.first!
+        let markedDate = try #require(markedDates.first)
         let components = calendar.dateComponents([.hour, .minute, .second], from: markedDate)
         #expect(components.hour == 0)
         #expect(components.minute == 0)
         #expect(components.second == 0)
     }
 
-    @Test("Marked dates handles empty sessions") func markedDatesHandlesEmptySessions() async throws {
+    @Test("Marked dates handles empty sessions") func markedDatesHandlesEmptySessions() {
         let viewModel = SessionListViewModel()
         let markedDates = viewModel.markedDates(from: [])
 
         #expect(markedDates.isEmpty)
     }
 
-    @Test("Index of first session finds correct index") func indexOfFirstSessionFindsCorrectIndex() async throws {
+    @Test("Index of first session finds correct index") func indexOfFirstSessionFindsCorrectIndex() {
         _ = Calendar.current
         let date1 = TestHelpers.dateComponents(year: 2024, month: 12, day: 10)
         let date2 = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
@@ -149,8 +153,7 @@ struct SessionListViewModelTests {
         #expect(index == 1)
     }
 
-    @Test("Index of first session returns nil when not found")
-    func indexOfFirstSessionReturnsNilWhenNotFound() async throws {
+    @Test("Index of first session returns nil when not found") func indexOfFirstSessionReturnsNilWhenNotFound() {
         let date1 = TestHelpers.dateComponents(year: 2024, month: 12, day: 10)
         let searchDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 25)
 
@@ -171,7 +174,7 @@ struct SessionListViewModelTests {
         #expect(index == nil)
     }
 
-    @Test("Clear filters clears treatment filter") func clearFiltersClearsTreatmentFilter() async throws {
+    @Test("Clear filters clears treatment filter") func clearFiltersClearsTreatmentFilter() {
         var viewModel = SessionListViewModel()
         viewModel.treatmentFilter = .psilocybin
         viewModel.sortOption = .moodChange
@@ -182,7 +185,7 @@ struct SessionListViewModelTests {
         #expect(viewModel.sortOption == .moodChange)
     }
 
-    @Test("Clear filters clears search text") func clearFiltersClearsSearchText() async throws {
+    @Test("Clear filters clears search text") func clearFiltersClearsSearchText() {
         var viewModel = SessionListViewModel()
         viewModel.searchText = "test query"
         viewModel.sortOption = .newestFirst
@@ -193,7 +196,7 @@ struct SessionListViewModelTests {
         #expect(viewModel.sortOption == .newestFirst)
     }
 
-    @Test("Clear filters does not affect sort option") func clearFiltersDoesNotAffectSortOption() async throws {
+    @Test("Clear filters does not affect sort option") func clearFiltersDoesNotAffectSortOption() {
         var viewModel = SessionListViewModel()
         viewModel.treatmentFilter = .mdma
         viewModel.searchText = "test"
@@ -204,7 +207,7 @@ struct SessionListViewModelTests {
         #expect(viewModel.sortOption == .oldestFirst)
     }
 
-    @Test("Cache hit when inputs unchanged") func cacheHitWhenInputsUnchanged() async throws {
+    @Test("Cache hit when inputs unchanged") func cacheHitWhenInputsUnchanged() {
         let sessions = SessionFixtureFactory.makeSessions(count: 10)
         let viewModel = SessionListViewModel()
 
@@ -215,7 +218,7 @@ struct SessionListViewModelTests {
         #expect(zip(result1, result2).allSatisfy { $0.0.id == $0.1.id })
     }
 
-    @Test("Cache miss when sessions change") func cacheMissWhenSessionsChange() async throws {
+    @Test("Cache miss when sessions change") func cacheMissWhenSessionsChange() {
         let sessions1 = SessionFixtureFactory.makeSessions(count: 5)
         let sessions2 = SessionFixtureFactory.makeSessions(count: 10)
         let viewModel = SessionListViewModel()
@@ -227,7 +230,7 @@ struct SessionListViewModelTests {
         #expect(result2.count == 10)
     }
 
-    @Test("Cache miss when filters change") func cacheMissWhenFiltersChange() async throws {
+    @Test("Cache miss when filters change") func cacheMissWhenFiltersChange() {
         let sessions = SessionFixtureFactory.makeSessions(count: 10)
         var viewModel = SessionListViewModel()
 
@@ -239,7 +242,7 @@ struct SessionListViewModelTests {
         #expect(result1.count >= result2.count)
     }
 
-    @Test("Apply filters with empty sessions") func applyFiltersWithEmptySessions() async throws {
+    @Test("Apply filters with empty sessions") func applyFiltersWithEmptySessions() {
         var viewModel = SessionListViewModel()
         viewModel.treatmentFilter = .psilocybin
         viewModel.searchText = "test"
@@ -249,7 +252,7 @@ struct SessionListViewModelTests {
         #expect(filtered.isEmpty)
     }
 
-    @Test("Search text with whitespace only") func searchTextWithWhitespaceOnly() async throws {
+    @Test("Search text with whitespace only") func searchTextWithWhitespaceOnly() {
         let sessions = SessionFixtureFactory.makeSessions(count: 5)
         var viewModel = SessionListViewModel()
         viewModel.searchText = "   \n\t   "
@@ -259,7 +262,7 @@ struct SessionListViewModelTests {
         #expect(filtered.count == sessions.count)
     }
 
-    @Test("Current filter description formats correctly") func currentFilterDescriptionFormats() async throws {
+    @Test("Current filter description formats correctly") func currentFilterDescriptionFormats() {
         var viewModel = SessionListViewModel()
 
         #expect(viewModel.currentFilterDescription == "Newest First")
@@ -273,7 +276,7 @@ struct SessionListViewModelTests {
         #expect(viewModel.currentFilterDescription.contains("Biggest Mood Lift"))
     }
 
-    @Test("Search filters reflections as well as intentions") func searchFiltersReflections() async throws {
+    @Test("Search filters reflections as well as intentions") func searchFiltersReflections() {
         let sessions = [
             TherapeuticSession(
                 sessionDate: Date(),
@@ -304,7 +307,7 @@ struct SessionListViewModelTests {
         #expect(filtered.first?.reflections.contains("insights") == true)
     }
 
-    @Test("Search is case insensitive") func searchIsCaseInsensitive() async throws {
+    @Test("Search is case insensitive") func searchIsCaseInsensitive() {
         let sessions = [
             TherapeuticSession(
                 sessionDate: Date(),
@@ -324,7 +327,7 @@ struct SessionListViewModelTests {
         #expect(filtered.count == 1)
     }
 
-    @Test("Mood change sort uses date as tiebreaker") func moodChangeSortUsesDateAsTiebreaker() async throws {
+    @Test("Mood change sort uses date as tiebreaker") func moodChangeSortUsesDateAsTiebreaker() {
         let date1 = TestHelpers.dateComponents(year: 2024, month: 12, day: 10)
         let date2 = TestHelpers.dateComponents(year: 2024, month: 12, day: 15)
 
@@ -355,7 +358,7 @@ struct SessionListViewModelTests {
         #expect(sorted.first?.sessionDate == date2)
     }
 
-    @Test("Reflection snippet returns nil without a query") func snippetNilWithoutQuery() throws {
+    @Test("Reflection snippet returns nil without a query") func snippetNilWithoutQuery() {
         let session = TherapeuticSession(intention: "Test", moodBefore: 5, moodAfter: 6)
         session.reflections = "Deep sense of grief lifting away."
 
@@ -363,7 +366,7 @@ struct SessionListViewModelTests {
         #expect(viewModel.matchingReflectionSnippet(for: session) == nil)
     }
 
-    @Test("Reflection snippet returns nil for intention-only matches") func snippetNilForIntentionMatch() throws {
+    @Test("Reflection snippet returns nil for intention-only matches") func snippetNilForIntentionMatch() {
         let session = TherapeuticSession(intention: "Working through grief", moodBefore: 5, moodAfter: 6)
         session.reflections = "Felt calm and settled."
 

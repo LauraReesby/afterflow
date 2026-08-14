@@ -76,7 +76,11 @@ struct SessionDetailView: View {
             "Music Link",
             isPresented: Binding(
                 get: { self.linkErrorMessage != nil },
-                set: { if !$0 { self.linkErrorMessage = nil } }
+                set: {
+                    if !$0 {
+                        self.linkErrorMessage = nil
+                    }
+                }
             )
         ) {
             Button("OK", role: .cancel) {}
@@ -322,7 +326,9 @@ struct MoodJourneyCard: View {
     private var deltaText: String {
         guard self.session.hasAfterMood else { return "" }
         let change = self.session.moodChange
-        if change == 0 { return "no shift" }
+        if change == 0 {
+            return "no shift"
+        }
         let sign = change > 0 ? "+" : "−"
         return "\(sign)\(abs(change)) shift"
     }

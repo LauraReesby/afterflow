@@ -5,7 +5,7 @@ import Testing
 @MainActor
 @Suite("Export/Import Integration Tests")
 struct ExportImportIntegrationTests {
-    @Test("CSV round trip preserves all session data") func csvRoundTripPreservesData() async throws {
+    @Test("CSV round trip preserves all session data") func csvRoundTripPreservesData() throws {
         let originalSessions = [
             TherapeuticSession(
                 sessionDate: date("2024-12-01T14:30:00Z"),
@@ -58,7 +58,7 @@ struct ExportImportIntegrationTests {
         #expect(second.moodAfter == 9)
     }
 
-    @Test("CSV round trip handles empty optional fields") func csvRoundTripWithEmptyFields() async throws {
+    @Test("CSV round trip handles empty optional fields") func csvRoundTripWithEmptyFields() throws {
         let originalSession = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .ketamine,
@@ -86,7 +86,7 @@ struct ExportImportIntegrationTests {
         #expect(imported.reminderDate == nil)
     }
 
-    @Test("CSV round trip preserves special characters") func csvRoundTripWithSpecialCharacters() async throws {
+    @Test("CSV round trip preserves special characters") func csvRoundTripWithSpecialCharacters() throws {
         let originalSession = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .mdma,
@@ -114,7 +114,7 @@ struct ExportImportIntegrationTests {
         #expect(imported.reflections.contains("<>&'\""))
     }
 
-    @Test("CSV round trip preserves Unicode and emoji") func csvRoundTripWithUnicode() async throws {
+    @Test("CSV round trip preserves Unicode and emoji") func csvRoundTripWithUnicode() throws {
         let originalSession = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -142,7 +142,7 @@ struct ExportImportIntegrationTests {
         #expect(imported.reflections.contains("🧘‍♀️"))
     }
 
-    @Test("CSV round trip with large dataset") func csvRoundTripLargeDataset() async throws {
+    @Test("CSV round trip with large dataset") func csvRoundTripLargeDataset() throws {
         let originalSessions = SessionFixtureFactory.makeSessions(count: 100)
 
         let exportService = CSVExportService()
@@ -159,7 +159,7 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[99].treatmentType == originalSessions[99].treatmentType)
     }
 
-    @Test("Filtered export by date range then import") func filteredExportByDateRange() async throws {
+    @Test("Filtered export by date range then import") func filteredExportByDateRange() throws {
         let inRange = TherapeuticSession(
             sessionDate: date("2024-12-01T00:00:00Z"),
             treatmentType: .psilocybin,
@@ -193,7 +193,7 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[0].intention == "In Range")
     }
 
-    @Test("Filtered export by treatment type then import") func filteredExportByTreatmentType() async throws {
+    @Test("Filtered export by treatment type then import") func filteredExportByTreatmentType() throws {
         let psilocybin = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -227,7 +227,7 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[0].intention == "Psilocybin Session")
     }
 
-    @Test("CSV round trip preserves all music link providers") func csvRoundTripMusicLinks() async throws {
+    @Test("CSV round trip preserves all music link providers") func csvRoundTripMusicLinks() throws {
         let spotify = SessionFixtureFactory.makeSessionWithMusicLink(provider: "spotify")
         let youtube = SessionFixtureFactory.makeSessionWithMusicLink(provider: "youtube")
         let apple = SessionFixtureFactory.makeSessionWithMusicLink(provider: "apple")
@@ -246,7 +246,7 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[2].musicLinkURL?.contains("apple") == true)
     }
 
-    @Test("CSV round trip with mood boundary values") func csvRoundTripMoodBoundaries() async throws {
+    @Test("CSV round trip with mood boundary values") func csvRoundTripMoodBoundaries() throws {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .ayahuasca,
@@ -271,7 +271,7 @@ struct ExportImportIntegrationTests {
         #expect(importedSessions[0].moodAfter == 10)
     }
 
-    @Test("CSV round trip with all treatment types") func csvRoundTripAllTreatmentTypes() async throws {
+    @Test("CSV round trip with all treatment types") func csvRoundTripAllTreatmentTypes() throws {
         var sessions: [TherapeuticSession] = []
         for treatmentType in PsychedelicTreatmentType.allCases {
             sessions.append(TherapeuticSession(
@@ -299,7 +299,7 @@ struct ExportImportIntegrationTests {
         }
     }
 
-    @Test("CSV round trip with all administration methods") func csvRoundTripAllAdministrationMethods() async throws {
+    @Test("CSV round trip with all administration methods") func csvRoundTripAllAdministrationMethods() throws {
         var sessions: [TherapeuticSession] = []
         for method in AdministrationMethod.allCases {
             sessions.append(TherapeuticSession(

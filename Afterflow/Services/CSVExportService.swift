@@ -7,8 +7,12 @@ struct CSVExportService: Sendable {
         treatmentType: PsychedelicTreatmentType? = nil
     ) throws -> URL {
         let filtered = sessions.filter { session in
-            if let range = dateRange, !range.contains(session.sessionDate) { return false }
-            if let type = treatmentType, session.treatmentType != type { return false }
+            if let range = dateRange, !range.contains(session.sessionDate) {
+                return false
+            }
+            if let type = treatmentType, session.treatmentType != type {
+                return false
+            }
             return true
         }
 

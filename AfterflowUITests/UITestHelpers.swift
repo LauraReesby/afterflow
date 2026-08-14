@@ -27,7 +27,9 @@ extension XCUIApplication {
 
                 for container in self.scrollContainers {
                     container.scrollTo(element: element)
-                    if element.isHittable { break }
+                    if element.isHittable {
+                        break
+                    }
                 }
 
                 if element.isHittable {
@@ -119,5 +121,7 @@ extension XCUIElement {
 }
 
 private extension CGRect {
-    var center: CGPoint { CGPoint(x: midX, y: midY) }
+    var center: CGPoint {
+        CGPoint(x: midX, y: midY)
+    }
 }

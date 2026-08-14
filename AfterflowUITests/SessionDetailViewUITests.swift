@@ -6,7 +6,7 @@ final class SessionDetailViewUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testEditingReflectionPersists() throws {
+    func testEditingReflectionPersists() {
         let app = self.makeApp()
         app.launch()
 
@@ -43,7 +43,7 @@ final class SessionDetailViewUITests: XCTestCase {
         XCTAssertTrue(reflectionText.waitForExistence(timeout: 5), "Reflection should appear on detail view")
     }
 
-    func testNeedsReflectionReminderMetadataVisible() throws {
+    func testNeedsReflectionReminderMetadataVisible() {
         let app = self.makeApp()
         app.launch()
 

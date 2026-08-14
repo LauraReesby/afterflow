@@ -38,7 +38,7 @@ enum DesignConstants {
         static let large: CGFloat = 16
         static let searchBar: CGFloat = 18
 
-        // Organic design-system card radius; buttons/chips/inputs use Capsule
+        /// Organic design-system card radius; buttons/chips/inputs use Capsule
         static let card: CGFloat = 28
     }
 

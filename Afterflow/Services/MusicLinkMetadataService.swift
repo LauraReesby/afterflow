@@ -141,19 +141,33 @@ final class MusicLinkMetadataService {
         }
 
         guard var host = url.host?.lowercased() else { return .linkOnly }
-        if host.hasPrefix("www.") { host.removeFirst(4) }
+        if host.hasPrefix("www.") {
+            host.removeFirst(4)
+        }
 
         if host
             .contains("podcasts.apple.com") || (host.contains("itunes.apple.com") && url.path.contains("/podcast/")) {
             return .applePodcasts
         }
-        if host.contains("spotify.com") { return .spotify }
+        if host.contains("spotify.com") {
+            return .spotify
+        }
         if host.contains("youtube.com") || host == "youtu.be" || host
-            .contains("youtube-nocookie.com") { return .youtube }
-        if host.contains("soundcloud.com") { return .soundcloud }
-        if host.contains("music.apple.com") || host.contains("itunes.apple.com") { return .appleMusic }
-        if host.contains("tidal.com") { return .tidal }
-        if host.contains("bandcamp.com") { return .bandcamp }
+            .contains("youtube-nocookie.com") {
+            return .youtube
+        }
+        if host.contains("soundcloud.com") {
+            return .soundcloud
+        }
+        if host.contains("music.apple.com") || host.contains("itunes.apple.com") {
+            return .appleMusic
+        }
+        if host.contains("tidal.com") {
+            return .tidal
+        }
+        if host.contains("bandcamp.com") {
+            return .bandcamp
+        }
         return .linkOnly
     }
 
@@ -195,7 +209,9 @@ final class MusicLinkMetadataService {
             return Self.normalizedTitle(from: slug)
         }
         if var host = url.host {
-            if host.hasPrefix("www.") { host.removeFirst(4) }
+            if host.hasPrefix("www.") {
+                host.removeFirst(4)
+            }
             return host.localizedCapitalized
         }
         return nil

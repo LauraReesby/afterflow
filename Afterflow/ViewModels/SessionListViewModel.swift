@@ -6,7 +6,9 @@ struct SessionListViewModel {
         case oldestFirst
         case moodChange
 
-        var id: String { self.rawValue }
+        var id: String {
+            self.rawValue
+        }
 
         var label: String {
             switch self {

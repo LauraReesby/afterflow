@@ -6,7 +6,7 @@ final class MusicLinkDetailCardUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testTier1MusicLinkCardShowsMetadata() throws {
+    func testTier1MusicLinkCardShowsMetadata() {
         let app = self.makeApp(arguments: ["-ui-musiclink-fixtures"])
         app.launch()
 
@@ -18,7 +18,7 @@ final class MusicLinkDetailCardUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Spotify"].waitForExistence(timeout: 4))
     }
 
-    func testLinkOnlyMusicLinkCardShowsFallbackTitle() throws {
+    func testLinkOnlyMusicLinkCardShowsFallbackTitle() {
         let app = self.makeApp(arguments: ["-ui-musiclink-fixtures"])
         app.launch()
 

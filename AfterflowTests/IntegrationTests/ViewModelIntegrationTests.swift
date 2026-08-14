@@ -6,7 +6,7 @@ import Testing
 @Suite("ViewModel Integration Tests")
 @MainActor
 struct ViewModelIntegrationTests {
-    @Test("SessionListViewModel with live SwiftData store") func listViewModelWithLiveStore() async throws {
+    @Test("SessionListViewModel with live SwiftData store") func listViewModelWithLiveStore() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
@@ -32,7 +32,7 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].sessionDate >= filtered[9].sessionDate)
     }
 
-    @Test("SessionListViewModel filtering with live data") func listViewModelFilteringLiveData() async throws {
+    @Test("SessionListViewModel filtering with live data") func listViewModelFilteringLiveData() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
@@ -73,7 +73,7 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].treatmentType == .psilocybin)
     }
 
-    @Test("SessionListViewModel search with live data") func listViewModelSearchLiveData() async throws {
+    @Test("SessionListViewModel search with live data") func listViewModelSearchLiveData() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: TherapeuticSession.self, configurations: config)
         let context = container.mainContext
@@ -117,7 +117,7 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].intention.contains("Healing"))
     }
 
-    @Test("Import CSV then filter in SessionListViewModel") func importThenFilterWorkflow() async throws {
+    @Test("Import CSV then filter in SessionListViewModel") func importThenFilterWorkflow() throws {
         let sessions = [
             TherapeuticSession(
                 sessionDate: Date(),
@@ -157,7 +157,7 @@ struct ViewModelIntegrationTests {
         #expect(filtered[0].treatmentType == .psilocybin)
     }
 
-    @Test("Filter sessions then export") func filterThenExportWorkflow() async throws {
+    @Test("Filter sessions then export") func filterThenExportWorkflow() throws {
         let sessions = SessionFixtureFactory.makeSessions(count: 20)
 
         let viewModel = TestHelpers.makeSessionListViewModel(
@@ -179,7 +179,7 @@ struct ViewModelIntegrationTests {
         #expect(importedSessions.allSatisfy { $0.treatmentType == .psilocybin })
     }
 
-    @Test("Search, filter, then export workflow") func searchFilterExportWorkflow() async throws {
+    @Test("Search, filter, then export workflow") func searchFilterExportWorkflow() throws {
         let sessions = [
             TherapeuticSession(
                 sessionDate: Date(),

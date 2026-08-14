@@ -4,8 +4,7 @@ import Testing
 
 @MainActor
 struct ExportSheetViewTests {
-    @Test("Export sheet initializes with required parameters")
-    func exportSheetInitializesWithRequiredParameters() throws {
+    @Test("Export sheet initializes with required parameters") func exportSheetInitializesWithRequiredParameters() {
         let treatmentTypes = [PsychedelicTreatmentType.psilocybin, .mdma]
         var cancelCalled = false
         var exportRequest: ExportRequest?
@@ -21,7 +20,7 @@ struct ExportSheetViewTests {
         #expect(exportRequest == nil)
     }
 
-    @Test("Default format is CSV") func defaultFormatIsCSV() throws {
+    @Test("Default format is CSV") func defaultFormatIsCSV() {
         _ = ExportSheetView(
             availableTreatmentTypes: [],
             onCancel: {},
@@ -31,7 +30,7 @@ struct ExportSheetViewTests {
         #expect(ExportFormat.csv == .csv)
     }
 
-    @Test("All export formats available") func allExportFormatsAvailable() throws {
+    @Test("All export formats available") func allExportFormatsAvailable() {
         let formats = ExportFormat.allCases
 
         #expect(formats.contains(.csv))
@@ -39,13 +38,12 @@ struct ExportSheetViewTests {
         #expect(formats.count == 2)
     }
 
-    @Test("Export format display names are correct") func exportFormatDisplayNamesAreCorrect() throws {
+    @Test("Export format display names are correct") func exportFormatDisplayNamesAreCorrect() {
         #expect(ExportFormat.csv.displayName == "CSV")
         #expect(ExportFormat.pdf.displayName == "PDF")
     }
 
-    @Test("Date filter toggle controls date picker visibility")
-    func dateFilterToggleControlsDatePickerVisibility() throws {
+    @Test("Date filter toggle controls date picker visibility") func dateFilterToggleControlsDatePickerVisibility() {
         var useDateFilter = false
 
         useDateFilter = true
@@ -57,7 +55,7 @@ struct ExportSheetViewTests {
         #expect(useDateFilter == false)
     }
 
-    @Test("Default date range is last 30 days") func defaultDateRangeIsLast30Days() throws {
+    @Test("Default date range is last 30 days") func defaultDateRangeIsLast30Days() {
         let now = Date()
         let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: now) ?? now
 
@@ -71,7 +69,7 @@ struct ExportSheetViewTests {
         #expect(difference == 30)
     }
 
-    @Test("Treatment picker includes all available types") func treatmentPickerIncludesAllAvailableTypes() throws {
+    @Test("Treatment picker includes all available types") func treatmentPickerIncludesAllAvailableTypes() {
         let treatmentTypes = [
             PsychedelicTreatmentType.psilocybin,
             .lsd,
@@ -92,7 +90,7 @@ struct ExportSheetViewTests {
         #expect(exportSheet.availableTreatmentTypes.contains(.ketamine))
     }
 
-    @Test("Treatment picker handles empty list") func treatmentPickerHandlesEmptyList() throws {
+    @Test("Treatment picker handles empty list") func treatmentPickerHandlesEmptyList() {
         let exportSheet = ExportSheetView(
             availableTreatmentTypes: [],
             onCancel: {},
@@ -102,7 +100,7 @@ struct ExportSheetViewTests {
         #expect(exportSheet.availableTreatmentTypes.isEmpty)
     }
 
-    @Test("Treatment picker has 'All Treatments' option") func treatmentPickerHasAllTreatmentsOption() throws {
+    @Test("Treatment picker has 'All Treatments' option") func treatmentPickerHasAllTreatmentsOption() {
         _ = [PsychedelicTreatmentType.psilocybin]
         var selectedTreatment: PsychedelicTreatmentType?
 
@@ -111,7 +109,7 @@ struct ExportSheetViewTests {
         #expect(selectedTreatment == nil)
     }
 
-    @Test("Cancel button calls onCancel callback") func cancelButtonCallsOnCancelCallback() throws {
+    @Test("Cancel button calls onCancel callback") func cancelButtonCallsOnCancelCallback() {
         var cancelCalled = false
         let exportSheet = ExportSheetView(
             availableTreatmentTypes: [],
@@ -124,7 +122,7 @@ struct ExportSheetViewTests {
         #expect(cancelCalled == true)
     }
 
-    @Test("Export button calls onExport callback") func exportButtonCallsOnExportCallback() throws {
+    @Test("Export button calls onExport callback") func exportButtonCallsOnExportCallback() {
         var exportRequest: ExportRequest?
         let exportSheet = ExportSheetView(
             availableTreatmentTypes: [],
@@ -143,7 +141,7 @@ struct ExportSheetViewTests {
         #expect(exportRequest?.format == .csv)
     }
 
-    @Test("Export request includes selected format") func exportRequestIncludesSelectedFormat() throws {
+    @Test("Export request includes selected format") func exportRequestIncludesSelectedFormat() {
         var exportRequest: ExportRequest?
 
         let csvRequest = ExportRequest(format: .csv, dateRange: nil, treatmentType: nil)
@@ -157,7 +155,7 @@ struct ExportSheetViewTests {
         #expect(exportRequest?.format == .pdf)
     }
 
-    @Test("Export request includes date range when enabled") func exportRequestIncludesDateRangeWhenEnabled() throws {
+    @Test("Export request includes date range when enabled") func exportRequestIncludesDateRangeWhenEnabled() {
         let startDate = TestHelpers.dateComponents(year: 2024, month: 1, day: 1)
         let endDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 31)
         let dateRange = startDate ... endDate
@@ -173,7 +171,7 @@ struct ExportSheetViewTests {
         #expect(request.dateRange?.upperBound == endDate)
     }
 
-    @Test("Export request has no date range when disabled") func exportRequestHasNoDateRangeWhenDisabled() throws {
+    @Test("Export request has no date range when disabled") func exportRequestHasNoDateRangeWhenDisabled() {
         let request = ExportRequest(
             format: .csv,
             dateRange: nil,
@@ -183,7 +181,7 @@ struct ExportSheetViewTests {
         #expect(request.dateRange == nil)
     }
 
-    @Test("Export request includes selected treatment type") func exportRequestIncludesSelectedTreatmentType() throws {
+    @Test("Export request includes selected treatment type") func exportRequestIncludesSelectedTreatmentType() {
         let request = ExportRequest(
             format: .pdf,
             dateRange: nil,
@@ -194,7 +192,7 @@ struct ExportSheetViewTests {
     }
 
     @Test("Export request has no treatment filter when 'All' selected")
-    func exportRequestHasNoTreatmentFilterWhenAllSelected() throws {
+    func exportRequestHasNoTreatmentFilterWhenAllSelected() {
         let request = ExportRequest(
             format: .csv,
             dateRange: nil,
@@ -204,7 +202,7 @@ struct ExportSheetViewTests {
         #expect(request.treatmentType == nil)
     }
 
-    @Test("Export request with all filters enabled") func exportRequestWithAllFiltersEnabled() throws {
+    @Test("Export request with all filters enabled") func exportRequestWithAllFiltersEnabled() {
         let startDate = TestHelpers.dateComponents(year: 2024, month: 6, day: 1)
         let endDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 31)
 
@@ -219,7 +217,7 @@ struct ExportSheetViewTests {
         #expect(request.treatmentType == .mdma)
     }
 
-    @Test("Export request with no filters enabled") func exportRequestWithNoFiltersEnabled() throws {
+    @Test("Export request with no filters enabled") func exportRequestWithNoFiltersEnabled() {
         let request = ExportRequest(
             format: .csv,
             dateRange: nil,
@@ -231,7 +229,7 @@ struct ExportSheetViewTests {
         #expect(request.treatmentType == nil)
     }
 
-    @Test("Export sheet with all treatment types") func exportSheetWithAllTreatmentTypes() throws {
+    @Test("Export sheet with all treatment types") func exportSheetWithAllTreatmentTypes() {
         let allTypes = PsychedelicTreatmentType.allCases
 
         let exportSheet = ExportSheetView(
@@ -244,7 +242,7 @@ struct ExportSheetViewTests {
         #expect(exportSheet.availableTreatmentTypes.count == 9)
     }
 
-    @Test("Date range with same start and end date") func dateRangeWithSameStartAndEndDate() throws {
+    @Test("Date range with same start and end date") func dateRangeWithSameStartAndEndDate() {
         let sameDate = TestHelpers.dateComponents(year: 2024, month: 12, day: 25)
 
         let request = ExportRequest(

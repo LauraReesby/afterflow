@@ -7,7 +7,7 @@ final class ReflectionFlowUITests: XCTestCase {
     }
 
     /// The flagship journey: nudge → prompt chip → type → Save → session completes.
-    func testReflectionSaveCompletesSession() throws {
+    func testReflectionSaveCompletesSession() {
         let app = self.makeApp()
         app.launch()
 

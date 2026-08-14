@@ -76,7 +76,9 @@ enum ExportFormat: String, CaseIterable, Identifiable {
     case csv
     case pdf
 
-    var id: String { self.rawValue }
+    var id: String {
+        self.rawValue
+    }
 
     var displayName: String {
         switch self {
@@ -87,8 +89,13 @@ enum ExportFormat: String, CaseIterable, Identifiable {
 }
 
 struct BinaryFileDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.commaSeparatedText, .pdf] }
-    static var writableContentTypes: [UTType] { [.commaSeparatedText, .pdf] }
+    static var readableContentTypes: [UTType] {
+        [.commaSeparatedText, .pdf]
+    }
+
+    static var writableContentTypes: [UTType] {
+        [.commaSeparatedText, .pdf]
+    }
 
     let data: Data
     let contentType: UTType

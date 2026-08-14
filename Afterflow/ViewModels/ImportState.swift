@@ -18,7 +18,11 @@ final class ImportState {
     func importCSV(from url: URL) {
         Task {
             let didStart = url.startAccessingSecurityScopedResource()
-            defer { if didStart { url.stopAccessingSecurityScopedResource() } }
+            defer {
+                if didStart {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
 
             do {
                 try await self.downloadIfNeeded(url: url)

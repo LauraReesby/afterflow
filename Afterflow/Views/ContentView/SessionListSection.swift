@@ -132,7 +132,7 @@ struct SessionListSection: View {
 
     // MARK: - List mode
 
-    @ViewBuilder private func sessionList() -> some View {
+    private func sessionList() -> some View {
         ScrollViewReader { proxy in
             List(selection: self.$selection) {
                 self.headerBlock(includeSearchAndNudge: true)

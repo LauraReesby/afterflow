@@ -4,7 +4,7 @@ import Testing
 
 @MainActor
 struct SessionRowViewTests {
-    @Test("Displays treatment type") func displaysTreatmentType() throws {
+    @Test("Displays treatment type") func displaysTreatmentType() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -22,7 +22,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.treatmentType.displayName == "Psilocybin")
     }
 
-    @Test("Displays date text") func displaysDateText() throws {
+    @Test("Displays date text") func displaysDateText() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .mdma,
@@ -40,7 +40,7 @@ struct SessionRowViewTests {
         #expect(rowView.dateText == "Yesterday")
     }
 
-    @Test("Displays intention text") func displaysIntention() throws {
+    @Test("Displays intention text") func displaysIntention() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .lsd,
@@ -58,7 +58,7 @@ struct SessionRowViewTests {
         #expect(!rowView.session.intention.isEmpty)
     }
 
-    @Test("Empty intention handled gracefully") func emptyIntentionHandled() throws {
+    @Test("Empty intention handled gracefully") func emptyIntentionHandled() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .ketamine,
@@ -75,7 +75,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.intention.isEmpty)
     }
 
-    @Test("Needs reflection status shown") func needsReflectionStatusShown() throws {
+    @Test("Needs reflection status shown") func needsReflectionStatusShown() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .psilocybin,
@@ -92,7 +92,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.status == .needsReflection)
     }
 
-    @Test("Complete status shown") func completeStatusShown() throws {
+    @Test("Complete status shown") func completeStatusShown() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .mdma,
@@ -110,7 +110,7 @@ struct SessionRowViewTests {
         #expect(!rowView.session.reflections.isEmpty)
     }
 
-    @Test("Draft status handled") func draftStatusHandled() throws {
+    @Test("Draft status handled") func draftStatusHandled() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .ayahuasca,
@@ -127,7 +127,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.status == .draft)
     }
 
-    @Test("Reminder label shown when present") func reminderLabelShownWhenPresent() throws {
+    @Test("Reminder label shown when present") func reminderLabelShownWhenPresent() {
         let futureDate = Date().addingTimeInterval(3600)
         let session = TherapeuticSession(
             sessionDate: Date(),
@@ -146,7 +146,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.reminderRelativeDescription != nil)
     }
 
-    @Test("Reminder label hidden for past reminders") func reminderLabelHiddenForPastReminders() throws {
+    @Test("Reminder label hidden for past reminders") func reminderLabelHiddenForPastReminders() {
         let pastDate = Date().addingTimeInterval(-3600)
         let session = TherapeuticSession(
             sessionDate: Date(),
@@ -166,7 +166,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.reminderRelativeDescription == nil)
     }
 
-    @Test("Reminder label nil when no reminder") func reminderLabelNilWhenNoReminder() throws {
+    @Test("Reminder label nil when no reminder") func reminderLabelNilWhenNoReminder() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .ketamine,
@@ -184,7 +184,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.reminderRelativeDescription == nil)
     }
 
-    @Test("All treatment types display correctly") func allTreatmentTypesDisplayCorrectly() throws {
+    @Test("All treatment types display correctly") func allTreatmentTypesDisplayCorrectly() {
         for treatmentType in PsychedelicTreatmentType.allCases {
             let session = TherapeuticSession(
                 sessionDate: Date(),
@@ -204,7 +204,7 @@ struct SessionRowViewTests {
         }
     }
 
-    @Test("Various date text formats handled") func variousDateTextFormatsHandled() throws {
+    @Test("Various date text formats handled") func variousDateTextFormatsHandled() {
         let session = TherapeuticSession(
             sessionDate: Date(),
             treatmentType: .cannabis,
@@ -224,7 +224,7 @@ struct SessionRowViewTests {
         }
     }
 
-    @Test("Long intention text handled") func longIntentionTextHandled() throws {
+    @Test("Long intention text handled") func longIntentionTextHandled() {
         let longIntention = String(repeating: "Long intention text with many words. ", count: 10)
         let session = TherapeuticSession(
             sessionDate: Date(),
@@ -243,7 +243,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.intention.count > 100)
     }
 
-    @Test("Unicode in intention displayed correctly") func unicodeInIntentionDisplayedCorrectly() throws {
+    @Test("Unicode in intention displayed correctly") func unicodeInIntentionDisplayedCorrectly() {
         let unicodeIntention = "Explore creativity 🌈✨ with émotions françaises and 日本語"
         let session = TherapeuticSession(
             sessionDate: Date(),
@@ -262,7 +262,7 @@ struct SessionRowViewTests {
         #expect(rowView.session.intention.contains("🌈"))
     }
 
-    @Test("Session with all fields populated") func sessionWithAllFieldsPopulated() throws {
+    @Test("Session with all fields populated") func sessionWithAllFieldsPopulated() {
         let futureReminder = Date().addingTimeInterval(7200)
         let session = TherapeuticSession(
             sessionDate: Date(),

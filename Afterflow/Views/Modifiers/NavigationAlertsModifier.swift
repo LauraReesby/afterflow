@@ -10,7 +10,11 @@ extension View {
         self
             .alert("Navigation Error", isPresented: Binding(
                 get: { deepLinkAlert.wrappedValue != nil },
-                set: { if !$0 { deepLinkAlert.wrappedValue = nil } }
+                set: {
+                    if !$0 {
+                        deepLinkAlert.wrappedValue = nil
+                    }
+                }
             )) {
                 Button("OK", role: .cancel) {}
             } message: {

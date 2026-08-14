@@ -6,7 +6,7 @@ import UserNotifications
 
 @MainActor
 struct SessionStoreTests {
-    @Test("Create and delete go through store and refresh list") func createAndDelete() async throws {
+    @Test("Create and delete go through store and refresh list") func createAndDelete() throws {
         let (store, container, _) = try makeStore()
         let session = TherapeuticSession(intention: "Test", moodBefore: 5)
 
@@ -19,7 +19,7 @@ struct SessionStoreTests {
         #expect(sessionsAfterDelete.isEmpty)
     }
 
-    @Test("Draft save, recover, and clear") func draftLifecycle() async throws {
+    @Test("Draft save, recover, and clear") func draftLifecycle() throws {
         let (store, _, _) = try makeStore()
         let draft = TherapeuticSession(
             sessionDate: Date(),
@@ -50,7 +50,7 @@ struct SessionStoreTests {
     }
 
     @Test("Updating a session cancels needs-reflection reminders when complete") func updateCancelsReminder(
-    ) async throws {
+    ) throws {
         let (store, _, mockCenter) = try makeStore()
         let session = TherapeuticSession(intention: "Reflection pending", moodBefore: 5)
         try store.create(session)
@@ -99,7 +99,9 @@ private final class MockNotificationCenter: NotificationCentering {
     var canceledIdentifiers: [String] = []
     var authorizationStatus: UNAuthorizationStatus = .authorized
 
-    func authorizationStatus() async -> UNAuthorizationStatus { self.authorizationStatus }
+    func authorizationStatus() async -> UNAuthorizationStatus {
+        self.authorizationStatus
+    }
 
     func add(_ request: UNNotificationRequest) async throws {
         self.addedRequests.append(request)
@@ -109,5 +111,7 @@ private final class MockNotificationCenter: NotificationCentering {
         self.canceledIdentifiers.append(contentsOf: identifiers)
     }
 
-    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool { true }
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+        true
+    }
 }

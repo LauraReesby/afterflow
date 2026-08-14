@@ -17,8 +17,12 @@ struct PDFExportService: Sendable {
     ) throws -> URL {
         #if canImport(UIKit)
             let filtered = sessions.filter { session in
-                if let range = dateRange, !range.contains(session.sessionDate) { return false }
-                if let type = treatmentType, session.treatmentType != type { return false }
+                if let range = dateRange, !range.contains(session.sessionDate) {
+                    return false
+                }
+                if let type = treatmentType, session.treatmentType != type {
+                    return false
+                }
                 return true
             }
 
@@ -164,7 +168,9 @@ struct PDFExportService: Sendable {
         let margin: CGFloat = 40
         var x: CGFloat
         var y: CGFloat
-        var contentWidth: CGFloat { self.pageRect.width - (self.margin * 2) }
+        var contentWidth: CGFloat {
+            self.pageRect.width - (self.margin * 2)
+        }
 
         init(pageRect: CGRect) {
             self.pageRect = pageRect

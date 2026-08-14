@@ -4,7 +4,7 @@ import Testing
 
 @MainActor
 struct SearchPanelTests {
-    @Test("Initializes with empty search text") func initializesWithEmptySearchText() throws {
+    @Test("Initializes with empty search text") func initializesWithEmptySearchText() {
         var searchText = ""
         var treatmentFilter: PsychedelicTreatmentType?
         var sortOption: SessionListViewModel.SortOption = .newestFirst
@@ -19,7 +19,7 @@ struct SearchPanelTests {
         #expect(searchView.searchText.isEmpty)
     }
 
-    @Test("Search text binding updates") func searchTextBindingUpdates() throws {
+    @Test("Search text binding updates") func searchTextBindingUpdates() {
         var searchText = ""
 
         let searchView = SearchPanel(
@@ -35,7 +35,7 @@ struct SearchPanelTests {
         #expect(searchText == "healing journey")
     }
 
-    @Test("Treatment filter starts as nil") func treatmentFilterStartsAsNil() throws {
+    @Test("Treatment filter starts as nil") func treatmentFilterStartsAsNil() {
         var treatmentFilter: PsychedelicTreatmentType?
 
         let searchView = SearchPanel(
@@ -48,7 +48,7 @@ struct SearchPanelTests {
         #expect(searchView.treatmentFilter == nil)
     }
 
-    @Test("Treatment filter can be set") func treatmentFilterCanBeSet() throws {
+    @Test("Treatment filter can be set") func treatmentFilterCanBeSet() {
         var treatmentFilter: PsychedelicTreatmentType?
 
         _ = SearchPanel(
@@ -65,7 +65,7 @@ struct SearchPanelTests {
         #expect(treatmentFilter == .ketamine)
     }
 
-    @Test("Treatment filter can be cleared") func treatmentFilterCanBeCleared() throws {
+    @Test("Treatment filter can be cleared") func treatmentFilterCanBeCleared() {
         var treatmentFilter: PsychedelicTreatmentType? = .mdma
 
         _ = SearchPanel(
@@ -81,7 +81,7 @@ struct SearchPanelTests {
         #expect(treatmentFilter == nil)
     }
 
-    @Test("Sort option defaults to newest first") func sortOptionDefaultsToNewestFirst() throws {
+    @Test("Sort option defaults to newest first") func sortOptionDefaultsToNewestFirst() {
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
         let searchView = SearchPanel(
@@ -94,7 +94,7 @@ struct SearchPanelTests {
         #expect(searchView.sortOption == .newestFirst)
     }
 
-    @Test("Sort option can change to oldest first") func sortOptionCanChangeToOldestFirst() throws {
+    @Test("Sort option can change to oldest first") func sortOptionCanChangeToOldestFirst() {
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
         _ = SearchPanel(
@@ -108,7 +108,7 @@ struct SearchPanelTests {
         #expect(sortOption == .oldestFirst)
     }
 
-    @Test("Sort option can change to mood change") func sortOptionCanChangeToMoodChange() throws {
+    @Test("Sort option can change to mood change") func sortOptionCanChangeToMoodChange() {
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
         _ = SearchPanel(
@@ -122,7 +122,7 @@ struct SearchPanelTests {
         #expect(sortOption == .moodChange)
     }
 
-    @Test("All sort options available") func allSortOptionsAvailable() throws {
+    @Test("All sort options available") func allSortOptionsAvailable() {
         let sortOptions = SessionListViewModel.SortOption.allCases
 
         #expect(sortOptions.contains(.newestFirst))
@@ -131,7 +131,7 @@ struct SearchPanelTests {
         #expect(sortOptions.count == 3)
     }
 
-    @Test("Collapse callback is set") func collapseCallbackIsSet() throws {
+    @Test("Collapse callback is set") func collapseCallbackIsSet() {
         var collapseCalled = false
 
         _ = SearchPanel(
@@ -145,7 +145,7 @@ struct SearchPanelTests {
         #expect(collapseCalled == false)
     }
 
-    @Test("Multiple bindings work together") func multipleBindingsWorkTogether() throws {
+    @Test("Multiple bindings work together") func multipleBindingsWorkTogether() {
         var searchText = ""
         var treatmentFilter: PsychedelicTreatmentType?
         var sortOption: SessionListViewModel.SortOption = .newestFirst
@@ -170,7 +170,7 @@ struct SearchPanelTests {
         #expect(sortOption == .moodChange)
     }
 
-    @Test("Search text with special characters") func searchTextWithSpecialCharacters() throws {
+    @Test("Search text with special characters") func searchTextWithSpecialCharacters() {
         var searchText = ""
 
         _ = SearchPanel(
@@ -184,7 +184,7 @@ struct SearchPanelTests {
         #expect(searchText == "healing & transformation 🌟")
     }
 
-    @Test("Long search text handled") func longSearchTextHandled() throws {
+    @Test("Long search text handled") func longSearchTextHandled() {
         var searchText = String(repeating: "search term ", count: 50)
 
         let searchView = SearchPanel(
@@ -198,7 +198,7 @@ struct SearchPanelTests {
         #expect(searchView.searchText.contains("search term"))
     }
 
-    @Test("All treatment types can be selected") func allTreatmentTypesCanBeSelected() throws {
+    @Test("All treatment types can be selected") func allTreatmentTypesCanBeSelected() {
         for treatmentType in PsychedelicTreatmentType.allCases {
             var filter: PsychedelicTreatmentType? = treatmentType
 
@@ -214,7 +214,7 @@ struct SearchPanelTests {
         }
     }
 
-    @Test("Filter state persists when search text changes") func filterStatePersistsWhenSearchTextChanges() throws {
+    @Test("Filter state persists when search text changes") func filterStatePersistsWhenSearchTextChanges() {
         var searchText = ""
         var treatmentFilter: PsychedelicTreatmentType? = .psilocybin
 
@@ -231,7 +231,7 @@ struct SearchPanelTests {
         #expect(treatmentFilter == .psilocybin) // Filter should remain
     }
 
-    @Test("Sort option persists when other fields change") func sortOptionPersistsWhenOtherFieldsChange() throws {
+    @Test("Sort option persists when other fields change") func sortOptionPersistsWhenOtherFieldsChange() {
         var searchText = ""
         var treatmentFilter: PsychedelicTreatmentType?
         var sortOption: SessionListViewModel.SortOption = .moodChange

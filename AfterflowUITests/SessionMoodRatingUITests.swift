@@ -5,7 +5,7 @@ final class SessionMoodRatingUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testMoodSlidersExposeVoiceOverFriendlyLabels() throws {
+    func testMoodSlidersExposeVoiceOverFriendlyLabels() {
         let app = self.makeApp()
         self.presentSessionForm(app)
 
@@ -25,7 +25,7 @@ final class SessionMoodRatingUITests: XCTestCase {
         }
     }
 
-    func testMoodSectionSupportsDynamicTypeXXXL() throws {
+    func testMoodSectionSupportsDynamicTypeXXXL() {
         let app = self.makeApp(arguments: ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL"])
         self.presentSessionForm(app)
 

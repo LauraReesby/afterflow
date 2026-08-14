@@ -8,13 +8,13 @@ final class AfterflowUITests: XCTestCase {
 
     override func tearDownWithError() throws {}
 
-    @MainActor func testAppLaunches() throws {
+    @MainActor func testAppLaunches() {
         let app = self.makeApp()
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
     }
 
-    @MainActor func testCreateAndOpenSessionFromList() throws {
+    @MainActor func testCreateAndOpenSessionFromList() {
         let app = self.makeApp()
         app.launch()
 

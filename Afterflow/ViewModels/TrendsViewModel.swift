@@ -8,7 +8,9 @@ struct TrendsViewModel {
         case sixMonths
         case all
 
-        var id: String { self.rawValue }
+        var id: String {
+            self.rawValue
+        }
 
         var label: String {
             switch self {

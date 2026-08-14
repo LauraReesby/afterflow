@@ -48,7 +48,11 @@ extension View {
             }
             .alert("Export Error", isPresented: Binding(
                 get: { config.exportError.wrappedValue != nil },
-                set: { if !$0 { config.exportError.wrappedValue = nil } }
+                set: {
+                    if !$0 {
+                        config.exportError.wrappedValue = nil
+                    }
+                }
             )) {
                 Button("OK", role: .cancel) {}
             } message: {
@@ -63,20 +67,18 @@ private struct ExportOverlay: View {
     let onCancel: () -> Void
 
     var body: some View {
-        Group {
-            if self.isExporting {
-                ZStack {
-                    Color.black.opacity(0.15).ignoresSafeArea()
-                    VStack(spacing: 12) {
-                        ProgressView("Preparing export…")
-                            .accessibilityIdentifier("exportProgressView")
-                            .accessibilityLabel("Preparing export")
-                        Button("Cancel", action: self.onCancel)
-                    }
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        if self.isExporting {
+            ZStack {
+                Color.black.opacity(0.15).ignoresSafeArea()
+                VStack(spacing: 12) {
+                    ProgressView("Preparing export…")
+                        .accessibilityIdentifier("exportProgressView")
+                        .accessibilityLabel("Preparing export")
+                    Button("Cancel", action: self.onCancel)
                 }
+                .padding()
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }
     }

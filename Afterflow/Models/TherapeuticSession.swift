@@ -117,7 +117,9 @@ enum MusicLinkProvider: String, Codable, CaseIterable {
 
     private func enforceHTTPS(for url: URL) -> URL? {
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
-        if components.scheme == nil || components.scheme == "http" { components.scheme = "https" }
+        if components.scheme == nil || components.scheme == "http" {
+            components.scheme = "https"
+        }
         return components.url
     }
 }
