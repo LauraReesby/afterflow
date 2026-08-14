@@ -79,4 +79,54 @@ struct SessionListViewModel {
         self.treatmentFilter = nil
         self.searchText = ""
     }
+
+    /// Returns the passage of the session's reflection text that matches the active
+    /// query, expanded to roughly ±60 characters around the hit, with ellipses when
+    /// the passage is clipped. `nil` when the query is empty or only the intention
+    /// matched — the quote block is evidence of a reflection match specifically.
+    func matchingReflectionSnippet(for session: TherapeuticSession) -> String? {
+        let query = self.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return nil }
+
+        let reflections = session.reflections
+        guard let matchRange = reflections.range(
+            of: query,
+            options: [.caseInsensitive, .diacriticInsensitive]
+        ) else { return nil }
+
+        let contextRadius = 60
+        var start = reflections.index(
+            matchRange.lowerBound,
+            offsetBy: -contextRadius,
+            limitedBy: reflections.startIndex
+        ) ?? reflections.startIndex
+        var end = reflections.index(
+            matchRange.upperBound,
+            offsetBy: contextRadius,
+            limitedBy: reflections.endIndex
+        ) ?? reflections.endIndex
+
+        // Snap outward-facing edges to word boundaries so the quote reads naturally.
+        if start > reflections.startIndex {
+            while start > reflections.startIndex, !reflections[reflections.index(before: start)].isWhitespace {
+                start = reflections.index(before: start)
+            }
+        }
+        if end < reflections.endIndex {
+            while end < reflections.endIndex, !reflections[end].isWhitespace {
+                end = reflections.index(after: end)
+            }
+        }
+
+        var snippet = String(reflections[start ..< end])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "\n+", with: " ", options: .regularExpression)
+        if start > reflections.startIndex {
+            snippet = "…" + snippet
+        }
+        if end < reflections.endIndex {
+            snippet += "…"
+        }
+        return snippet
+    }
 }

@@ -30,7 +30,7 @@ final class ScreenshotTourUITests: XCTestCase {
         if clearSearch.waitForExistence(timeout: 1) {
             clearSearch.tap()
         }
-        self.tapByLabel(app, "Close search")
+        self.tapByLabel(app, "Done")
         RunLoop.current.run(until: Date().addingTimeInterval(0.3))
 
         self.tapByLabel(app, "Calendar")

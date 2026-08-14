@@ -3,6 +3,7 @@ import SwiftUI
 
 struct SessionListSection: View {
     let sessions: [TherapeuticSession]
+    var totalSessionCount: Int?
     @Binding var listViewModel: SessionListViewModel
     @Binding var selection: UUID?
     let sessionStore: SessionStore
@@ -77,11 +78,41 @@ struct SessionListSection: View {
                 self.searchArea
                     .padding(.top, DesignConstants.Spacing.medium)
 
-                if self.shouldShowNudge {
+                if self.hasActiveQuery {
+                    self.resultLine
+                        .padding(.top, DesignConstants.Spacing.medium)
+                } else if self.shouldShowNudge {
                     self.reflectNudge
                         .padding(.top, DesignConstants.Spacing.medium)
                 }
             }
+        }
+    }
+
+    private var hasActiveQuery: Bool {
+        !self.listViewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var resultLine: some View {
+        let query = self.listViewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let count = self.sessions.count
+        let noun = count == 1 ? "session mentions" : "sessions mention"
+
+        return HStack {
+            Text("\(SpelledNumber.text(for: count).capitalized) \(noun) \u{201C}\(query)\u{201D}")
+                .font(.afterflowBody(13, weight: .semibold))
+                .foregroundStyle(AF.accent(800))
+            Spacer(minLength: 8)
+            Button {
+                self.listViewModel.searchText = ""
+            } label: {
+                Text("Clear")
+                    .font(.afterflowBody(12, weight: .semibold))
+                    .foregroundStyle(AF.neutral(600))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Clear search")
+            .accessibilityHint("Empties the search query")
         }
     }
 
@@ -142,7 +173,7 @@ struct SessionListSection: View {
         guard let latest = self.sessions.map(\.sessionDate).max() else {
             return "Nothing logged yet"
         }
-        let count = SpelledNumber.text(for: self.sessions.count)
+        let count = SpelledNumber.text(for: self.totalSessionCount ?? self.sessions.count)
         let calendar = Calendar.current
         let lastText: String
         if calendar.isDateInToday(latest) {
@@ -161,27 +192,17 @@ struct SessionListSection: View {
 
     @ViewBuilder private var searchArea: some View {
         if self.isSearchExpanded {
-            VStack(spacing: 0) {
-                ExpandableSearchView(
-                    searchText: self.$listViewModel.searchText,
-                    treatmentFilter: self.$listViewModel.treatmentFilter,
-                    sortOption: self.$listViewModel.sortOption,
-                    onCollapse: {
-                        withAnimation(
-                            .easeInOut(duration: DesignConstants.Animation.standardDuration)
-                        ) {
-                            self.isSearchExpanded = false
-                        }
+            SearchPanel(
+                searchText: self.$listViewModel.searchText,
+                treatmentFilter: self.$listViewModel.treatmentFilter,
+                sortOption: self.$listViewModel.sortOption,
+                onCollapse: {
+                    withAnimation(
+                        .easeInOut(duration: DesignConstants.Animation.standardDuration)
+                    ) {
+                        self.isSearchExpanded = false
                     }
-                )
-            }
-            .background(
-                RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous)
-                    .fill(AF.neutral(100))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous)
-                    .strokeBorder(AF.neutral(200), lineWidth: 1)
+                }
             )
         } else {
             Button {
@@ -468,7 +489,11 @@ private extension SessionListSection {
         let isLast = index == self.sessions.count - 1
 
         return NavigationLink(value: session.id) {
-            SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
+            SessionRowView(
+                session: session,
+                dateText: session.sessionDate.relativeSessionLabel,
+                reflectionSnippet: self.listViewModel.matchingReflectionSnippet(for: session)
+            )
         }
         .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
         .buttonStyle(.plain)

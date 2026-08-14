@@ -354,4 +354,45 @@ struct SessionListViewModelTests {
 
         #expect(sorted.first?.sessionDate == date2)
     }
+
+    @Test("Reflection snippet returns nil without a query") func snippetNilWithoutQuery() throws {
+        let session = TherapeuticSession(intention: "Test", moodBefore: 5, moodAfter: 6)
+        session.reflections = "Deep sense of grief lifting away."
+
+        let viewModel = SessionListViewModel()
+        #expect(viewModel.matchingReflectionSnippet(for: session) == nil)
+    }
+
+    @Test("Reflection snippet returns nil for intention-only matches") func snippetNilForIntentionMatch() throws {
+        let session = TherapeuticSession(intention: "Working through grief", moodBefore: 5, moodAfter: 6)
+        session.reflections = "Felt calm and settled."
+
+        var viewModel = SessionListViewModel()
+        viewModel.searchText = "grief"
+        #expect(viewModel.matchingReflectionSnippet(for: session) == nil)
+    }
+
+    @Test("Reflection snippet contains the match, case-insensitively") func snippetContainsMatch() throws {
+        let session = TherapeuticSession(intention: "Test", moodBefore: 5, moodAfter: 6)
+        session.reflections = "There was a deep sense of Grief lifting away from me."
+
+        var viewModel = SessionListViewModel()
+        viewModel.searchText = "grief"
+        let snippet = try #require(viewModel.matchingReflectionSnippet(for: session))
+        #expect(snippet.localizedCaseInsensitiveContains("grief"))
+    }
+
+    @Test("Reflection snippet clips long text with ellipses") func snippetClipsLongText() throws {
+        let padding = String(repeating: "calm steady breath ", count: 20)
+        let session = TherapeuticSession(intention: "Test", moodBefore: 5, moodAfter: 6)
+        session.reflections = padding + "the grief finally moved" + padding
+
+        var viewModel = SessionListViewModel()
+        viewModel.searchText = "grief"
+        let snippet = try #require(viewModel.matchingReflectionSnippet(for: session))
+        #expect(snippet.hasPrefix("…"))
+        #expect(snippet.hasSuffix("…"))
+        #expect(snippet.count < session.reflections.count)
+        #expect(snippet.contains("grief"))
+    }
 }

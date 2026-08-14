@@ -3,6 +3,13 @@ import SwiftUI
 struct SessionRowView: View {
     let session: TherapeuticSession
     let dateText: String
+    var reflectionSnippet: String?
+
+    init(session: TherapeuticSession, dateText: String, reflectionSnippet: String? = nil) {
+        self.session = session
+        self.dateText = dateText
+        self.reflectionSnippet = reflectionSnippet
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 13) {
@@ -24,6 +31,33 @@ struct SessionRowView: View {
                         .font(.afterflowBody(13))
                         .foregroundStyle(AF.neutral(700))
                         .lineLimit(1)
+                }
+
+                if let snippet = self.reflectionSnippet {
+                    Text(snippet)
+                        .font(.afterflowBody(12))
+                        .lineSpacing(12 * 0.45)
+                        .foregroundStyle(AF.accent(900))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 11)
+                        .background(
+                            RoundedRectangle(
+                                cornerRadius: DesignConstants.CornerRadius.medium,
+                                style: .continuous
+                            )
+                            .fill(AF.accent(100))
+                        )
+                        .overlay(alignment: .leading) {
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: DesignConstants.CornerRadius.medium,
+                                bottomLeadingRadius: DesignConstants.CornerRadius.medium
+                            )
+                            .fill(AF.accent(400))
+                            .frame(width: 2)
+                        }
+                        .padding(.top, 4)
+                        .accessibilityLabel("Matching reflection: \(snippet)")
                 }
 
                 HStack(spacing: 8) {

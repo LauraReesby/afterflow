@@ -8,14 +8,16 @@ enum CalendarGridHelper {
     ) -> [Date] {
         let calendar = Calendar.current
 
-        guard let oldestSession = sessions.last,
-              let newestSession = sessions.first
+        // Use min/max rather than first/last: the caller's array order depends on
+        // the active sort option, so positional assumptions are unsafe.
+        guard let oldestDate = sessions.map(\.sessionDate).min(),
+              let newestDate = sessions.map(\.sessionDate).max()
         else {
             return [calendar.startOfMonth(for: referenceDate)]
         }
 
-        let startMonth = calendar.startOfMonth(for: oldestSession.sessionDate)
-        let endMonth = calendar.startOfMonth(for: max(newestSession.sessionDate, referenceDate))
+        let startMonth = calendar.startOfMonth(for: oldestDate)
+        let endMonth = calendar.startOfMonth(for: max(newestDate, referenceDate))
 
         var months: [Date] = []
         var currentMonth = startMonth

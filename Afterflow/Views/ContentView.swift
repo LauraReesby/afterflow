@@ -155,6 +155,7 @@ private extension ContentView {
         NavigationSplitView {
             SessionListSection(
                 sessions: self.filteredSessions,
+                totalSessionCount: self.allSessions.count,
                 listViewModel: self.$listViewModel,
                 selection: self.$selectedSessionID,
                 sessionStore: self.sessionStore,

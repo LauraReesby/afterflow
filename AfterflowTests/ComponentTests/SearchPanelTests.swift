@@ -3,13 +3,13 @@ import SwiftUI
 import Testing
 
 @MainActor
-struct ExpandableSearchViewTests {
+struct SearchPanelTests {
     @Test("Initializes with empty search text") func initializesWithEmptySearchText() throws {
         var searchText = ""
         var treatmentFilter: PsychedelicTreatmentType?
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
-        let searchView = ExpandableSearchView(
+        let searchView = SearchPanel(
             searchText: Binding(get: { searchText }, set: { searchText = $0 }),
             treatmentFilter: Binding(get: { treatmentFilter }, set: { treatmentFilter = $0 }),
             sortOption: Binding(get: { sortOption }, set: { sortOption = $0 }),
@@ -22,7 +22,7 @@ struct ExpandableSearchViewTests {
     @Test("Search text binding updates") func searchTextBindingUpdates() throws {
         var searchText = ""
 
-        let searchView = ExpandableSearchView(
+        let searchView = SearchPanel(
             searchText: Binding(get: { searchText }, set: { searchText = $0 }),
             treatmentFilter: .constant(nil),
             sortOption: .constant(.newestFirst),
@@ -38,7 +38,7 @@ struct ExpandableSearchViewTests {
     @Test("Treatment filter starts as nil") func treatmentFilterStartsAsNil() throws {
         var treatmentFilter: PsychedelicTreatmentType?
 
-        let searchView = ExpandableSearchView(
+        let searchView = SearchPanel(
             searchText: .constant(""),
             treatmentFilter: Binding(get: { treatmentFilter }, set: { treatmentFilter = $0 }),
             sortOption: .constant(.newestFirst),
@@ -51,7 +51,7 @@ struct ExpandableSearchViewTests {
     @Test("Treatment filter can be set") func treatmentFilterCanBeSet() throws {
         var treatmentFilter: PsychedelicTreatmentType?
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: .constant(""),
             treatmentFilter: Binding(get: { treatmentFilter }, set: { treatmentFilter = $0 }),
             sortOption: .constant(.newestFirst),
@@ -68,7 +68,7 @@ struct ExpandableSearchViewTests {
     @Test("Treatment filter can be cleared") func treatmentFilterCanBeCleared() throws {
         var treatmentFilter: PsychedelicTreatmentType? = .mdma
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: .constant(""),
             treatmentFilter: Binding(get: { treatmentFilter }, set: { treatmentFilter = $0 }),
             sortOption: .constant(.newestFirst),
@@ -84,7 +84,7 @@ struct ExpandableSearchViewTests {
     @Test("Sort option defaults to newest first") func sortOptionDefaultsToNewestFirst() throws {
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
-        let searchView = ExpandableSearchView(
+        let searchView = SearchPanel(
             searchText: .constant(""),
             treatmentFilter: .constant(nil),
             sortOption: Binding(get: { sortOption }, set: { sortOption = $0 }),
@@ -97,7 +97,7 @@ struct ExpandableSearchViewTests {
     @Test("Sort option can change to oldest first") func sortOptionCanChangeToOldestFirst() throws {
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: .constant(""),
             treatmentFilter: .constant(nil),
             sortOption: Binding(get: { sortOption }, set: { sortOption = $0 }),
@@ -111,7 +111,7 @@ struct ExpandableSearchViewTests {
     @Test("Sort option can change to mood change") func sortOptionCanChangeToMoodChange() throws {
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: .constant(""),
             treatmentFilter: .constant(nil),
             sortOption: Binding(get: { sortOption }, set: { sortOption = $0 }),
@@ -134,7 +134,7 @@ struct ExpandableSearchViewTests {
     @Test("Collapse callback is set") func collapseCallbackIsSet() throws {
         var collapseCalled = false
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: .constant(""),
             treatmentFilter: .constant(nil),
             sortOption: .constant(.newestFirst),
@@ -150,7 +150,7 @@ struct ExpandableSearchViewTests {
         var treatmentFilter: PsychedelicTreatmentType?
         var sortOption: SessionListViewModel.SortOption = .newestFirst
 
-        let searchView = ExpandableSearchView(
+        let searchView = SearchPanel(
             searchText: Binding(get: { searchText }, set: { searchText = $0 }),
             treatmentFilter: Binding(get: { treatmentFilter }, set: { treatmentFilter = $0 }),
             sortOption: Binding(get: { sortOption }, set: { sortOption = $0 }),
@@ -173,7 +173,7 @@ struct ExpandableSearchViewTests {
     @Test("Search text with special characters") func searchTextWithSpecialCharacters() throws {
         var searchText = ""
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: Binding(get: { searchText }, set: { searchText = $0 }),
             treatmentFilter: .constant(nil),
             sortOption: .constant(.newestFirst),
@@ -187,7 +187,7 @@ struct ExpandableSearchViewTests {
     @Test("Long search text handled") func longSearchTextHandled() throws {
         var searchText = String(repeating: "search term ", count: 50)
 
-        let searchView = ExpandableSearchView(
+        let searchView = SearchPanel(
             searchText: Binding(get: { searchText }, set: { searchText = $0 }),
             treatmentFilter: .constant(nil),
             sortOption: .constant(.newestFirst),
@@ -202,7 +202,7 @@ struct ExpandableSearchViewTests {
         for treatmentType in PsychedelicTreatmentType.allCases {
             var filter: PsychedelicTreatmentType? = treatmentType
 
-            _ = ExpandableSearchView(
+            _ = SearchPanel(
                 searchText: .constant(""),
                 treatmentFilter: Binding(get: { filter }, set: { filter = $0 }),
                 sortOption: .constant(.newestFirst),
@@ -218,7 +218,7 @@ struct ExpandableSearchViewTests {
         var searchText = ""
         var treatmentFilter: PsychedelicTreatmentType? = .psilocybin
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: Binding(get: { searchText }, set: { searchText = $0 }),
             treatmentFilter: Binding(get: { treatmentFilter }, set: { treatmentFilter = $0 }),
             sortOption: .constant(.newestFirst),
@@ -236,7 +236,7 @@ struct ExpandableSearchViewTests {
         var treatmentFilter: PsychedelicTreatmentType?
         var sortOption: SessionListViewModel.SortOption = .moodChange
 
-        _ = ExpandableSearchView(
+        _ = SearchPanel(
             searchText: Binding(get: { searchText }, set: { searchText = $0 }),
             treatmentFilter: Binding(get: { treatmentFilter }, set: { treatmentFilter = $0 }),
             sortOption: Binding(get: { sortOption }, set: { sortOption = $0 }),
