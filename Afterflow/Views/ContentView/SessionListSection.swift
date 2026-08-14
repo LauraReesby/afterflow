@@ -3,7 +3,8 @@ import SwiftUI
 
 struct SessionListSection: View {
     let sessions: [TherapeuticSession]
-    var totalSessionCount: Int?
+    /// The unfiltered session set — feeds the subhead count and the Trends screen.
+    var allSessions: [TherapeuticSession]?
     @Binding var listViewModel: SessionListViewModel
     @Binding var selection: UUID?
     let sessionStore: SessionStore
@@ -21,6 +22,7 @@ struct SessionListSection: View {
     @State private var isSearchExpanded = false
     @State private var navigateToSessionFromCalendar = false
     @State private var pendingCalendarSelection = false
+    @State private var showingTrends = false
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
@@ -48,6 +50,14 @@ struct SessionListSection: View {
             self.addButton
         }
         .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(isPresented: self.$showingTrends) {
+            TrendsView(sessions: self.allSessions ?? self.sessions) { word in
+                self.showingTrends = false
+                self.showCalendarView = false
+                self.listViewModel.searchText = word
+                self.isSearchExpanded = true
+            }
+        }
         .onChange(of: self.showCalendarView) { wasCalendar, isCalendar in
             // In compact mode, when switching from calendar to list after having
             // navigated from calendar, clear selection to prevent auto-navigation
@@ -65,6 +75,7 @@ struct SessionListSection: View {
             HStack {
                 self.overflowMenu
                 Spacer()
+                self.trendsPill
             }
 
             Text("Sessions")
@@ -179,11 +190,32 @@ struct SessionListSection: View {
         .accessibilityLabel("More options")
     }
 
+    private var trendsPill: some View {
+        Button {
+            self.showingTrends = true
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("Trends")
+                    .font(.afterflowBody(13, weight: .semibold))
+            }
+            .foregroundStyle(AF.accent(800))
+            .padding(.horizontal, 14)
+            .frame(height: 40)
+            .background(Capsule().fill(AF.accent(200)))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("trendsButton")
+        .accessibilityLabel("Trends")
+        .accessibilityHint("Shows your mood over time")
+    }
+
     private var subheadText: String {
         guard let latest = self.sessions.map(\.sessionDate).max() else {
             return "Nothing logged yet"
         }
-        let count = SpelledNumber.text(for: self.totalSessionCount ?? self.sessions.count)
+        let count = SpelledNumber.text(for: (self.allSessions ?? self.sessions).count)
 
         if self.showCalendarView {
             let quarterCount = SpelledNumber.text(for: self.sessionsThisQuarter)

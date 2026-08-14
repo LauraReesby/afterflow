@@ -70,6 +70,24 @@ final class ScreenshotTourUITests: XCTestCase {
         )
         RunLoop.current.run(until: Date().addingTimeInterval(0.4))
         self.attach(app, name: "06-reflection")
+
+        // Reflection sits on top of the session detail: two pops back to the list.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        RunLoop.current.run(until: Date().addingTimeInterval(0.4))
+        if !addButton.exists {
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
+        XCTAssertTrue(addButton.waitForExistence(timeout: 4), "Should return to sessions list")
+
+        let trendsButton = app.buttons["trendsButton"]
+        XCTAssertTrue(trendsButton.waitForExistence(timeout: 4), "Trends pill should be visible")
+        trendsButton.tap()
+        XCTAssertTrue(
+            app.staticTexts["Mood over time"].waitForExistence(timeout: 4),
+            "Trends screen should appear"
+        )
+        RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+        self.attach(app, name: "07-trends")
     }
 
     private func tapByLabel(_ app: XCUIApplication, _ label: String) {
