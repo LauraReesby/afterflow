@@ -33,15 +33,11 @@ final class ScreenshotTourUITests: XCTestCase {
         self.tapByLabel(app, "Close search")
         RunLoop.current.run(until: Date().addingTimeInterval(0.3))
 
-        self.tapByLabel(app, "Show Calendar")
-        let showListButton = app.buttons.matching(NSPredicate(format: "label == %@", "Show List")).firstMatch
-        XCTAssertTrue(showListButton.waitForExistence(timeout: 4), "Should switch into calendar mode")
+        self.tapByLabel(app, "Calendar")
         RunLoop.current.run(until: Date().addingTimeInterval(0.8))
         self.attach(app, name: "03-calendar")
 
-        showListButton.tap()
-        let showCalendarButton = app.buttons.matching(NSPredicate(format: "label == %@", "Show Calendar")).firstMatch
-        XCTAssertTrue(showCalendarButton.waitForExistence(timeout: 4), "Should switch back into list mode")
+        self.tapByLabel(app, "List")
         RunLoop.current.run(until: Date().addingTimeInterval(0.5))
 
         let list = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch

@@ -10,19 +10,8 @@ final class ExportFlowUITests: XCTestCase {
         let app = self.makeApp(arguments: ["-ui-testing"])
         app.launch()
 
-        let navBar = app.navigationBars.firstMatch
-        XCTAssertTrue(navBar.waitForExistence(timeout: 5))
-
-        let menuPredicate =
-            NSPredicate(format: "label IN {'More','ellipsis','Menu'} OR identifier IN {'More','ellipsis','Menu'}")
-        var menuButton = navBar.buttons.matching(menuPredicate).firstMatch
-        if !menuButton.exists {
-            let candidates = navBar.buttons.allElementsBoundByIndex
-
-            menuButton = candidates.last(where: { !$0.label.localizedCaseInsensitiveContains("filter") }) ?? navBar
-                .buttons.element(boundBy: 0)
-        }
-        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "Toolbar menu button should exist")
+        let menuButton = app.buttons["overflowMenuButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "Overflow menu button should exist")
         menuButton.tap()
 
         let exportButton = app.buttons["Export"]

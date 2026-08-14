@@ -23,7 +23,7 @@ struct SessionListSection: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 if self.showCalendarView {
                     self.calendarScrollView()
@@ -31,18 +31,12 @@ struct SessionListSection: View {
                     self.sessionList()
                 }
             }
-            .navigationTitle("Sessions")
-            .toolbar { self.toolbarContent }
-            .toolbarBackground(.visible, for: .navigationBar)
-            .navigationBarTitleDisplayMode(.inline)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AF.bg)
 
-            SearchControlBar(
-                listViewModel: self.$listViewModel,
-                showCalendarView: self.$showCalendarView,
-                isSearchExpanded: self.$isSearchExpanded,
-                onAdd: self.onAdd
-            )
+            self.addButton
         }
+        .toolbar(.hidden, for: .navigationBar)
         .onChange(of: self.showCalendarView) { wasCalendar, isCalendar in
             // In compact mode, when switching from calendar to list after having
             // navigated from calendar, clear selection to prevent auto-navigation
@@ -53,6 +47,245 @@ struct SessionListSection: View {
         }
     }
 
+    // MARK: - Header
+
+    @ViewBuilder private func headerBlock(includeSearchAndNudge: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                self.overflowMenu
+                Spacer()
+            }
+
+            Text("Sessions")
+                .font(.afterflowDisplay(40))
+                .tracking(-0.8)
+                .foregroundStyle(AF.text)
+                .padding(.top, DesignConstants.Spacing.large)
+
+            Text(self.subheadText)
+                .font(.afterflowBody(14))
+                .foregroundStyle(AF.neutral(600))
+                .padding(.top, 2)
+
+            AFSegmentedControl(
+                selection: self.$showCalendarView,
+                options: [(false, "List"), (true, "Calendar")]
+            )
+            .padding(.top, DesignConstants.Spacing.large)
+
+            if includeSearchAndNudge {
+                self.searchArea
+                    .padding(.top, DesignConstants.Spacing.medium)
+
+                if self.shouldShowNudge {
+                    self.reflectNudge
+                        .padding(.top, DesignConstants.Spacing.medium)
+                }
+            }
+        }
+    }
+
+    private var overflowMenu: some View {
+        Menu {
+            Button {
+                self.onOpenSettings()
+            } label: {
+                Label("Settings", systemImage: "gearshape")
+            }
+            .accessibilityHint("Opens settings")
+            Button {
+                self.onExport()
+            } label: {
+                Label("Export", systemImage: "square.and.arrow.up")
+            }
+            .accessibilityHint("Exports your session data")
+            Button {
+                self.onImport()
+            } label: {
+                Label("Import", systemImage: "square.and.arrow.down")
+            }
+            .accessibilityHint("Imports session data from a file")
+            Menu {
+                Button {
+                    self.onExampleImport()
+                } label: {
+                    Label("Example Import", systemImage: "doc.badge.plus")
+                }
+                .accessibilityHint("Imports example session data")
+            } label: {
+                Label("Help", systemImage: "questionmark.circle")
+            }
+            #if DEBUG
+                Divider()
+                Button {
+                    self.onDebugNotification()
+                } label: {
+                    Label("Test Notification (5s)", systemImage: "bell.badge")
+                }
+                .disabled(self.sessions.isEmpty)
+                .accessibilityHint("Sends a test notification in 5 seconds")
+            #endif
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(AF.text)
+                .frame(width: 60, height: 40)
+                .background(Capsule().fill(AF.neutral(100)))
+                .afShadow(.sm)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("overflowMenuButton")
+        .accessibilityLabel("More options")
+    }
+
+    private var subheadText: String {
+        guard let latest = self.sessions.map(\.sessionDate).max() else {
+            return "Nothing logged yet"
+        }
+        let count = SpelledNumber.text(for: self.sessions.count)
+        let calendar = Calendar.current
+        let lastText: String
+        if calendar.isDateInToday(latest) {
+            lastText = "last one today"
+        } else if calendar.isDateInYesterday(latest) {
+            lastText = "last one yesterday"
+        } else {
+            let formatter = RelativeDateTimeFormatter()
+            formatter.unitsStyle = .full
+            lastText = "last one \(formatter.localizedString(for: latest, relativeTo: Date()))"
+        }
+        return "\(count.capitalized) logged · \(lastText)"
+    }
+
+    // MARK: - Search (expanded panel is replaced in the search phase)
+
+    @ViewBuilder private var searchArea: some View {
+        if self.isSearchExpanded {
+            VStack(spacing: 0) {
+                ExpandableSearchView(
+                    searchText: self.$listViewModel.searchText,
+                    treatmentFilter: self.$listViewModel.treatmentFilter,
+                    sortOption: self.$listViewModel.sortOption,
+                    onCollapse: {
+                        withAnimation(
+                            .easeInOut(duration: DesignConstants.Animation.standardDuration)
+                        ) {
+                            self.isSearchExpanded = false
+                        }
+                    }
+                )
+            }
+            .background(
+                RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous)
+                    .fill(AF.neutral(100))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous)
+                    .strokeBorder(AF.neutral(200), lineWidth: 1)
+            )
+        } else {
+            Button {
+                withAnimation(
+                    .easeInOut(duration: DesignConstants.Animation.standardDuration)
+                ) {
+                    self.isSearchExpanded = true
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(AF.neutral(600))
+                    Text(self.listViewModel.searchText.isEmpty
+                        ? "Search intentions and reflections"
+                        : self.listViewModel.searchText)
+                        .font(.afterflowBody(15))
+                        .foregroundStyle(AF.neutral(600))
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .background(Capsule().fill(AF.neutral(200)))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Search sessions")
+            .accessibilityHint("Tap to expand search and filter controls")
+        }
+    }
+
+    // MARK: - Reflect nudge
+
+    private var shouldShowNudge: Bool {
+        self.listViewModel.searchText.isEmpty && self.oldestUnreflectedSession != nil
+    }
+
+    private var oldestUnreflectedSession: TherapeuticSession? {
+        self.sessions
+            .filter { $0.status == .needsReflection }
+            .min(by: { $0.sessionDate < $1.sessionDate })
+    }
+
+    private var reflectNudge: some View {
+        let waitingCount = self.sessions.count(where: { $0.status == .needsReflection })
+        let title = waitingCount == 1
+            ? "One session is waiting"
+            : "\(SpelledNumber.text(for: waitingCount).capitalized) sessions are waiting"
+
+        return HStack(spacing: DesignConstants.Spacing.medium) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.afterflowBody(15, weight: .semibold))
+                    .foregroundStyle(AF.accent2(800))
+                Text("A few words is plenty.")
+                    .font(.afterflowBody(13))
+                    .foregroundStyle(AF.accent2(700))
+            }
+            Spacer(minLength: 8)
+            Button {
+                if let target = self.oldestUnreflectedSession {
+                    self.selection = target.id
+                }
+            } label: {
+                Text("Reflect")
+                    .font(.afterflowBody(13, weight: .semibold))
+                    .foregroundStyle(AF.neutral(100))
+                    .padding(.vertical, 9)
+                    .padding(.horizontal, 16)
+                    .background(Capsule().fill(AF.accent2(700)))
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("reflectNudgeButton")
+            .accessibilityHint("Opens the oldest session that still needs a reflection")
+        }
+        .padding(.vertical, 14)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous)
+                .fill(AF.accent2(200))
+        )
+    }
+
+    // MARK: - Floating add button
+
+    private var addButton: some View {
+        Button(action: self.onAdd) {
+            Image(systemName: "plus")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(AF.onAccent)
+                .frame(width: 60, height: 60)
+                .background(Circle().fill(AF.accent))
+        }
+        .buttonStyle(.plain)
+        .afShadow(.md)
+        .padding(.trailing, 20)
+        .padding(.bottom, 34)
+        .accessibilityIdentifier("addSessionButton")
+        .accessibilityLabel("Add Session")
+        .accessibilityHint("Creates a new therapy session")
+    }
+
+    // MARK: - Calendar mode
+
     private func calendarMarkers() -> [Date: Color] {
         CalendarGridHelper.calendarMarkers(from: self.sessions)
     }
@@ -60,7 +293,10 @@ struct SessionListSection: View {
     private func calendarScrollView() -> some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 16) {
+                    self.headerBlock(includeSearchAndNudge: false)
+                        .padding(.horizontal, DesignConstants.Spacing.large)
+
                     ForEach(self.generateMonthRange(), id: \.self) { monthStart in
                         VStack(alignment: .leading, spacing: 8) {
                             Text(monthStart, format: .dateTime.month(.wide).year())
@@ -74,9 +310,7 @@ struct SessionListSection: View {
                 }
                 .padding(.vertical)
             }
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 88)
-            }
+            .contentMargins(.bottom, 110, for: .scrollContent)
             .onAppear {
                 if let selectedDate = self.listViewModel.selectedDate {
                     let calendar = Calendar.current
@@ -177,34 +411,38 @@ struct SessionListSection: View {
             }
     }
 
+    // MARK: - List mode
+
     @ViewBuilder private func sessionList() -> some View {
         ScrollViewReader { proxy in
             List(selection: self.$selection) {
+                self.headerBlock(includeSearchAndNudge: true)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(
+                        .init(
+                            top: DesignConstants.Spacing.small,
+                            leading: DesignConstants.Spacing.large,
+                            bottom: DesignConstants.Spacing.medium,
+                            trailing: DesignConstants.Spacing.large
+                        )
+                    )
+                    .selectionDisabled(true)
+
                 ForEach(Array(self.sessions.enumerated()), id: \.element.id) { index, session in
                     self.buildSessionRow(session: session, index: index)
                 }
                 .onDelete(perform: self.onDelete)
             }
             .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
-            .listRowInsets(
-                .init(
-                    top: DesignConstants.Spacing.small,
-                    leading: DesignConstants.Spacing.large,
-                    bottom: DesignConstants.Spacing.small,
-                    trailing: DesignConstants.Spacing.large
-                )
-            )
+            .background(AF.bg)
             .listSectionSeparator(.hidden)
             .listStyle(.plain)
             .tint(.clear)
             .scrollBounceBehavior(.basedOnSize)
             .coordinateSpace(name: "listScroll")
-            .toolbarBackground(.visible, for: .automatic)
             .scrollDismissesKeyboard(.immediately)
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 88)
-            }
+            .contentMargins(.bottom, 130, for: .scrollContent)
             .onChange(of: self.scrollTarget) { _, target in
                 guard let target else { return }
                 withAnimation(.easeInOut(duration: DesignConstants.Animation.standardDuration)) {
@@ -219,66 +457,6 @@ struct SessionListSection: View {
                     }
                 }
             }
-            .onAppear {
-                Task { @MainActor in
-                    if let firstSession = self.sessions.first {
-                        self.scrollTarget = firstSession.id
-                    }
-                }
-            }
-        }
-    }
-
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            Menu {
-                Button {
-                    self.onOpenSettings()
-                } label: {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                .accessibilityHint("Opens settings")
-                Button {
-                    self.onExport()
-                } label: {
-                    Label("Export", systemImage: "square.and.arrow.up")
-                }
-                .accessibilityHint("Exports your session data")
-                Button {
-                    self.onImport()
-                } label: {
-                    Label("Import", systemImage: "square.and.arrow.down")
-                }
-                .accessibilityHint("Imports session data from a file")
-                Menu {
-                    Button {
-                        self.onExampleImport()
-                    } label: {
-                        Label("Example Import", systemImage: "doc.badge.plus")
-                    }
-                    .accessibilityHint("Imports example session data")
-                } label: {
-                    Label("Help", systemImage: "questionmark.circle")
-                }
-                #if DEBUG
-                    Divider()
-                    Button {
-                        self.onDebugNotification()
-                    } label: {
-                        Label("Test Notification (5s)", systemImage: "bell.badge")
-                    }
-                    .disabled(self.sessions.isEmpty)
-                    .accessibilityHint("Sends a test notification in 5 seconds")
-                #endif
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.title3)
-                    .foregroundStyle(.primary)
-                    .frame(width: 44, height: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("More options")
         }
     }
 }
@@ -286,10 +464,11 @@ struct SessionListSection: View {
 private extension SessionListSection {
     func buildSessionRow(session: TherapeuticSession, index: Int) -> some View {
         let isSelected = self.selection == session.id
+        let isFirst = index == 0
+        let isLast = index == self.sessions.count - 1
 
         return NavigationLink(value: session.id) {
             SessionRowView(session: session, dateText: session.sessionDate.relativeSessionLabel)
-                .padding(.vertical, -4)
         }
         .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
         .buttonStyle(.plain)
@@ -304,7 +483,22 @@ private extension SessionListSection {
             }
         )
         .id("session-\(session.id.uuidString)")
-        .listRowBackground(isSelected ? Color(uiColor: .systemGroupedBackground) : Color(.systemBackground))
+        .listRowBackground(
+            SessionRowCardBackground(
+                isFirst: isFirst,
+                isLast: isLast,
+                isHighlighted: isSelected
+            )
+        )
+        .listRowSeparator(.hidden)
+        .listRowInsets(
+            .init(
+                top: 14,
+                leading: DesignConstants.Spacing.large * 2,
+                bottom: 14,
+                trailing: DesignConstants.Spacing.large * 2
+            )
+        )
         .contextMenu {
             Button(role: .destructive) {
                 self.onDelete(IndexSet(integer: index))
@@ -317,8 +511,48 @@ private extension SessionListSection {
                 .frame(width: 350, height: 600)
                 .environment(self.sessionStore)
         }
-        .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
-        .listRowSeparator(.visible, edges: .bottom)
+    }
+}
+
+/// Rows share a single rounded card: the first and last rows round the card's
+/// corners, and every row after the first draws a 1px hairline at its top.
+private struct SessionRowCardBackground: View {
+    let isFirst: Bool
+    let isLast: Bool
+    let isHighlighted: Bool
+
+    var body: some View {
+        let radius = DesignConstants.CornerRadius.card
+        UnevenRoundedRectangle(
+            topLeadingRadius: self.isFirst ? radius : 0,
+            bottomLeadingRadius: self.isLast ? radius : 0,
+            bottomTrailingRadius: self.isLast ? radius : 0,
+            topTrailingRadius: self.isFirst ? radius : 0,
+            style: .continuous
+        )
+        .fill(self.isHighlighted ? AF.neutral(200) : AF.neutral(100))
+        .overlay(alignment: .top) {
+            if !self.isFirst {
+                Rectangle()
+                    .fill(AF.neutral(200))
+                    .frame(height: 1)
+                    .padding(.horizontal, DesignConstants.Spacing.large)
+            }
+        }
+        .padding(.horizontal, DesignConstants.Spacing.large)
+    }
+}
+
+private enum SpelledNumber {
+    private static let words = [
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
+        "eighteen", "nineteen", "twenty"
+    ]
+
+    static func text(for value: Int) -> String {
+        guard value >= 0, value < self.words.count else { return "\(value)" }
+        return self.words[value]
     }
 }
 

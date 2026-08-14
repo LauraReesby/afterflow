@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="stylesheet" href="../design_system/styles.css"><style>body{margin:0;background:#e8e6e1;font-family:var(--font-body);color:var(--color-text)}.dv-turn{padding:40px 44px 32px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--color-neutral-900);color:var(--color-neutral-100);border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 var(--font-body);color:var(--color-text)}.dv-sub{font:400 12px/1.5 var(--font-body);color:var(--color-neutral-600);max-width:800px;margin:0 0 24px}.dv-opts{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}.dv-opt{flex:none;width:370px;display:flex;flex-direction:column;gap:9px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--color-neutral-200);color:var(--color-text);border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:600 12px/1.3 var(--font-body);color:var(--color-text)}.dv-note{font:400 11.5px/1.5 var(--font-body);color:var(--color-neutral-600);margin:0}.stage{background:var(--color-bg);border-radius:var(--radius-lg);padding:18px}.card{border-radius:var(--radius-lg);background:var(--color-neutral-100);box-shadow:var(--shadow-sm);padding:18px}.kick{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-600)}.dv-next{margin:24px 0 0;font:12px/1.5 var(--font-body);color:var(--color-neutral-600)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}</style></helmet>
+
+<section class="dv-turn" id="t6">
+<div class="dv-thd"><a class="dv-tid" href="#t6">6</a><span class="dv-tname">The mood block on Session detail — five treatments</span></div>
+<p class="dv-sub">All show the same session: before 5, after 6, complete. They differ in what they make the subject — the pair, the position on the 1–10 scale, the delta, or the felt descriptor. Shown at the real card width on the real ground. <a href="#6a">6a</a> is what's live.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="6a"><div class="dv-olabel"><a class="dv-oid" href="#6a">6a</a>Live now — pair with a dotted arc</div><p class="dv-note">Two circles and a rising dashed line. Reads as a journey, but the arc is decoration: it draws the same curve whatever the numbers, and the status tag has nothing to do with mood.</p>
+<div class="stage"><div class="card">
+  <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="kick">Mood</div><div style="font-size:13px;font-weight:600;color:var(--color-accent-700)">+1 shift</div></div>
+  <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+    <div style="text-align:center"><div style="width:44px;height:44px;border-radius:9999px;background:var(--color-neutral-200);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;color:var(--color-neutral-700)">5</div><div style="font-size:11px;color:var(--color-neutral-600);margin-top:5px">before</div></div>
+    <svg width="100" height="34" viewBox="0 0 120 34" style="flex:none"><path d="M2 26C34 26 70 22 118 8" fill="none" stroke="var(--color-accent-300)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 6"></path></svg>
+    <div style="text-align:center"><div style="width:52px;height:52px;border-radius:9999px;background:var(--color-accent-200);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--color-accent-800)">6</div><div style="font-size:11px;color:var(--color-neutral-600);margin-top:5px">centered</div></div>
+    <div style="flex:1"></div>
+    <div style="padding:5px 11px;border-radius:9999px;font-size:11px;font-weight:600;background:var(--color-accent-2-200);color:var(--color-accent-2-800)">Complete</div>
+  </div>
+</div></div>
+</div>
+
+<div class="dv-opt" id="6b"><div class="dv-olabel"><a class="dv-oid" href="#6b">6b</a>On the scale</div><p class="dv-note">One 1–10 track with the move drawn on it: hollow marker where you started, filled where you ended, the span between them tinted. Answers "how high was that?" as well as "did it move?" — the only version where a 5→6 and an 8→9 look different.</p>
+<div class="stage"><div class="card">
+  <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="kick">Mood</div><div style="font-size:13px;color:var(--color-neutral-600)">5 → 6 · centered</div></div>
+  <div style="position:relative;margin:22px 4px 0;height:14px">
+    <div style="position:absolute;left:0;right:0;top:5px;height:5px;border-radius:9999px;background:var(--color-neutral-200)"></div>
+    <div style="position:absolute;left:44.4%;width:11.1%;top:5px;height:5px;border-radius:9999px;background:var(--color-accent-300)"></div>
+    <div style="position:absolute;left:44.4%;top:0;width:14px;height:14px;margin-left:-7px;border-radius:9999px;background:var(--color-neutral-100);border:2.5px solid var(--color-neutral-400)"></div>
+    <div style="position:absolute;left:55.5%;top:-2px;width:18px;height:18px;margin-left:-9px;border-radius:9999px;background:var(--color-accent);box-shadow:0 0 0 4px var(--color-accent-100)"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:11px;color:var(--color-neutral-600)"><span>1 tender</span><span>10 radiant</span></div>
+</div></div>
+</div>
+
+<div class="dv-opt" id="6c"><div class="dv-olabel"><a class="dv-oid" href="#6c">6c</a>Typographic</div><p class="dv-note">No chart at all: the after-mood as a display number, the descriptor as the headline, the journey as a quiet line beneath. Quietest and most Organic — leans on Caprasimo instead of drawing furniture. Loses the sense of range.</p>
+<div class="stage"><div class="card">
+  <div class="kick">Mood after</div>
+  <div style="display:flex;align-items:flex-end;gap:14px;margin-top:10px">
+    <div style="font-family:var(--font-heading);font-size:60px;line-height:.85;color:var(--color-accent-700)">6</div>
+    <div style="padding-bottom:5px"><div style="font-family:var(--font-heading);font-size:22px;line-height:1">Centered</div><div style="font-size:13px;color:var(--color-neutral-600);margin-top:3px">up one from 5 before the session</div></div>
+  </div>
+</div></div>
+</div>
+
+<div class="dv-opt" id="6d"><div class="dv-olabel"><a class="dv-oid" href="#6d">6d</a>Lift, in context</div><p class="dv-note">Makes the delta the subject and gives it a yardstick — this session against your own average. The one that earns its place on a detail screen, because it says something you can't get by reading two numbers.</p>
+<div class="stage"><div class="card">
+  <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="kick">Mood lift</div><div style="font-size:13px;color:var(--color-neutral-600)">5 → 6</div></div>
+  <div style="display:flex;align-items:baseline;gap:8px;margin-top:12px"><div style="font-family:var(--font-heading);font-size:34px;line-height:1;color:var(--color-accent-700)">+1</div><div style="font-size:13px;color:var(--color-neutral-600)">gentler than your usual +2.1</div></div>
+  <div style="display:flex;align-items:center;gap:9px;margin-top:16px">
+    <div style="flex:1;height:9px;border-radius:9999px;background:var(--color-neutral-200);overflow:hidden"><div style="width:20%;height:9px;border-radius:9999px;background:var(--color-accent)"></div></div>
+    <div style="font-size:11px;color:var(--color-neutral-600);white-space:nowrap">this session</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:9px;margin-top:8px">
+    <div style="flex:1;height:9px;border-radius:9999px;background:var(--color-neutral-200);overflow:hidden"><div style="width:42%;height:9px;border-radius:9999px;background:var(--color-accent-2-500)"></div></div>
+    <div style="font-size:11px;color:var(--color-neutral-600);white-space:nowrap">your average</div>
+  </div>
+</div></div>
+</div>
+
+<div class="dv-opt" id="6e"><div class="dv-olabel"><a class="dv-oid" href="#6e">6e</a>The app's own weather scale</div><p class="dv-note">Uses the scale your code already speaks — <code>MoodRatingScale</code>'s five bands and their weather emoji — with the before band ghosted and the after band lit. Most human, least analytical; the emoji are the app's, not invented.</p>
+<div class="stage"><div class="card">
+  <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="kick">Mood</div><div style="font-size:13px;color:var(--color-neutral-600)">reflective → centered</div></div>
+  <div style="display:flex;gap:6px;margin-top:14px">
+    <div style="flex:1;text-align:center;padding:10px 0 8px;border-radius:var(--radius-md);background:var(--color-neutral-200);opacity:.5"><div style="font-size:19px">☁️</div><div style="font-size:10px;color:var(--color-neutral-700);margin-top:4px">tender</div></div>
+    <div style="flex:1;text-align:center;padding:10px 0 8px;border-radius:var(--radius-md);background:var(--color-neutral-200);border:2px dashed var(--color-neutral-400)"><div style="font-size:19px">🌦️</div><div style="font-size:10px;color:var(--color-neutral-700);margin-top:4px">before</div></div>
+    <div style="flex:1;text-align:center;padding:10px 0 8px;border-radius:var(--radius-md);background:var(--color-accent-200)"><div style="font-size:22px">🌤️</div><div style="font-size:10px;font-weight:600;color:var(--color-accent-800);margin-top:4px">centered</div></div>
+    <div style="flex:1;text-align:center;padding:10px 0 8px;border-radius:var(--radius-md);background:var(--color-neutral-200);opacity:.5"><div style="font-size:19px">☀️</div><div style="font-size:10px;color:var(--color-neutral-700);margin-top:4px">uplifted</div></div>
+    <div style="flex:1;text-align:center;padding:10px 0 8px;border-radius:var(--radius-md);background:var(--color-neutral-200);opacity:.5"><div style="font-size:19px">✨</div><div style="font-size:10px;color:var(--color-neutral-700);margin-top:4px">radiant</div></div>
+  </div>
+</div></div>
+</div>
+
+</div>
+<p class="dv-next">Say which to apply — e.g. "use <a href="#6b">6b</a>" · "<a href="#6d">6d</a> without the average bar" · "<a href="#6c">6c</a> but keep the status tag".</p>
+</section>
+</x-dc>
+</body>
+</html>

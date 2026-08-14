@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="stylesheet" href="design_system/styles.css"><style>body{margin:0;background:#e8e6e1;font-family:var(--font-body)}.dv-turn{padding:40px 44px 32px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--color-neutral-900);color:var(--color-neutral-100);border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 var(--font-body);color:var(--color-text)}.dv-sub{font:400 12px/1.5 var(--font-body);color:var(--color-neutral-600);max-width:780px;margin:0 0 24px}.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--color-neutral-200);color:var(--color-text);border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 var(--font-body);color:var(--color-neutral-600)}.dv-next{margin:24px 0 0;font:12px/1.5 var(--font-body);color:var(--color-neutral-600)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}</style></helmet>
+
+<section class="dv-turn" id="t5">
+<div class="dv-thd"><a class="dv-tid" href="#t5">5</a><span class="dv-tname">Dark mode — Organic, inverted</span></div>
+<p class="dv-sub">Same screens, lights off: grounds rebuilt from the warm end of the neutral ramp (900 page, 800 cards) rather than turning grey, tinted fills moved to the 700–800 accent steps with their text on the 100–300 steps, and treatment colours held as-is so a session looks like itself in either mode. Caprasimo, Figtree, pills and the terracotta/sage vocabulary are unchanged — this is a mode, not a rebrand. Live file: <a href="Afterflow Redesign Dark.dc.html">Afterflow Redesign Dark</a>.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="5a"><div class="dv-olabel"><a class="dv-oid" href="#5a">5a</a>Sessions list</div><dc-import name="Afterflow Redesign Dark" screen="list" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="5b"><div class="dv-olabel"><a class="dv-oid" href="#5b">5b</a>Trends</div><dc-import name="Afterflow Redesign Dark" screen="trends" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="5c"><div class="dv-olabel"><a class="dv-oid" href="#5c">5c</a>Session detail</div><dc-import name="Afterflow Redesign Dark" screen="detail" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="5d"><div class="dv-olabel"><a class="dv-oid" href="#5d">5d</a>Reflection entry</div><dc-import name="Afterflow Redesign Dark" screen="reflect" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="5e"><div class="dv-olabel"><a class="dv-oid" href="#5e">5e</a>Calendar</div><dc-import name="Afterflow Redesign Dark" screen="calendar" hint-size="402px,874px"></dc-import></div>
+</div>
+<p class="dv-next">Try next: "lift the card surfaces a step in dark" · "dark version of <a href="Afterflow Accent Options.dc.html#4c">4c</a>" · "show light and dark of the reflection screen together".</p>
+</section>
+
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Redesign — warm branded skin on native bones</span></div>
+<p class="dv-sub">Same information architecture as the shipped app (list ↔ calendar, sheet-based form, grouped detail sections), with the controls rearranged per <a href="Afterflow Nav Options.dc.html#3a">3a</a>: list/calendar as a labelled segmented control under the title, search as a pull-down field, and Add alone as a bottom-right button rendered in the Organic system: cream ground, terracotta accent, sage second voice, Caprasimo titles over Figtree. Treatment identity is kept but remapped to muted earth tones. Two additions you asked for: a Trends view for mood over time and a reflection screen built around prompts. Every screen here is the live prototype at a different starting state — tap through <a href="#2a">2a</a>.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="2a"><div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Sessions list</div><dc-import name="Afterflow Redesign" screen="list" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="2h"><div class="dv-olabel"><a class="dv-oid" href="#2h">2h</a>Search · matches in reflections</div><dc-import name="Afterflow Redesign" screen="search" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="2g"><div class="dv-olabel"><a class="dv-oid" href="#2g">2g</a>Trends</div><dc-import name="Afterflow Redesign" screen="trends" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="2f"><div class="dv-olabel"><a class="dv-oid" href="#2f">2f</a>Sessions list · scrolled</div><dc-import name="Afterflow Redesign" screen="list" scrolled="{{ true }}" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="2b"><div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Calendar</div><dc-import name="Afterflow Redesign" screen="calendar" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="2c"><div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Session detail · mood arc</div><dc-import name="Afterflow Redesign" screen="detail" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="2d"><div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>New session sheet</div><dc-import name="Afterflow Redesign" screen="form" hint-size="402px,874px"></dc-import></div>
+<div class="dv-opt" id="2e"><div class="dv-olabel"><a class="dv-oid" href="#2e">2e</a>Reflection entry · prompts</div><dc-import name="Afterflow Redesign" screen="reflect" hint-size="402px,874px"></dc-import></div>
+</div>
+<p class="dv-next">Try next: "search panel open on <a href="#2a">2a</a>" · "try the dark Nocturne palette instead" · "tighten the detail screen".</p>
+</section>
+</x-dc>
+</body>
+</html>
