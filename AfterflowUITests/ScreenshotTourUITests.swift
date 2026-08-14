@@ -57,6 +57,19 @@ final class ScreenshotTourUITests: XCTestCase {
         XCTAssertTrue(app.waitForTextInput("intentionField") != nil, "New session form should appear")
         RunLoop.current.run(until: Date().addingTimeInterval(0.3))
         self.attach(app, name: "05-new-session-form")
+
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(addButton.waitForExistence(timeout: 4), "Should return to sessions list")
+
+        let nudgeButton = app.buttons["reflectNudgeButton"]
+        XCTAssertTrue(nudgeButton.waitForExistence(timeout: 4), "Reflect nudge should be visible with seeded data")
+        nudgeButton.tap()
+        XCTAssertTrue(
+            app.staticTexts["How has it settled?"].waitForExistence(timeout: 4),
+            "Reflection screen should appear"
+        )
+        RunLoop.current.run(until: Date().addingTimeInterval(0.4))
+        self.attach(app, name: "06-reflection")
     }
 
     private func tapByLabel(_ app: XCUIApplication, _ label: String) {

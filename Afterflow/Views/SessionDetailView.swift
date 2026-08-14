@@ -11,6 +11,9 @@ struct SessionDetailView: View {
     @Environment(\.openURL) private var openURL
 
     let session: TherapeuticSession
+    /// Pushes the dedicated reflection screen; falls back to the edit sheet when
+    /// unset (context-menu previews, calendar pushes).
+    var onAddReflection: (() -> Void)?
 
     private let metadataService = MusicLinkMetadataService()
 
@@ -213,7 +216,11 @@ struct SessionDetailView: View {
                 KickerLabel("Reflection")
                 Spacer()
                 Button {
-                    self.showingEdit = true
+                    if let onAddReflection {
+                        onAddReflection()
+                    } else {
+                        self.showingEdit = true
+                    }
                 } label: {
                     Text("Add more")
                         .font(.afterflowBody(12, weight: .semibold))

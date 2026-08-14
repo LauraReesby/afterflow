@@ -16,7 +16,12 @@ struct ContentView: View {
     @State private var listViewModel = SessionListViewModel()
 
     @State private var selectedSessionID: UUID?
+    @State private var detailPath: [DetailRoute] = []
     @State private var deepLinkAlert: (title: String, message: String)?
+
+    enum DetailRoute: Hashable {
+        case reflection(UUID)
+    }
 
     @State private var sessionPendingDeletion: (session: TherapeuticSession, index: Int)?
     @State private var showingDeleteConfirmation = false
@@ -130,6 +135,17 @@ struct ContentView: View {
                 if case let .openSession(sessionID) = action {
                     await MainActor.run {
                         self.selectedSessionID = sessionID
+                        // Reminder notifications exist only for sessions awaiting
+                        // reflection — open those straight into the reflection screen.
+                        // Deferred one runloop so the fresh stack doesn't drop the push.
+                        if let session = self.allSessions.first(where: { $0.id == sessionID }),
+                           session.status == .needsReflection {
+                            DispatchQueue.main.async {
+                                self.detailPath = [.reflection(sessionID)]
+                            }
+                        } else {
+                            self.detailPath = []
+                        }
                         self.notificationHandler.clearPendingDeepLink()
                     }
                 } else {
@@ -161,6 +177,14 @@ private extension ContentView {
                 sessionStore: self.sessionStore,
                 onDelete: self.deleteSessions,
                 onAdd: { self.showingSessionForm = true },
+                onReflect: { sessionID in
+                    self.selectedSessionID = sessionID
+                    // Deferred one runloop: pushing in the same update as the
+                    // selection change resets the freshly-instantiated stack path.
+                    DispatchQueue.main.async {
+                        self.detailPath = [.reflection(sessionID)]
+                    }
+                },
                 onExport: { self.exportState.showingExportSheet = true },
                 onImport: { self.importState?.showingImportPicker = true },
                 onOpenSettings: { self.openAppSettings() },
@@ -168,12 +192,34 @@ private extension ContentView {
                 onDebugNotification: { Task { await self.scheduleDebugNotification() } }
             )
         } detail: {
-            if let sessionID = selectedSessionID,
-               let session = allSessions.first(where: { $0.id == sessionID }) {
-                SessionDetailView(session: session)
-            } else {
-                Text("Select a session")
-                    .foregroundColor(.secondary)
+            NavigationStack(path: self.$detailPath) {
+                Group {
+                    if let sessionID = selectedSessionID,
+                       let session = allSessions.first(where: { $0.id == sessionID }) {
+                        SessionDetailView(
+                            session: session,
+                            onAddReflection: { self.detailPath.append(.reflection(session.id)) }
+                        )
+                    } else {
+                        Text("Select a session")
+                            .font(.afterflowBody(15))
+                            .foregroundStyle(AF.neutral(600))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(AF.bg)
+                    }
+                }
+                .navigationDestination(for: DetailRoute.self) { route in
+                    switch route {
+                    case let .reflection(sessionID):
+                        if let session = self.allSessions.first(where: { $0.id == sessionID }) {
+                            ReflectionEntryView(session: session)
+                        } else {
+                            Text("Session not found")
+                                .font(.afterflowBody(15))
+                                .foregroundStyle(AF.neutral(600))
+                        }
+                    }
+                }
             }
         }
     }

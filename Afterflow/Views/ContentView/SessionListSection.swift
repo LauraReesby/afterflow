@@ -9,6 +9,7 @@ struct SessionListSection: View {
     let sessionStore: SessionStore
     let onDelete: (IndexSet) -> Void
     let onAdd: () -> Void
+    let onReflect: (UUID) -> Void
     let onExport: () -> Void
     let onImport: () -> Void
     let onOpenSettings: () -> Void
@@ -290,7 +291,7 @@ struct SessionListSection: View {
             Spacer(minLength: 8)
             Button {
                 if let target = self.oldestUnreflectedSession {
-                    self.selection = target.id
+                    self.onReflect(target.id)
                 }
             } label: {
                 Text("Reflect")

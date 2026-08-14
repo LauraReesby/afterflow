@@ -115,6 +115,23 @@ struct TherapeuticSessionTests {
         #expect(whitespaceReflection.hasAfterMood == false)
     }
 
+    @Test("Reflection entry save path flips status to complete") func reflectionSavePathFlipsStatus() async throws {
+        let session = TherapeuticSession(
+            intention: "Working through grief",
+            moodBefore: 4
+        )
+        #expect(session.status == .needsReflection)
+
+        // Mirrors ReflectionEntryView.save(): append text, then write moodAfter.
+        session.addReflection("What emerged — a sense of spaciousness.")
+        session.moodAfter = 7
+
+        #expect(session.status == .complete)
+        #expect(session.hasAfterMood)
+        #expect(session.reflections.contains("What emerged — a sense of spaciousness."))
+        #expect(session.moodChange == 3)
+    }
+
     @Test("Valid session validation") func validSessionValidation() async throws {
         let validSession = TherapeuticSession(
             treatmentType: .psilocybin,
