@@ -39,7 +39,7 @@ final class AfterflowUITests: XCTestCase {
         sessionCell.forceTap()
 
         XCTAssertTrue(
-            app.navigationBars["Session"].waitForExistence(timeout: 3),
+            app.buttons["Edit"].waitForExistence(timeout: 3),
             "Detail view should show after tapping session"
         )
     }

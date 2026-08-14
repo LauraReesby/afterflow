@@ -20,9 +20,9 @@ final class SessionDetailViewUITests: XCTestCase {
         sessionCell.waitForHittable()
         sessionCell.forceTap()
 
-        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 2), "Detail view should appear")
+        XCTAssertTrue(app.buttons["Edit"].waitForExistence(timeout: 2), "Detail view should appear")
 
-        app.navigationBars["Session"].buttons["Edit"].tap()
+        app.buttons["Edit"].tap()
 
         guard let reflectionEditor = app.waitForTextInput("reflectionEditor") else {
             XCTFail("Reflection editor should appear on edit screen")
@@ -37,7 +37,9 @@ final class SessionDetailViewUITests: XCTestCase {
 
         XCTAssertFalse(doneButton.waitForExistence(timeout: 3))
 
+        let detailList = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch
         let reflectionText = app.staticTexts["Gentle integration notes for testing."]
+        detailList.scrollTo(element: reflectionText)
         XCTAssertTrue(reflectionText.waitForExistence(timeout: 5), "Reflection should appear on detail view")
     }
 
@@ -58,7 +60,7 @@ final class SessionDetailViewUITests: XCTestCase {
         XCTAssertTrue(reminderBadge.waitForExistence(timeout: 4))
 
         sessionCell.forceTap()
-        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Edit"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["detailReminderLabel"].waitForExistence(timeout: 4))
     }
 

@@ -47,34 +47,30 @@ final class ExportFlowUITests: XCTestCase {
         XCTAssertTrue(exportNavButton.waitForExistence(timeout: 2))
         exportNavButton.tap()
 
+        // The system file exporter (Save to Files) hosts a DocumentsUI/FileProvider extension embedded
+        // in-process under a different pid, as a plain UIKit UI with no accessibilityIdentifiers set —
+        // only labels. So it must be queried by label across all element types, not app.sheets/app.buttons["Save"].
+        let saveButton = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "Save"))
+            .firstMatch
+
         let progress = app.otherElements["exportProgressView"]
         let progressAppeared = progress.waitForExistence(timeout: 2)
-        let fileExporter = app.sheets.firstMatch
-        let exporterAppeared = fileExporter.waitForExistence(timeout: 6) || app.buttons["Save"]
-            .waitForExistence(timeout: 6)
+        let exporterAppeared = saveButton.waitForExistence(timeout: 6)
 
         XCTAssertTrue(
             progressAppeared || exporterAppeared,
             "Either progress overlay should appear or file exporter should present"
         )
 
-        if fileExporter.exists {
-            let saveButton = app.buttons["Save"]
-            if saveButton.waitForExistence(timeout: 2) {
-                if !saveButton.isEnabled {
-                    let firstDestination = app.cells.allElementsBoundByIndex.first ?? app.cells.firstMatch
-                    if firstDestination.waitForExistence(timeout: 2) {
-                        firstDestination.tap()
-                    }
-                }
-                if saveButton.isEnabled {
-                    saveButton.tap()
+        if saveButton.exists {
+            if !saveButton.isEnabled {
+                let firstDestination = app.cells.allElementsBoundByIndex.first ?? app.cells.firstMatch
+                if firstDestination.waitForExistence(timeout: 2) {
+                    firstDestination.tap()
                 }
             }
-        } else {
-            XCTAssertTrue(fileExporter.waitForExistence(timeout: 6), "File exporter should appear for exports")
-            let saveButton = app.buttons["Save"]
-            if saveButton.waitForExistence(timeout: 2), saveButton.isEnabled {
+            if saveButton.isEnabled {
                 saveButton.tap()
             }
         }

@@ -12,7 +12,8 @@ final class MusicLinkDetailCardUITests: XCTestCase {
 
         self.openSession(named: "Tier1 Music Session", in: app)
 
-        let card = app.otherElements["musicLinkDetailCard"]
+        let card = app.buttons["musicLinkDetailCard"]
+        self.detailList(in: app).scrollTo(element: card)
         XCTAssertTrue(card.waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Lo-Fi Focus"].waitForExistence(timeout: 4))
         XCTAssertTrue(app.staticTexts["Spotify"].waitForExistence(timeout: 4))
@@ -24,7 +25,8 @@ final class MusicLinkDetailCardUITests: XCTestCase {
 
         self.openSession(named: "Link Only Music Session", in: app)
 
-        let card = app.otherElements["musicLinkDetailCard"]
+        let card = app.buttons["musicLinkDetailCard"]
+        self.detailList(in: app).scrollTo(element: card)
         XCTAssertTrue(card.waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Calm"].waitForExistence(timeout: 4))
         XCTAssertTrue(app.staticTexts["Apple Music"].waitForExistence(timeout: 4))
@@ -37,6 +39,10 @@ final class MusicLinkDetailCardUITests: XCTestCase {
         list.scrollTo(element: sessionCell)
         sessionCell.waitForHittable()
         sessionCell.forceTap()
-        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Edit"].waitForExistence(timeout: 5))
+    }
+
+    private func detailList(in app: XCUIApplication) -> XCUIElement {
+        app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch
     }
 }
