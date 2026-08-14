@@ -338,7 +338,9 @@ struct TrendsView: View {
         }
     }
 
-    private static func signedText(_ value: Double) -> String {
+    // Pure formatter; nonisolated so it can be passed to nonisolated closures
+    // like Optional.map without tripping main-actor inference from View.
+    private nonisolated static func signedText(_ value: Double) -> String {
         let formatted = String(format: "%.1f", abs(value))
         if value > 0 { return "+\(formatted)" }
         if value < 0 { return "−\(formatted)" }
