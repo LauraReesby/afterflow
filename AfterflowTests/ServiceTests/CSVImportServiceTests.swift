@@ -173,6 +173,51 @@ final class CSVImportServiceTests: XCTestCase {
         }
     }
 
+    func testEmptyMoodAfterImportsAsNil() throws {
+        let csv = """
+        Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
+        "Dec 1, 2024 at 10:30 AM",Psilocybin,Oral,Awaiting reflection,5,,,
+        """
+
+        let imported = try CSVImportService().import(from: csv)
+
+        XCTAssertEqual(imported.count, 1)
+        XCTAssertEqual(imported[0].moodBefore, 5)
+        XCTAssertNil(imported[0].moodAfter, "Empty Mood After cell should import as not recorded")
+        XCTAssertFalse(imported[0].hasAfterMood)
+    }
+
+    func testNonNumericMoodAfterThrows() throws {
+        let csv = """
+        Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
+        "Dec 1, 2024 at 10:30 AM",Psilocybin,Oral,Bad after mood,5,soaring,,
+        """
+
+        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
+            guard case CSVImportService.CSVImportError.invalidRow = error else {
+                return XCTFail("Expected invalidRow, got \(error)")
+            }
+        }
+    }
+
+    func testRoundTripPreservesUnrecordedMoodAfter() throws {
+        let session = TherapeuticSession(
+            sessionDate: Date(timeIntervalSince1970: 1_733_050_000),
+            treatmentType: .ketamine,
+            administration: .oral,
+            intention: "Round trip nil",
+            moodBefore: 6,
+            moodAfter: nil
+        )
+
+        let url = try CSVExportService().export(sessions: [session])
+        let restoredSessions = try CSVImportService().import(from: url)
+
+        XCTAssertEqual(restoredSessions.count, 1)
+        XCTAssertEqual(restoredSessions[0].moodBefore, 6)
+        XCTAssertNil(restoredSessions[0].moodAfter, "nil after-mood should survive an export/import round trip")
+    }
+
     func testDecimalMoodValueThrows() {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +

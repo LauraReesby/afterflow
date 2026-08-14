@@ -135,6 +135,30 @@ final class CSVExportServiceTests: XCTestCase {
         )
     }
 
+    func testUnrecordedMoodAfterExportsEmptyCell() throws {
+        let service = CSVExportService()
+        let session = TherapeuticSession(
+            sessionDate: date("2024-12-01T10:30:00Z"),
+            treatmentType: .psilocybin,
+            administration: .oral,
+            intention: "No after mood yet",
+            moodBefore: 4,
+            moodAfter: nil,
+            reflections: "",
+            reminderDate: nil
+        )
+
+        let url = try service.export(sessions: [session])
+        let csv = try String(contentsOf: url, encoding: .utf8)
+        let lines = csv.split(separator: "\n").map(String.init)
+
+        XCTAssertEqual(lines.count, 2)
+        // Mood Before is 4; the Mood After cell that follows it exports as a
+        // quoted empty field.
+        XCTAssertTrue(lines[1].contains(",4,\"\","),
+                      "Expected an empty Mood After cell, got: \(lines[1])")
+    }
+
     func testSessionWithAllEmptyFields() throws {
         let service = CSVExportService()
         let session = TherapeuticSession(

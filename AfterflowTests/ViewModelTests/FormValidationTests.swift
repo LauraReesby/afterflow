@@ -95,6 +95,56 @@ struct FormValidationTests {
         #expect(result2Components.minute == 15)
     }
 
+    @Test("Rounding up past the hour rolls the day, month, and year forward")
+    func dateNormalizationBoundaryRollover() async throws {
+        let validation = FormValidation()
+        let calendar = Calendar.current
+
+        // Regression: 23:53+ used to wrap the hour to 0 without advancing the
+        // day, silently moving the session back ~24 hours.
+        let lateNight = calendar.date(from: DateComponents(year: 2026, month: 8, day: 13, hour: 23, minute: 55))!
+        let nextDay = calendar.dateComponents(
+            [.year, .month, .day, .hour, .minute],
+            from: validation.normalizeSessionDate(lateNight)
+        )
+        #expect(nextDay.year == 2026)
+        #expect(nextDay.month == 8)
+        #expect(nextDay.day == 14)
+        #expect(nextDay.hour == 0)
+        #expect(nextDay.minute == 0)
+
+        // Month boundary
+        let monthEnd = calendar.date(from: DateComponents(year: 2026, month: 8, day: 31, hour: 23, minute: 58))!
+        let nextMonth = calendar.dateComponents(
+            [.year, .month, .day, .hour],
+            from: validation.normalizeSessionDate(monthEnd)
+        )
+        #expect(nextMonth.month == 9)
+        #expect(nextMonth.day == 1)
+        #expect(nextMonth.hour == 0)
+
+        // Year boundary
+        let yearEnd = calendar.date(from: DateComponents(year: 2026, month: 12, day: 31, hour: 23, minute: 59))!
+        let nextYear = calendar.dateComponents(
+            [.year, .month, .day, .hour],
+            from: validation.normalizeSessionDate(yearEnd)
+        )
+        #expect(nextYear.year == 2027)
+        #expect(nextYear.month == 1)
+        #expect(nextYear.day == 1)
+        #expect(nextYear.hour == 0)
+
+        // Mid-day hour rollover keeps the same day
+        let midDay = calendar.date(from: DateComponents(year: 2026, month: 8, day: 13, hour: 14, minute: 53))!
+        let nextHour = calendar.dateComponents(
+            [.day, .hour, .minute],
+            from: validation.normalizeSessionDate(midDay)
+        )
+        #expect(nextHour.day == 13)
+        #expect(nextHour.hour == 15)
+        #expect(nextHour.minute == 0)
+    }
+
     @Test("Date normalization message appears for significant changes") func dateNormalizationMessage() async throws {
         let validation = FormValidation()
         let calendar = Calendar.current
