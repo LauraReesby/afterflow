@@ -447,15 +447,24 @@ private extension SessionListSection {
         let isFirst = index == 0
         let isLast = index == self.sessions.count - 1
 
-        return NavigationLink(value: session.id) {
-            SessionRowView(
-                session: session,
-                dateText: session.sessionDate.relativeSessionLabel,
-                reflectionSnippet: self.listViewModel.matchingReflectionSnippet(for: session)
-            )
+        return SessionRowView(
+            session: session,
+            dateText: session.sessionDate.relativeSessionLabel,
+            reflectionSnippet: self.listViewModel.matchingReflectionSnippet(for: session)
+        )
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        // Selection-driven navigation: tapping sets the selection, which the
+        // split view resolves to the detail (including the compact push) — no
+        // NavigationLink, and therefore no disclosure chevron accessory. The
+        // explicit gesture is required because tag-only selection ignores taps
+        // in compact width.
+        .tag(session.id)
+        .onTapGesture {
+            self.selection = session.id
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("sessionRow-\(session.id.uuidString)")
-        .buttonStyle(.plain)
         .background(
             GeometryReader { geo in
                 let frame = geo.frame(in: .named("listScroll"))
