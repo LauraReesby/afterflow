@@ -18,12 +18,12 @@ struct CSVImportDateParser {
         let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
-        if let exact = Self.exportFormatter.date(from: trimmed) {
+        if let exact = Self.faithfulDate(from: trimmed, using: Self.exportFormatter) {
             return exact
         }
 
         let text = Self.normalizedText(trimmed)
-        if let date = Self.exportFormatter.date(from: text) ?? Self.parseISO8601(text) {
+        if let date = Self.faithfulDate(from: text, using: Self.exportFormatter) ?? Self.parseISO8601(text) {
             return date
         }
         return Self.firstPlausibleDate(in: Self.localISOFormatters, text)
@@ -72,11 +72,25 @@ struct CSVImportDateParser {
             if textHasTime, !(formatter.dateFormat ?? "").contains(":") {
                 continue
             }
-            if let date = formatter.date(from: text), date >= Self.earliestPlausibleDate {
+            if let date = Self.faithfulDate(from: text, using: formatter), date >= Self.earliestPlausibleDate {
                 return date
             }
         }
         return nil
+    }
+
+    /// `DateFormatter` rolls impossible values over instead of failing: `2/30/2024` becomes March 1 and `25:00`
+    /// the next day. A parse only counts when formatting the result back gives the same numbers the text held.
+    private static func faithfulDate(from text: String, using formatter: DateFormatter) -> Date? {
+        guard let date = formatter.date(from: text),
+              Self.numbers(in: formatter.string(from: date)) == Self.numbers(in: text)
+        else { return nil }
+        return date
+    }
+
+    /// The runs of ASCII digits in `text`, as integers, so `02/03/2024` and `2/3/2024` compare equal.
+    private static func numbers(in text: String) -> [Int] {
+        text.split(whereSeparator: { !($0.isASCII && $0.isNumber) }).compactMap { Int($0) }
     }
 
     private static func parseISO8601(_ text: String) -> Date? {

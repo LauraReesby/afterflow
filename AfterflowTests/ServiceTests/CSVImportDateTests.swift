@@ -98,7 +98,11 @@ struct CSVImportDateTests {
     // MARK: - Rejections
 
     @Test("Unrecognised or impossible dates are not parsed") func unrecognisedDates() {
-        for text in ["not a date", "2024-13-45", "13/13/2024", "2/30/2024", "yesterday"] {
+        let impossible = [
+            "not a date", "2024-13-45", "13/13/2024", "2/30/2024", "2024-02-30", "Feb 30, 2024",
+            "12/25/2024 25:00", "yesterday"
+        ]
+        for text in impossible {
             #expect(self.parsedDate(text) == nil)
         }
     }
