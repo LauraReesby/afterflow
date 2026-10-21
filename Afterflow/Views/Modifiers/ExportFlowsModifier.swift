@@ -10,8 +10,10 @@ struct ExportFlowConfig {
     let exportFilename: Binding<String>
     let isExporting: Binding<Bool>
     let exportError: Binding<String?>
+    let lastBackupDate: Date?
     let startExport: (ExportRequest) -> Void
     let cancelExport: () -> Void
+    let fileExporterCompleted: (Result<URL, Error>) -> Void
 }
 
 extension View {
@@ -27,6 +29,7 @@ extension View {
             .sheet(isPresented: config.showingExportSheet) {
                 ExportSheetView(
                     availableTreatmentTypes: PsychedelicTreatmentType.allCases,
+                    lastBackupDate: config.lastBackupDate,
                     onCancel: { config.showingExportSheet.wrappedValue = false },
                     onExport: { request in
                         config.showingExportSheet.wrappedValue = false
@@ -40,11 +43,7 @@ extension View {
                 contentType: config.exportContentType.wrappedValue,
                 defaultFilename: config.exportFilename.wrappedValue
             ) { result in
-                config.isExporting.wrappedValue = false
-                if case let .failure(error) = result {
-                    config.exportError.wrappedValue = error.localizedDescription
-                }
-                config.exportDocument.wrappedValue = nil
+                config.fileExporterCompleted(result)
             }
             .alert("Export Error", isPresented: Binding(
                 get: { config.exportError.wrappedValue != nil },

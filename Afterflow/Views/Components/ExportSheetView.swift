@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct ExportSheetView: View {
     let availableTreatmentTypes: [PsychedelicTreatmentType]
+    var lastBackupDate: Date?
     let onCancel: () -> Void
     let onExport: (ExportRequest) -> Void
 
@@ -25,23 +26,10 @@ struct ExportSheetView: View {
                     .accessibilityIdentifier("exportFormatPicker")
                 }
 
-                Section("Filters") {
-                    Toggle("Filter by date", isOn: self.$useDateFilter)
-                        .accessibilityIdentifier("exportDateToggle")
-                    if self.useDateFilter {
-                        DatePicker("Start", selection: self.$startDate, displayedComponents: [.date])
-                            .accessibilityIdentifier("exportStartDate")
-                        DatePicker("End", selection: self.$endDate, displayedComponents: [.date])
-                            .accessibilityIdentifier("exportEndDate")
-                    }
-
-                    Picker("Treatment", selection: self.$selectedTreatment) {
-                        Text("All Treatments").tag(PsychedelicTreatmentType?.none)
-                        ForEach(self.availableTreatmentTypes, id: \.self) { type in
-                            Text(type.displayName).tag(PsychedelicTreatmentType?.some(type))
-                        }
-                    }
-                    .accessibilityIdentifier("exportTreatmentPicker")
+                if self.selectedFormat == .backup {
+                    self.backupSection
+                } else {
+                    self.filtersSection
                 }
             }
             .navigationTitle("Export Sessions")
@@ -52,17 +40,53 @@ struct ExportSheetView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Export") {
-                        let range: ClosedRange<Date>? = self.useDateFilter ? self.startDate ... self.endDate : nil
-                        let request = ExportRequest(
-                            format: self.selectedFormat,
-                            dateRange: range,
-                            treatmentType: self.selectedTreatment
-                        )
-                        self.onExport(request)
+                        self.onExport(self.makeRequest())
                     }
                 }
             }
         }
+    }
+
+    private var filtersSection: some View {
+        Section("Filters") {
+            Toggle("Filter by date", isOn: self.$useDateFilter)
+                .accessibilityIdentifier("exportDateToggle")
+            if self.useDateFilter {
+                DatePicker("Start", selection: self.$startDate, displayedComponents: [.date])
+                    .accessibilityIdentifier("exportStartDate")
+                DatePicker("End", selection: self.$endDate, displayedComponents: [.date])
+                    .accessibilityIdentifier("exportEndDate")
+            }
+
+            Picker("Treatment", selection: self.$selectedTreatment) {
+                Text("All Treatments").tag(PsychedelicTreatmentType?.none)
+                ForEach(self.availableTreatmentTypes, id: \.self) { type in
+                    Text(type.displayName).tag(PsychedelicTreatmentType?.some(type))
+                }
+            }
+            .accessibilityIdentifier("exportTreatmentPicker")
+        }
+    }
+
+    private var backupSection: some View {
+        Section("About backups") {
+            Text(
+                "Includes every session and all its details, so you can restore it later or move to a new device. "
+                    + "The file isn't encrypted; keep it somewhere private."
+            )
+            .accessibilityIdentifier("backupDescription")
+            Label(BackupService.lastBackupText(for: self.lastBackupDate), systemImage: "clock")
+                .accessibilityIdentifier("lastBackupStatus")
+        }
+    }
+
+    /// Filters apply only to reports; a backup always covers every session.
+    private func makeRequest() -> ExportRequest {
+        guard self.selectedFormat != .backup else {
+            return ExportRequest(format: .backup, dateRange: nil, treatmentType: nil)
+        }
+        let range: ClosedRange<Date>? = self.useDateFilter ? self.startDate ... self.endDate : nil
+        return ExportRequest(format: self.selectedFormat, dateRange: range, treatmentType: self.selectedTreatment)
     }
 }
 
@@ -75,6 +99,7 @@ struct ExportRequest {
 enum ExportFormat: String, CaseIterable, Identifiable {
     case csv
     case pdf
+    case backup
 
     var id: String {
         self.rawValue
@@ -84,6 +109,7 @@ enum ExportFormat: String, CaseIterable, Identifiable {
         switch self {
         case .csv: "CSV"
         case .pdf: "PDF"
+        case .backup: "Backup"
         }
     }
 }

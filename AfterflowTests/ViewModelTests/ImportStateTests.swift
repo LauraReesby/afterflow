@@ -19,7 +19,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-import.csv")
         try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 
@@ -48,7 +48,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-import-confirm.csv")
         try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 
@@ -77,7 +77,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-import-pending.csv")
         try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 
@@ -163,7 +163,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-invalid.csv")
         try invalidCSV.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await TestHelpers.waitFor({ importState.importError != nil }, timeout: 2.0)
 
@@ -179,7 +179,7 @@ struct ImportStateTests {
 
         let nonExistentURL = URL(fileURLWithPath: "/tmp/nonexistent-file-\(UUID().uuidString).csv")
 
-        importState.importCSV(from: nonExistentURL)
+        importState.importFile(from: nonExistentURL)
 
         try await TestHelpers.waitFor({ importState.importError != nil }, timeout: 2.0)
 
@@ -219,7 +219,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-empty.csv")
         try emptyCSV.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 
@@ -246,7 +246,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-malformed.csv")
         try malformedCSV.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await TestHelpers.waitFor(
             { importState.importError != nil || !importState.pendingImportedSessions.isEmpty },
@@ -283,7 +283,7 @@ struct ImportStateTests {
         let tempURL1 = TestHelpers.makeTemporaryFileURL(filename: "test-import-1.csv")
         try csv1.write(to: tempURL1, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL1)
+        importState.importFile(from: tempURL1)
         try await Task.sleep(nanoseconds: 50_000_000)
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
@@ -300,7 +300,7 @@ struct ImportStateTests {
         let tempURL2 = TestHelpers.makeTemporaryFileURL(filename: "test-import-2.csv")
         try csv2.write(to: tempURL2, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL2)
+        importState.importFile(from: tempURL2)
         try await Task.sleep(nanoseconds: 50_000_000)
         try await TestHelpers.waitFor(
             { !importState.pendingImportedSessions.isEmpty || importState.importError != nil },
@@ -334,7 +334,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-unicode.csv")
         try csvWithUnicode.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 
@@ -367,7 +367,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-special.csv")
         try csvWithSpecialChars.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 
@@ -396,7 +396,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-music.csv")
         try csvWithMusicLink.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 
@@ -429,7 +429,7 @@ struct ImportStateTests {
         let tempURL = TestHelpers.makeTemporaryFileURL(filename: "test-boundary.csv")
         try csvWithBoundaryValues.write(to: tempURL, atomically: true, encoding: .utf8)
 
-        importState.importCSV(from: tempURL)
+        importState.importFile(from: tempURL)
 
         try await Task.sleep(nanoseconds: 500_000_000)
 

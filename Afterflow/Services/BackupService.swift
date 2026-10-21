@@ -55,6 +55,14 @@ struct BackupService {
         "Afterflow-Backup-\(self.filenameFormatter.string(from: date))"
     }
 
+    static func lastBackupText(for date: Date?, now: Date = Date()) -> String {
+        guard let date else { return "Not backed up yet" }
+        guard now.timeIntervalSince(date) >= 60 else { return "Last backup: just now" }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return "Last backup: \(formatter.localizedString(for: date, relativeTo: now))"
+    }
+
     static var currentAppVersion: String? {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     }

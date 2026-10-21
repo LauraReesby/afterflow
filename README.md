@@ -24,7 +24,7 @@ Afterflow is a therapeutic session logging app designed for individuals undergoi
 - **♿ Accessibility**: VoiceOver support and Dynamic Type compliance
 - **📚 History Filters**: In-place search over intentions and reflections (with matching passages quoted in results), treatment filter chips, and sort options
 - **⏰ Reflection Reminders**: Optional reminders that open straight into the reflection screen
-- **📤 Data Export**: On-device CSV or PDF exports with date/treatment filters and progress feedback
+- **📤 Data Export**: On-device CSV or PDF exports with date/treatment filters and progress feedback, plus a full JSON backup you can restore
 - **🎨 Organic Design System**: Warm token-driven palette (terracotta/sage/cream), Caprasimo + Figtree type, full dark-mode support
 
 ### Therapeutic Value
@@ -298,9 +298,10 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI with strong
 - **Privacy**: No playback or authentication; only lightweight metadata fetches for oEmbed-capable providers.
 
 ## Export Usage
-- Open the Sessions list, tap the **⋯ menu → Export**, choose CSV or PDF, and optionally filter by date range or treatment type.
+- Open the Sessions list, tap the **⋯ menu → Export**, choose CSV, PDF or Backup, and optionally filter CSV and PDF exports by date range or treatment type. Backup always includes every session.
 - Exports run locally and present the iOS file exporter/share sheet; temporary files are cleaned after completion.
 - CSVs use RFC‑4180 quoting and injection guards; PDFs include session summaries with optional cover pages.
+- Backup saves a lossless JSON file of every session (see Backup Files under Privacy & Data). The export sheet shows when you last made one.
 
 ## CSV Import Guide
 
@@ -386,6 +387,8 @@ Afterflow automatically protects against CSV injection attacks:
 6. Review the import summary
 7. Confirm to add the sessions
 
+The same **Import** item also restores Afterflow backup files (`.json`): choose the backup file, confirm, and sessions already on the device are kept while matching ones are updated only if the backup is newer.
+
 ### Troubleshooting
 
 **"Invalid header" error:**
@@ -415,7 +418,7 @@ Afterflow collects **zero** personal data. All information stays on your device.
 ### Data Storage
 - **Local Only**: SwiftData with SQLite backing
 - **No Cloud Sync**: Afterflow never sends your data anywhere. Like any app's data, it is included in your own iOS device backups (iCloud Backup or Finder), which Apple encrypts
-- **Backup Files**: Save a complete backup file from the menu at any time and restore it later, even on a new device. Restoring never duplicates or deletes sessions. The file isn't encrypted, so keep it somewhere private
+- **Backup Files**: Choose **⋯ menu → Export → Backup** to save a complete backup file at any time, and restore it later with **⋯ menu → Import**, even on a new device. Restoring never duplicates or deletes sessions. The file isn't encrypted, so keep it somewhere private
 - **No Analytics**: No usage tracking or crash reporting
 
 ### Data Export

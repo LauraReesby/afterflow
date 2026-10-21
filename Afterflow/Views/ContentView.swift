@@ -28,7 +28,6 @@ struct ContentView: View {
 
     @State private var exportState = ExportState()
     @State private var importState: ImportState?
-    @State private var backupState = BackupState()
 
     @State private var settingsError: String?
     @State private var deleteError: String?
@@ -61,51 +60,16 @@ struct ContentView: View {
                     exportFilename: self.$exportState.exportFilename,
                     isExporting: self.$exportState.isExporting,
                     exportError: self.$exportState.exportError,
+                    lastBackupDate: self.exportState.lastBackupDate,
                     startExport: { request in self.exportState.startExport(sessions: self.allSessions, with: request) },
-                    cancelExport: self.exportState.cancelExport
+                    cancelExport: self.exportState.cancelExport,
+                    fileExporterCompleted: { result in self.exportState.handleFileExporterResult(result) }
                 )
             )
-            .applyImportFlows(
-                self.importFlowConfig
-            )
-            .applyBackupFlows(self.backupState)
+            .applyImportFlows(self.importState)
             .applySettingsAlert(settingsError: self.$settingsError)
             .errorAlert(title: "Delete Failed", error: self.$deleteError)
             .overlay(alignment: .top) { self.bannerOverlay }
-    }
-
-    private var importFlowConfig: ImportFlowConfig {
-        guard let importState = self.importState else {
-            return ImportFlowConfig(
-                showingImportPicker: .constant(false),
-                importError: .constant(nil),
-                showingImportConfirmation: .constant(false),
-                pendingImportedSessions: .constant([]),
-                confirmImport: {},
-                importCSV: { _ in }
-            )
-        }
-
-        return ImportFlowConfig(
-            showingImportPicker: Binding(
-                get: { importState.showingImportPicker },
-                set: { importState.showingImportPicker = $0 }
-            ),
-            importError: Binding(
-                get: { importState.importError },
-                set: { importState.importError = $0 }
-            ),
-            showingImportConfirmation: Binding(
-                get: { importState.showingImportConfirmation },
-                set: { importState.showingImportConfirmation = $0 }
-            ),
-            pendingImportedSessions: Binding(
-                get: { importState.pendingImportedSessions },
-                set: { importState.pendingImportedSessions = $0 }
-            ),
-            confirmImport: { importState.confirmImport() },
-            importCSV: { url in importState.importCSV(from: url) }
-        )
     }
 
     private var filteredSessions: [TherapeuticSession] {
@@ -184,9 +148,6 @@ private extension ContentView {
                 },
                 onExport: { self.exportState.showingExportSheet = true },
                 onImport: { self.importState?.showingImportPicker = true },
-                lastBackupDate: self.backupState.lastBackupDate,
-                onBackup: { self.backupState.startBackup(sessions: self.allSessions) },
-                onRestore: { self.backupState.showingRestorePicker = true },
                 onOpenSettings: { self.openAppSettings() },
                 onExampleImport: { self.exportExampleImport() },
                 onDebugNotification: { Task { await self.scheduleDebugNotification() } }

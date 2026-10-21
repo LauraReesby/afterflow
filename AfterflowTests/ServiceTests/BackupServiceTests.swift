@@ -147,4 +147,19 @@ struct BackupServiceTests {
 
         #expect(BackupService.filename(for: date) == "Afterflow-Backup-2024-12-01")
     }
+
+    @Test("Status text says when nothing has been backed up") func statusTextWithoutBackup() {
+        #expect(BackupService.lastBackupText(for: nil) == "Not backed up yet")
+    }
+
+    @Test("Status text describes how long ago the last backup was") func statusTextWithBackup() {
+        let now = Date(timeIntervalSinceReferenceDate: 800_000_000)
+
+        let justNow = BackupService.lastBackupText(for: now.addingTimeInterval(-5), now: now)
+        let daysAgo = BackupService.lastBackupText(for: now.addingTimeInterval(-3 * 86400), now: now)
+
+        #expect(justNow == "Last backup: just now")
+        #expect(daysAgo.hasPrefix("Last backup: "))
+        #expect(daysAgo != justNow)
+    }
 }

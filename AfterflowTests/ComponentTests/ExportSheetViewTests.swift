@@ -35,12 +35,27 @@ struct ExportSheetViewTests {
 
         #expect(formats.contains(.csv))
         #expect(formats.contains(.pdf))
-        #expect(formats.count == 2)
+        #expect(formats.contains(.backup))
+        #expect(formats == [.csv, .pdf, .backup])
     }
 
     @Test("Export format display names are correct") func exportFormatDisplayNamesAreCorrect() {
         #expect(ExportFormat.csv.displayName == "CSV")
         #expect(ExportFormat.pdf.displayName == "PDF")
+        #expect(ExportFormat.backup.displayName == "Backup")
+    }
+
+    @Test("Export sheet accepts a last backup date") func exportSheetAcceptsLastBackupDate() {
+        let date = Date(timeIntervalSinceReferenceDate: 800_000_000)
+
+        let exportSheet = ExportSheetView(
+            availableTreatmentTypes: [],
+            lastBackupDate: date,
+            onCancel: {},
+            onExport: { _ in }
+        )
+
+        #expect(exportSheet.lastBackupDate == date)
     }
 
     @Test("Date filter toggle controls date picker visibility") func dateFilterToggleControlsDatePickerVisibility() {

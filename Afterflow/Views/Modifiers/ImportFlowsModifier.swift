@@ -1,50 +1,73 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct ImportFlowConfig {
-    let showingImportPicker: Binding<Bool>
-    let importError: Binding<String?>
-    let showingImportConfirmation: Binding<Bool>
-    let pendingImportedSessions: Binding<[TherapeuticSession]>
-    let confirmImport: () -> Void
-    let importCSV: (URL) -> Void
-}
+/// `ContentView` creates its `ImportState` in `onAppear` (it needs the environment's
+/// store), so the state is optional here; until it exists every binding is inert.
+struct ImportFlowsModifier: ViewModifier {
+    let state: ImportState?
 
-extension View {
-    func applyImportFlows(_ config: ImportFlowConfig) -> some View {
-        self
+    func body(content: Content) -> some View {
+        content
             .alert("Import Error", isPresented: Binding(
-                get: { config.importError.wrappedValue != nil },
+                get: { self.state?.importError != nil },
                 set: {
                     if !$0 {
-                        config.importError.wrappedValue = nil
+                        self.state?.importError = nil
                     }
                 }
             )) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text(config.importError.wrappedValue ?? "")
+                Text(self.state?.importError ?? "")
             }
             .fileImporter(
-                isPresented: config.showingImportPicker,
-                allowedContentTypes: [.commaSeparatedText]
+                isPresented: Binding(
+                    get: { self.state?.showingImportPicker ?? false },
+                    set: { self.state?.showingImportPicker = $0 }
+                ),
+                allowedContentTypes: [.commaSeparatedText, .json]
             ) { result in
-                do {
-                    let url = try result.get()
-                    config.importCSV(url)
-                } catch {
-                    config.importError.wrappedValue = error.localizedDescription
-                }
+                self.state?.handleFilePick(result)
             }
-            .alert("Import Sessions", isPresented: config.showingImportConfirmation) {
-                Button("Import \(config.pendingImportedSessions.wrappedValue.count) Sessions") {
-                    config.confirmImport()
+            .alert("Import Sessions", isPresented: Binding(
+                get: { self.state?.showingImportConfirmation ?? false },
+                set: { self.state?.showingImportConfirmation = $0 }
+            )) {
+                Button("Import \(self.state?.pendingImportedSessions.count ?? 0) Sessions") {
+                    self.state?.confirmImport()
                 }
                 Button("Cancel", role: .cancel) {
-                    config.pendingImportedSessions.wrappedValue = []
+                    self.state?.pendingImportedSessions = []
                 }
             } message: {
-                Text("Import \(config.pendingImportedSessions.wrappedValue.count) session(s) from the selected CSV?")
+                Text("Import \(self.state?.pendingImportedSessions.count ?? 0) session(s) from the selected CSV?")
             }
+            .alert("Restore Backup", isPresented: Binding(
+                get: { self.state?.showingRestoreConfirmation ?? false },
+                set: { self.state?.showingRestoreConfirmation = $0 }
+            )) {
+                Button("Restore") {
+                    self.state?.confirmRestore()
+                }
+                Button("Cancel", role: .cancel) {
+                    self.state?.cancelRestore()
+                }
+            } message: {
+                Text(self.state?.restoreConfirmationMessage ?? "")
+            }
+            .alert("Restore Complete", isPresented: Binding(
+                get: { self.state?.showingRestoreResult ?? false },
+                set: { self.state?.showingRestoreResult = $0 }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(self.state?.restoreResultMessage ?? "")
+            }
+    }
+}
+
+extension View {
+    func applyImportFlows(_ state: ImportState?) -> some View {
+        modifier(ImportFlowsModifier(state: state))
     }
 }
