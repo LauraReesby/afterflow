@@ -70,26 +70,28 @@ final class CSVImportServiceTests: XCTestCase {
         }
     }
 
-    func testInvalidRowThrows() {
+    func testShortRowIsPaddedWithBlanks() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Grounding,5,5,Missing URL"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case CSVImportService.CSVImportError.invalidRow = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-        }
+        let imported = try CSVImportService().import(from: csv)
+
+        XCTAssertEqual(imported.count, 1)
+        XCTAssertEqual(imported[0].reflections, "Missing URL")
+        XCTAssertNil(imported[0].musicLinkURL)
     }
 
     private func date(_ iso8601: String) -> Date {
         ISO8601DateFormatter().date(from: iso8601) ?? Date()
     }
 
-    func testEmptyFileReturnsEmptyArray() throws {
-        let csv = ""
-        let imported = try CSVImportService().import(from: csv)
-        XCTAssertEqual(imported.count, 0)
+    func testEmptyFileThrows() {
+        XCTAssertThrowsError(try CSVImportService().import(from: "")) { error in
+            guard case CSVImportService.CSVImportError.emptyFile = error else {
+                return XCTFail("Expected emptyFile, got \(error)")
+            }
+        }
     }
 
     func testHeaderOnlyFileReturnsEmptyArray() throws {
@@ -128,49 +130,56 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertEqual(imported[2].intention, "Test3")
     }
 
-    func testMoodValueZeroIsAccepted() throws {
+    func testMoodValueZeroSkipsRow() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
-            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test,0,10,Reflections,"
+            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Valid,5,7,Reflections,\n" +
+            "\"Dec 2, 2024 at 10:30 AM\",Psilocybin,Oral,Test,0,10,Reflections,"
 
-        let imported = try CSVImportService().import(from: csv)
-        XCTAssertEqual(imported.count, 1)
-        XCTAssertEqual(imported[0].moodBefore, 0)
-        XCTAssertEqual(imported[0].moodAfter, 10)
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.count, 1)
+        XCTAssertEqual(result.sessions[0].intention, "Valid")
+        XCTAssertEqual(result.skippedRows.map(\.line), [3])
     }
 
-    func testMoodValueOutOfRangeIsAccepted() throws {
+    func testMoodValueOutOfRangeSkipsRow() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
-            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test,15,20,Reflections,"
+            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Valid,5,7,Reflections,\n" +
+            "\"Dec 2, 2024 at 10:30 AM\",Psilocybin,Oral,Test,15,20,Reflections,"
 
-        let imported = try CSVImportService().import(from: csv)
-        XCTAssertEqual(imported.count, 1)
-        XCTAssertEqual(imported[0].moodBefore, 15)
-        XCTAssertEqual(imported[0].moodAfter, 20)
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.count, 1)
+        XCTAssertEqual(result.sessions[0].intention, "Valid")
+        XCTAssertEqual(result.skippedRows.map(\.line), [3])
     }
 
-    func testNegativeMoodValueIsAccepted() throws {
+    func testNegativeMoodValueSkipsRow() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
-            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test,-5,10,Reflections,"
+            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Valid,5,7,Reflections,\n" +
+            "\"Dec 2, 2024 at 10:30 AM\",Psilocybin,Oral,Test,-5,10,Reflections,"
 
-        let imported = try CSVImportService().import(from: csv)
-        XCTAssertEqual(imported.count, 1)
-        XCTAssertEqual(imported[0].moodBefore, -5)
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.count, 1)
+        XCTAssertEqual(result.sessions[0].intention, "Valid")
+        XCTAssertEqual(result.skippedRows.map(\.line), [3])
     }
 
-    func testNonNumericMoodValueThrows() {
+    func testNonNumericMoodValueSkipsRow() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
-            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test,abc,7,Reflections,"
+            "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Valid,5,7,Reflections,\n" +
+            "\"Dec 2, 2024 at 10:30 AM\",Psilocybin,Oral,Test,abc,7,Reflections,"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case let CSVImportService.CSVImportError.invalidRow(index) = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-            XCTAssertEqual(index, 1)
-        }
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.count, 1)
+        XCTAssertEqual(result.sessions[0].intention, "Valid")
+        XCTAssertEqual(result.skippedRows.map(\.line), [3])
     }
 
     func testEmptyMoodAfterImportsAsNil() throws {
@@ -187,15 +196,15 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertFalse(imported[0].hasAfterMood)
     }
 
-    func testNonNumericMoodAfterThrows() throws {
+    func testNonNumericMoodAfterSkipsRowAndThrowsWhenNothingElseImports() throws {
         let csv = """
         Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
         "Dec 1, 2024 at 10:30 AM",Psilocybin,Oral,Bad after mood,5,soaring,,
         """
 
         XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case CSVImportService.CSVImportError.invalidRow = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
+            guard case CSVImportService.CSVImportError.noValidRows = error else {
+                return XCTFail("Expected noValidRows, got \(error)")
             }
         }
     }
@@ -218,16 +227,15 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertNil(restoredSessions[0].moodAfter, "nil after-mood should survive an export/import round trip")
     }
 
-    func testDecimalMoodValueThrows() {
+    func testDecimalMoodValueIsRoundedHalfUp() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test,5.5,7,Reflections,"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case CSVImportService.CSVImportError.invalidRow = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-        }
+        let imported = try CSVImportService().import(from: csv)
+
+        XCTAssertEqual(imported.count, 1)
+        XCTAssertEqual(imported[0].moodBefore, 6)
     }
 
     func testUnknownMusicProviderSetsLinkOnly() throws {
@@ -290,53 +298,53 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertEqual(imported[3].musicLinkProvider, .appleMusic)
     }
 
-    func testInvalidDateFormatThrows() {
+    func testISODateWithoutTimeIsAccepted() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "2024-12-01,Psilocybin,Oral,Test,5,7,Reflections,"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case let CSVImportService.CSVImportError.invalidRow(index) = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-            XCTAssertEqual(index, 1)
-        }
+        let imported = try CSVImportService().import(from: csv)
+
+        XCTAssertEqual(imported.count, 1)
+        XCTAssertEqual(imported[0].intention, "Test")
     }
 
-    func testMalformedDateThrows() {
+    func testMalformedDateOnlyRowThrowsNoValidRows() {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "Not a date,Psilocybin,Oral,Test,5,7,Reflections,"
 
         XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case CSVImportService.CSVImportError.invalidRow = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
+            guard case CSVImportService.CSVImportError.noValidRows = error else {
+                return XCTFail("Expected noValidRows, got \(error)")
             }
         }
     }
 
-    func testInvalidTreatmentTypeThrows() {
+    func testUnrecognisedTreatmentBecomesOtherAndIsPreserved() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "\"Dec 1, 2024 at 10:30 AM\",InvalidTreatment,Oral,Test,5,7,Reflections,"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case CSVImportService.CSVImportError.invalidRow = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-        }
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.count, 1)
+        XCTAssertEqual(result.sessions[0].treatmentType, .other)
+        XCTAssertEqual(result.sessions[0].reflections, "Reflections\n\nImported treatment: InvalidTreatment")
+        XCTAssertEqual(result.unrecognisedTreatmentCount, 1)
     }
 
-    func testInvalidAdministrationMethodThrows() {
+    func testUnrecognisedAdministrationBecomesOtherAndIsPreserved() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,InvalidMethod,Test,5,7,Reflections,"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case CSVImportService.CSVImportError.invalidRow = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-        }
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.count, 1)
+        XCTAssertEqual(result.sessions[0].administration, .other)
+        XCTAssertEqual(result.sessions[0].reflections, "Reflections\n\nImported administration: InvalidMethod")
+        XCTAssertEqual(result.unrecognisedAdministrationCount, 1)
     }
 
     func testUnicodeInIntentionAndReflections() throws {
@@ -375,33 +383,29 @@ final class CSVImportServiceTests: XCTestCase {
         XCTAssertEqual(imported[0].reflections, "")
     }
 
-    func testFirstRowErrorReportsCorrectIndex() {
+    func testFirstRowSkippedReportsLineTwo() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "Invalid date,Psilocybin,Oral,Test,5,7,Reflections,\n" +
             "\"Dec 2, 2024 at 10:30 AM\",LSD,Oral,Test,5,8,Reflections,"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case let CSVImportService.CSVImportError.invalidRow(index) = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-            XCTAssertEqual(index, 1)
-        }
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.count, 1)
+        XCTAssertEqual(result.skippedRows, [CSVImportSkippedRow(line: 2, reason: "date not recognised")])
     }
 
-    func testMiddleRowErrorReportsCorrectIndex() {
+    func testMiddleRowSkippedReportsLineThree() throws {
         let csv =
             "Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL\n" +
             "\"Dec 1, 2024 at 10:30 AM\",Psilocybin,Oral,Test1,5,7,Reflections,\n" +
             "Invalid date,LSD,Oral,Test2,5,8,Reflections,\n" +
             "\"Dec 3, 2024 at 10:30 AM\",MDMA,Oral,Test3,6,9,Reflections,"
 
-        XCTAssertThrowsError(try CSVImportService().import(from: csv)) { error in
-            guard case let CSVImportService.CSVImportError.invalidRow(index) = error else {
-                return XCTFail("Expected invalidRow, got \(error)")
-            }
-            XCTAssertEqual(index, 2)
-        }
+        let result = try CSVImportService().importDetailed(from: csv)
+
+        XCTAssertEqual(result.sessions.map(\.intention), ["Test1", "Test3"])
+        XCTAssertEqual(result.skippedRows, [CSVImportSkippedRow(line: 3, reason: "date not recognised")])
     }
 
     func testNonUTF8DataThrows() throws {

@@ -30,6 +30,37 @@ final class SessionStore {
         self.scheduleReminderIfNeeded(for: session)
     }
 
+    /// Inserts imported sessions that are not already stored, committing them with a single save.
+    /// A session counts as a duplicate when an existing session (or an earlier one in `sessions`) has the same
+    /// minute, treatment and trimmed intention. If the save fails nothing is kept and the error is rethrown.
+    /// Imported sessions carry no reminder, so, as with `create(_:)`, there is nothing to schedule.
+    @discardableResult
+    func importSessions(_ sessions: [TherapeuticSession]) throws -> CSVImportSummary {
+        let existing = try self.modelContext.fetch(FetchDescriptor<TherapeuticSession>())
+        var knownKeys = Set(existing.map { ImportDuplicateKey(session: $0) })
+        var insertedCount = 0
+        var skippedDuplicateCount = 0
+
+        for session in sessions {
+            if knownKeys.insert(ImportDuplicateKey(session: session)).inserted {
+                self.modelContext.insert(session)
+                insertedCount += 1
+            } else {
+                skippedDuplicateCount += 1
+            }
+        }
+
+        if insertedCount > 0 {
+            do {
+                try self.modelContext.save()
+            } catch {
+                self.modelContext.rollback()
+                throw error
+            }
+        }
+        return CSVImportSummary(insertedCount: insertedCount, skippedDuplicateCount: skippedDuplicateCount)
+    }
+
     func update(_ session: TherapeuticSession) throws {
         session.markAsUpdated()
         try self.modelContext.save()
@@ -129,6 +160,20 @@ final class SessionStore {
     func clearDraft() {
         self.draftDefaults.removeObject(forKey: self.draftPayloadKey)
         self.draftDefaults.removeObject(forKey: self.draftTimestampKey)
+    }
+}
+
+/// Identity used to recognise a session that was imported before. CSV dates are minute-precision, so seconds
+/// are ignored.
+private struct ImportDuplicateKey: Hashable {
+    let minute: Int
+    let treatmentTypeRawValue: String
+    let intention: String
+
+    init(session: TherapeuticSession) {
+        self.minute = Int((session.sessionDate.timeIntervalSince1970 / 60).rounded(.down))
+        self.treatmentTypeRawValue = session.treatmentTypeRawValue
+        self.intention = session.intention.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

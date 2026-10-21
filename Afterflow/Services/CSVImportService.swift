@@ -6,164 +6,189 @@ struct CSVImportService {
         case invalidHeader
         case invalidRow(Int)
         case parseFailure(String)
+        case emptyFile
+        case noValidRows
 
         var errorDescription: String? {
             switch self {
             case .invalidHeader:
-                "CSV header does not match expected export format."
+                "CSV is missing the required \"Date\" column."
             case let .invalidRow(index):
                 "Row \(index + 1) is invalid or incomplete."
             case let .parseFailure(reason):
                 "Failed to parse CSV: \(reason)"
+            case .emptyFile:
+                "The CSV file is empty."
+            case .noValidRows:
+                "None of the rows could be imported. Each row needs a recognisable date and moods from 1 to 10."
             }
         }
+    }
+
+    /// Fixed reasons for skipped rows. They must never include cell contents.
+    private enum SkipReason {
+        static let date = "date not recognised"
+        static let moodBefore = "mood before must be 1–10"
+        static let moodAfter = "mood after must be 1–10"
+    }
+
+    /// Matches `TherapeuticSession`'s default mood.
+    private static let defaultMoodBefore = 5
+
+    private let dateParser: CSVImportDateParser
+
+    /// - Parameter locale: decides whether ambiguous slash dates such as `03/04/2024` read day-first or month-first.
+    init(locale: Locale = .current) {
+        self.dateParser = CSVImportDateParser(locale: locale)
     }
 
     func `import`(from url: URL) throws -> [TherapeuticSession] {
-        let data = try Data(contentsOf: url)
-        return try self.import(from: data)
+        try self.importDetailed(from: url).sessions
     }
 
     func `import`(from data: Data) throws -> [TherapeuticSession] {
-        guard let csvString = String(data: data, encoding: .utf8) else {
-            throw CSVImportError.parseFailure("Data is not UTF-8 encoded.")
-        }
-        return try self.import(from: csvString)
+        try self.importDetailed(from: data).sessions
     }
 
-    /// An empty after-mood cell means "not recorded"; anything else must parse.
-    private static func parseMoodAfter(_ field: String, rowIndex: Int) throws -> Int? {
-        if field.isEmpty {
-            return nil
-        }
-        guard let parsed = Int(field) else {
-            throw CSVImportError.invalidRow(rowIndex + 1)
-        }
-        return parsed
-    }
-
-    // swiftlint:disable:next function_body_length
     func `import`(from csvString: String) throws -> [TherapeuticSession] {
-        let rows = try Self.parseCSV(csvString)
-        guard let header = rows.first else { return [] }
-        guard header.map(Self.trimmedHeader) == Self.expectedHeader else {
+        try self.importDetailed(from: csvString).sessions
+    }
+
+    func importDetailed(from url: URL) throws -> CSVImportResult {
+        let data = try Data(contentsOf: url)
+        return try self.importDetailed(from: data)
+    }
+
+    func importDetailed(from data: Data) throws -> CSVImportResult {
+        guard let csvString = CSVTextParser.decode(data) else {
+            throw CSVImportError.parseFailure("File is not UTF-8, Windows-1252 or Mac Roman text.")
+        }
+        return try self.importDetailed(from: csvString)
+    }
+
+    /// Parses a spreadsheet export. Bad rows are skipped and reported in the result instead of aborting.
+    /// Throws only for whole-file problems: an empty file, a missing Date column, or no importable rows.
+    func importDetailed(from csvString: String) throws -> CSVImportResult {
+        let text = CSVTextParser.normalizeLineEndings(CSVTextParser.stripByteOrderMark(from: csvString))
+        let records = CSVTextParser.parse(text, delimiter: CSVTextParser.detectDelimiter(in: text))
+        guard let headerIndex = records.firstIndex(where: { !CSVImportRow.isBlank($0) }) else {
+            throw CSVImportError.emptyFile
+        }
+
+        let columns = CSVImportColumn.indexes(in: records[headerIndex])
+        guard columns[.date] != nil else {
             throw CSVImportError.invalidHeader
         }
 
-        let payloadRows = rows.dropFirst()
-        var sessions: [TherapeuticSession] = []
-
-        for (index, fields) in payloadRows.enumerated() {
-            guard fields.count == Self.expectedHeader.count else {
-                throw CSVImportError.invalidRow(index + 1)
+        var result = CSVImportResult()
+        for index in (headerIndex + 1) ..< records.count where !CSVImportRow.isBlank(records[index]) {
+            let row = CSVImportRow(fields: records[index], columns: columns)
+            if let reason = self.appendSession(from: row, to: &result) {
+                result.skippedRows.append(CSVImportSkippedRow(line: index + 1, reason: reason))
             }
-
-            let dateString = fields[0]
-            let treatmentString = fields[1]
-            let administrationString = fields[2]
-            let intention = fields[3]
-            let moodBeforeString = fields[4]
-            let moodAfterString = fields[5]
-            let reflections = fields[6]
-            let musicLink = fields[7]
-
-            guard let date = Self.dateFormatter.date(from: dateString) else {
-                throw CSVImportError.invalidRow(index + 1)
-            }
-
-            guard let treatment = PsychedelicTreatmentType.allCases.first(where: { $0.displayName == treatmentString })
-            else {
-                throw CSVImportError.invalidRow(index + 1)
-            }
-
-            guard let administration = AdministrationMethod.allCases
-                .first(where: { $0.displayName == administrationString }) else {
-                throw CSVImportError.invalidRow(index + 1)
-            }
-
-            guard let moodBefore = Int(moodBeforeString) else {
-                throw CSVImportError.invalidRow(index + 1)
-            }
-
-            let moodAfter = try Self.parseMoodAfter(moodAfterString, rowIndex: index)
-
-            let session = TherapeuticSession(
-                sessionDate: date,
-                treatmentType: treatment,
-                administration: administration,
-                intention: intention,
-                moodBefore: moodBefore,
-                moodAfter: moodAfter,
-                reflections: reflections
-            )
-
-            if !musicLink.isEmpty {
-                let sanitizedLink = Self.stripInjectionGuard(musicLink)
-                if let classification = Self.classifyLink(sanitizedLink) {
-                    session.musicLinkURL = classification.originalURL.absoluteString
-                    session.musicLinkWebURL = classification.canonicalURL.absoluteString
-                    session.musicLinkProvider = classification.provider
-                } else {
-                    session.musicLinkURL = sanitizedLink
-                    session.musicLinkWebURL = sanitizedLink
-                    session.musicLinkProvider = .unknown
-                }
-            }
-
-            sessions.append(session)
         }
 
-        return sessions
+        if result.sessions.isEmpty, !result.skippedRows.isEmpty {
+            throw CSVImportError.noValidRows
+        }
+        return result
     }
 
-    private static func parseCSV(_ csv: String) throws -> [[String]] {
-        let normalized = csv.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
-        var rows: [[String]] = []
-        var row: [String] = []
-        var field = ""
-        var insideQuotes = false
+    /// Adds the row's session to `result`, or returns the reason it was skipped.
+    /// Counters in `result` change only once the row is known to be importable.
+    private func appendSession(from row: CSVImportRow, to result: inout CSVImportResult) -> String? {
+        guard let date = self.dateParser.parse(row.text(.date)) else { return SkipReason.date }
 
-        let scalars = Array(normalized)
-        var index = 0
-        while index < scalars.count {
-            let char = scalars[index]
-            if char == "\"" {
-                if insideQuotes, index + 1 < scalars.count, scalars[index + 1] == "\"" {
-                    field.append("\"")
-                    index += 2
-                    continue
-                }
-                insideQuotes.toggle()
-                index += 1
-                continue
-            }
-
-            if char == ",", !insideQuotes {
-                row.append(field)
-                field = ""
-                index += 1
-                continue
-            }
-
-            if char == "\n", !insideQuotes {
-                row.append(field)
-                rows.append(row)
-                row = []
-                field = ""
-                index += 1
-                continue
-            }
-
-            field.append(char)
-            index += 1
+        var defaultedMoodBefore = false
+        let moodBefore: Int
+        switch CSVImportValueMatcher.mood(from: row.text(.moodBefore)) {
+        case .blank:
+            moodBefore = Self.defaultMoodBefore
+            defaultedMoodBefore = true
+        case let .value(value):
+            moodBefore = value
+        case .invalid:
+            return SkipReason.moodBefore
         }
 
-        if !field.isEmpty || !row.isEmpty {
-            row.append(field)
-            rows.append(row)
+        let moodAfter: Int?
+        switch CSVImportValueMatcher.mood(from: row.text(.moodAfter)) {
+        case .blank:
+            moodAfter = nil
+        case let .value(value):
+            moodAfter = value
+        case .invalid:
+            return SkipReason.moodAfter
         }
 
-        return rows
+        let labels = Self.resolveLabels(from: row, counting: &result)
+        let session = TherapeuticSession(
+            sessionDate: date,
+            treatmentType: labels.treatment,
+            administration: labels.administration,
+            intention: row.text(.intention),
+            moodBefore: moodBefore,
+            moodAfter: moodAfter,
+            reflections: labels.reflections
+        )
+        Self.applyMusicLink(row.trimmedText(.musicLink), to: session)
+
+        if defaultedMoodBefore {
+            result.defaultedMoodBeforeCount += 1
+        }
+        result.sessions.append(session)
+        return nil
+    }
+
+    private struct ResolvedLabels {
+        let treatment: PsychedelicTreatmentType
+        let administration: AdministrationMethod
+        let reflections: String
+    }
+
+    /// Maps treatment and administration text to enums. A blank cell is `.other`; text we cannot map is also
+    /// `.other`, but the original is kept in the reflections and counted so nothing is silently lost.
+    private static func resolveLabels(
+        from row: CSVImportRow,
+        counting result: inout CSVImportResult
+    ) -> ResolvedLabels {
+        let treatmentText = row.trimmedText(.treatment)
+        let treatment = CSVImportValueMatcher.treatment(for: treatmentText)
+        let administrationText = row.trimmedText(.administration)
+        let administration = CSVImportValueMatcher.administration(for: administrationText)
+
+        var reflections = row.text(.reflections)
+        if treatment == nil, !treatmentText.isEmpty {
+            reflections = Self.appendingNote("Imported treatment: \(treatmentText)", to: reflections)
+            result.unrecognisedTreatmentCount += 1
+        }
+        if administration == nil, !administrationText.isEmpty {
+            reflections = Self.appendingNote("Imported administration: \(administrationText)", to: reflections)
+            result.unrecognisedAdministrationCount += 1
+        }
+        return ResolvedLabels(
+            treatment: treatment ?? .other,
+            administration: administration ?? .other,
+            reflections: reflections
+        )
+    }
+
+    private static func appendingNote(_ note: String, to text: String) -> String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? note : text + "\n\n" + note
+    }
+
+    private static func applyMusicLink(_ musicLink: String, to session: TherapeuticSession) {
+        guard !musicLink.isEmpty else { return }
+        let sanitizedLink = Self.stripInjectionGuard(musicLink)
+        if let classification = Self.classifyLink(sanitizedLink) {
+            session.musicLinkURL = classification.originalURL.absoluteString
+            session.musicLinkWebURL = classification.canonicalURL.absoluteString
+            session.musicLinkProvider = classification.provider
+        } else {
+            session.musicLinkURL = sanitizedLink
+            session.musicLinkWebURL = sanitizedLink
+            session.musicLinkProvider = .unknown
+        }
     }
 
     private static func stripInjectionGuard(_ value: String) -> String {
@@ -234,27 +259,4 @@ struct CSVImportService {
         }
         return .linkOnly
     }
-
-    private nonisolated static func trimmedHeader(_ value: String) -> String {
-        value.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private static let expectedHeader: [String] = [
-        "Date",
-        "Treatment Type",
-        "Administration",
-        "Intention",
-        "Mood Before",
-        "Mood After",
-        "Reflections",
-        "Music Link URL"
-    ]
-
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        return formatter
-    }()
 }
