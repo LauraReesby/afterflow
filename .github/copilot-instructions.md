@@ -141,7 +141,7 @@ refactor(views): extract reusable form validation components
 
 ### Data Handling
 - **Never log therapeutic data** in debug output
-- **Local-first**: SwiftData with SQLite backing, optional CloudKit
+- **Local-first**: SwiftData with SQLite backing; no CloudKit sync
 - **Export control**: CSV/PDF generation user-initiated only
 - **Biometric protection**: Encourage but don't require Face ID/Touch ID
 

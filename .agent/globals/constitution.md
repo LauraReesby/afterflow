@@ -34,7 +34,7 @@ Every public interface must be test-first and measurable.
 
 - **Target Devices**: iPhone and iPad with adaptive UI
 
-- **Architecture**: SwiftUI + SwiftData + CloudKit (optional)
+- **Architecture**: SwiftUI + SwiftData (local store only; no CloudKit sync)
 
 - **Third-party Dependencies**: Minimal, only for essential integrations (Spotify SDK)
 
@@ -44,7 +44,7 @@ Every public interface must be test-first and measurable.
 
 - **Primary Storage**: SwiftData with local SQLite backing
 
-- **Backup Strategy**: iCloud sync is user-controlled; backups remain local unless enabled.
+- **Backup Strategy**: No app-level cloud sync. The store is included in the user's own iOS device backups (iCloud Backup / Finder), and users can save a lossless JSON backup file and restore it idempotently. Schema changes ship as a new `VersionedSchema` + migration stage; never edit a shipped schema in place.
 
 - **Export Options**: CSV, PDF for sharing with therapists
 
@@ -90,7 +90,7 @@ Every public interface must be test-first and measurable.
 
 4. Spotify integration — optional, depends on local data persistence.
 
-5. iCloud sync — depends on local data persistence.
+5. iCloud sync — not implemented; would require revisiting the "no cloud sync" privacy pillar first.
 
 6. Advanced analytics/insights — depends on export functionality and data persistence.
 

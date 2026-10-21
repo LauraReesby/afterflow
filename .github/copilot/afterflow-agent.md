@@ -83,7 +83,7 @@ These principles override all other considerations:
 - **Platform**: iOS 17.6+ (iPhone and iPad)
 - **UI Framework**: SwiftUI with adaptive layouts
 - **Data Persistence**: SwiftData with local SQLite
-- **Cloud Sync**: CloudKit (optional, user-controlled)
+- **Cloud Sync**: None (local store only; covered by the user's iOS device backups)
 - **Testing**: XCTest (unit), XCUITest (UI), 80% minimum coverage
 - **Integration**: Spotify Web API with PKCE OAuth (no in-app playback)
 
