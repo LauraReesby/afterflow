@@ -23,7 +23,10 @@ final class AppStartup {
     private(set) var state: State
     let persistence: PersistenceController
 
-    init(persistence: PersistenceController = .forLaunch()) {
+    /// `nil` means the launch configuration. It's resolved here rather than as a default argument because
+    /// default arguments are evaluated outside the main actor, and `forLaunch()` is main-actor isolated.
+    init(persistence: PersistenceController? = nil) {
+        let persistence = persistence ?? .forLaunch()
         self.persistence = persistence
         self.state = Self.openStore(with: persistence)
     }
