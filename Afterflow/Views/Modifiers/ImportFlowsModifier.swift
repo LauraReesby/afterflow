@@ -33,14 +33,22 @@ struct ImportFlowsModifier: ViewModifier {
                 get: { self.state?.showingImportConfirmation ?? false },
                 set: { self.state?.showingImportConfirmation = $0 }
             )) {
-                Button("Import \(self.state?.pendingImportedSessions.count ?? 0) Sessions") {
+                Button(self.state?.importButtonTitle ?? "Import") {
                     self.state?.confirmImport()
                 }
                 Button("Cancel", role: .cancel) {
-                    self.state?.pendingImportedSessions = []
+                    self.state?.cancelImport()
                 }
             } message: {
-                Text("Import \(self.state?.pendingImportedSessions.count ?? 0) session(s) from the selected CSV?")
+                Text(self.state?.importConfirmationMessage ?? "")
+            }
+            .alert("Import Complete", isPresented: Binding(
+                get: { self.state?.showingImportResult ?? false },
+                set: { self.state?.showingImportResult = $0 }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(self.state?.importResultMessage ?? "")
             }
             .alert("Restore Backup", isPresented: Binding(
                 get: { self.state?.showingRestoreConfirmation ?? false },

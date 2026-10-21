@@ -305,106 +305,60 @@ Afterflow follows a clean architecture pattern optimized for SwiftUI with strong
 
 ## CSV Import Guide
 
-Afterflow supports importing session data from CSV files, making it easy to:
-- Migrate data from other apps or spreadsheets
-- Bulk-add sessions from clinical records
-- Restore previously exported data
+Import sessions from an Afterflow export or your own spreadsheet. Only **Date** is required; every other column is optional.
 
-### CSV Format Requirements
+### Columns
 
-The CSV must be **UTF-8 encoded** with the following header row (exact column names required):
+Columns can be in any order, header names ignore case, spaces, `_` and `-`, and unknown columns are ignored.
 
-```
-Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
-```
+| Field | Accepted header names | Values |
+|-------|----------------------|--------|
+| **Date** (required) | `Date`, `Session Date`, `Date Time`, `DateTime`, `When` | See date formats below |
+| **Treatment** | `Treatment Type`, `Treatment`, `Substance`, `Medicine` | Case-insensitive; also `Mushrooms`, `Shrooms` (Psilocybin), `Acid` (LSD), `Molly`, `Ecstasy` (MDMA), `Esketamine`, `Spravato` (Ketamine) |
+| **Administration** | `Administration`, `Route`, `Method` | `Oral`, `Nasal`, `IV`, `IM` or the full names; `By mouth`, `Intranasal` |
+| **Intention** | `Intention`, `Intent`, `Goal` | Any text |
+| **Mood before** | `Mood Before`, `Before Mood`, `Pre Mood`, `Mood Pre` | 1-10, `7/10` or `6.5` (rounds up) |
+| **Mood after** | `Mood After`, `After Mood`, `Post Mood`, `Mood Post` | Same; leave empty if not yet recorded |
+| **Reflections** | `Reflections`, `Reflection`, `Notes`, `Journal` | Any text |
+| **Music link** | `Music Link URL`, `Music Link`, `Music`, `Playlist` | A URL, or empty |
 
-### Column Specifications
+### What the importer accepts
 
-| Column | Format | Valid Values | Example |
-|--------|--------|--------------|---------|
-| **Date** | Medium date + short time (en_US_POSIX) | `MMM d, yyyy 'at' h:mm a` | `Dec 10, 2024 at 2:30 PM` |
-| **Treatment Type** | Text | `Psilocybin`, `LSD`, `DMT`, `MDMA`, `Ketamine`, `Ayahuasca`, `Mescaline`, `Cannabis`, `Other` | `Psilocybin` |
-| **Administration** | Text | `Intravenous (IV)`, `Intramuscular (IM)`, `Oral`, `Nasal`, `Other` | `Oral` |
-| **Intention** | Text | Any non-empty string | `To explore creativity` |
-| **Mood Before** | Integer | 1-10 | `5` |
-| **Mood After** | Integer or empty | 1-10, or empty when not yet recorded | `8` |
-| **Reflections** | Text | Any string (can be empty) | `Felt peaceful and connected` |
-| **Music Link URL** | URL | Any valid URL or empty | `https://open.spotify.com/playlist/...` |
+- **Separators and encodings**: comma, semicolon or tab separated; UTF-8 (with or without a BOM) and the Windows-1252 and Mac Roman text that older Excel versions save. UTF-16 files are not supported, so choose **CSV UTF-8** when saving.
+- **Dates**: the format Afterflow exports, ISO 8601 (`2024-12-10T14:30:00Z`), `2024-12-10 14:30` and `2024-12-10`, slash dates such as `12/10/2024`, and month names such as `10 Dec 2024` or `December 10, 2024`. The time is optional and may be 12 or 24 hour. Slash dates read day first or month first according to your device region, and times without a time zone are taken as local time.
+- **Treatment and administration**: matching is case-insensitive. A value Afterflow does not recognise is saved as **Other** and the original text is added to the session's reflections.
+- **Moods**: a missing mood before becomes 5. A mood that is not a number from 1 to 10 makes that row unreadable.
+- **Unreadable rows**: a row with an unrecognised date or an invalid mood is skipped, not fatal. The confirmation lists the row numbers (header row is 1), never the contents. If no row can be read, nothing is imported.
+- **Duplicates**: re-importing is safe. Sessions already in Afterflow, with the same minute, treatment and intention, are skipped.
+- **Formula guard**: Afterflow's CSV export prefixes `'` to text starting with `=`, `+`, `-` or `@`. Import removes that prefix again, but only in that case, so other apostrophes are kept.
 
-### Creating a CSV Template
+### Creating a template
 
-#### Option 1: Use the Built-in Example
-The quickest way to get a valid template:
-1. Open Afterflow
-2. Tap **Menu → Help → Example Import**
-3. Save the example CSV file
-4. Open it in your preferred editor and modify as needed
-
-#### Option 2: Export Existing Data
-If you already have sessions in Afterflow:
-1. Create one or two sample sessions
-2. Export them as CSV
-3. Use the exported file as your template
-
-#### Option 3: Create Manually
-Create a text file with a `.csv` extension and use this template:
+The quickest way is **Menu → Help → Example Import**, which saves a sample file you can edit. You can also export a few sessions as CSV and use that, or start from this:
 
 ```csv
 Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL
-Dec 10, 2024 at 2:30 PM,Psilocybin,Oral,To explore creativity and connection,5,8,"Felt peaceful, connected to nature. Insights about relationships.",https://open.spotify.com/playlist/37i9dQZF1DX4dyzvuaRJ0n
-Dec 3, 2024 at 10:00 AM,Ketamine,Intravenous (IV),Process grief and find acceptance,4,7,Gentle experience. Worked through difficult emotions.,
-Nov 15, 2024 at 6:45 PM,MDMA,Oral,Healing trauma with therapist,3,9,"Breakthrough session. Finally felt safe enough to process childhood memories. So grateful.",https://www.youtube.com/watch?v=dQw4w9WgXcQ
+2024-12-10 14:30,Psilocybin,Oral,To explore creativity,5,8,"Felt peaceful, connected to nature.",https://open.spotify.com/playlist/37i9dQZF1DX4dyzvuaRJ0n
+2024-12-03 10:00,Ketamine,IV,Process grief,4,7,Gentle experience.,
 ```
 
-### Important Notes
+Wrap cells containing commas, quotes or line breaks in double quotes, and double any quote inside them (`""`).
 
-1. **Date Format**: Must match exactly `MMM d, yyyy 'at' h:mm a` (e.g., `Dec 10, 2024 at 2:30 PM`)
-2. **Quoted Fields**: Fields containing commas, quotes, or newlines must be wrapped in double quotes (`"`)
-3. **Escaped Quotes**: Use `""` (two double quotes) to include a quote character within a quoted field
-4. **Music Links**:
-   - Can be any valid URL (Spotify, YouTube, Apple Music, etc.)
-   - Leave empty if no music link
-   - The app will automatically classify the provider and fetch metadata for supported services
-5. **Excel/Google Sheets**: If creating in a spreadsheet app:
-   - Format the Date column exactly as shown
-   - Save/Export as CSV (UTF-8)
-   - Verify the exported file matches the expected format
+### Using the import feature
 
-### CSV Injection Protection
+1. Transfer the file to your device (AirDrop, Files, email).
+2. Tap the **⋯ menu → Import** and pick the file.
+3. Review the confirmation, which reports skipped rows, defaulted moods and unrecognised treatments, then confirm.
+4. A summary shows how many sessions were added and how many were already in Afterflow.
 
-Afterflow automatically protects against CSV injection attacks:
-- Fields starting with `=`, `+`, `-`, or `@` are prefixed with `'` during export
-- When importing, these prefixes are stripped automatically
-- You don't need to manually handle this unless creating files outside of Afterflow exports
-
-### Using the Import Feature
-
-1. Prepare your CSV file following the format above
-2. Transfer the file to your iOS device (via AirDrop, Files app, email, etc.)
-3. Open Afterflow
-4. Tap the **⋯ menu → Import**
-5. Select your CSV file
-6. Review the import summary
-7. Confirm to add the sessions
-
-The same **Import** item also restores Afterflow backup files (`.json`): choose the backup file, confirm, and sessions already on the device are kept while matching ones are updated only if the backup is newer.
+The same **Import** item restores Afterflow backup files (`.json`): sessions already on the device are kept, and matching ones are updated only if the backup is newer.
 
 ### Troubleshooting
 
-**"Invalid header" error:**
-- Verify the header row exactly matches: `Date,Treatment Type,Administration,Intention,Mood Before,Mood After,Reflections,Music Link URL`
-- Check for extra spaces or typos in column names
-
-**"Invalid row" error:**
-- Check the date format matches exactly (Medium date + short time)
-- Verify Treatment Type and Administration values match the valid options
-- Ensure Mood Before is an integer between 1-10, and Mood After is 1-10 or empty
-- Make sure all required fields (Date through Mood Before) have values
-
-**"Data is not UTF-8 encoded" error:**
-- Re-save your CSV file with UTF-8 encoding
-- In Excel: Save As → CSV UTF-8
-- In Google Sheets: Download → CSV automatically uses UTF-8
+- **"Missing the required Date column"**: add a header row with a `Date` column (or one of its alternative names).
+- **"None of the rows could be imported"**: check dates are in a supported format and moods are 1-10.
+- **"No sessions were found in this file"**: the file has a header row but no data rows.
+- **Garbled characters**: re-save as CSV UTF-8 (Excel: Save As → CSV UTF-8; Google Sheets: Download → CSV).
 
 ## Contributing
 

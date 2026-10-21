@@ -24,7 +24,7 @@ struct ImportStateBackupTests {
         #expect(state.pendingBackup?.sessions.count == 3)
         #expect(state.showingRestoreConfirmation == true)
         #expect(state.showingImportConfirmation == false)
-        #expect(state.pendingImportedSessions.isEmpty)
+        #expect(state.pendingImportResult == nil)
         #expect(state.importError == nil)
         #expect(state.restoreConfirmationMessage.hasPrefix("Restore 3 sessions from a backup made on "))
         #expect(state.restoreConfirmationMessage.hasSuffix(
@@ -55,7 +55,7 @@ struct ImportStateBackupTests {
 
         await state.loadFile(from: url)
 
-        #expect(state.pendingImportedSessions.count == 2)
+        #expect(state.pendingImportResult?.sessions.count == 2)
         #expect(state.showingImportConfirmation == true)
         #expect(state.pendingBackup == nil)
         #expect(state.showingRestoreConfirmation == false)
@@ -144,7 +144,7 @@ struct ImportStateBackupTests {
         #expect(state.pendingBackup == nil)
         #expect(state.showingRestoreConfirmation == false)
         #expect(state.showingRestoreResult == false)
-        #expect(state.pendingImportedSessions.isEmpty)
+        #expect(state.pendingImportResult == nil)
         #expect(try BackupTestHelpers.records(in: container) == before)
     }
 

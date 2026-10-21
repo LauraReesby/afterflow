@@ -33,7 +33,7 @@ struct CSVImportService {
     }
 
     /// Matches `TherapeuticSession`'s default mood.
-    private static let defaultMoodBefore = 5
+    static let defaultMoodBefore = 5
 
     private let dateParser: CSVImportDateParser
 
@@ -126,7 +126,7 @@ struct CSVImportService {
             sessionDate: date,
             treatmentType: labels.treatment,
             administration: labels.administration,
-            intention: row.text(.intention),
+            intention: Self.removingInjectionGuard(from: row.text(.intention)),
             moodBefore: moodBefore,
             moodAfter: moodAfter,
             reflections: labels.reflections
@@ -152,12 +152,12 @@ struct CSVImportService {
         from row: CSVImportRow,
         counting result: inout CSVImportResult
     ) -> ResolvedLabels {
-        let treatmentText = row.trimmedText(.treatment)
+        let treatmentText = Self.removingInjectionGuard(from: row.trimmedText(.treatment))
         let treatment = CSVImportValueMatcher.treatment(for: treatmentText)
-        let administrationText = row.trimmedText(.administration)
+        let administrationText = Self.removingInjectionGuard(from: row.trimmedText(.administration))
         let administration = CSVImportValueMatcher.administration(for: administrationText)
 
-        var reflections = row.text(.reflections)
+        var reflections = Self.removingInjectionGuard(from: row.text(.reflections))
         if treatment == nil, !treatmentText.isEmpty {
             reflections = Self.appendingNote("Imported treatment: \(treatmentText)", to: reflections)
             result.unrecognisedTreatmentCount += 1
@@ -191,6 +191,18 @@ struct CSVImportService {
         }
     }
 
+    /// Undoes `CSVExportService`'s formula guard: it prefixes `'` to text starting with `=`, `+`, `-` or `@`, so a
+    /// leading `'` is removed only when one of those characters follows. Any other apostrophe is the user's own.
+    private static func removingInjectionGuard(from value: String) -> String {
+        let leading = value.prefix(2)
+        guard leading.count == 2, leading.first == "'", let next = leading.last, "=+-@".contains(next) else {
+            return value
+        }
+        return String(value.dropFirst())
+    }
+
+    /// Music links are more forgiving than text: a URL never legitimately starts with an apostrophe, so any
+    /// leading `'` (for example one a spreadsheet kept) is dropped.
     private static func stripInjectionGuard(_ value: String) -> String {
         guard let first = value.first, first == "'" else { return value }
         return String(value.dropFirst())
