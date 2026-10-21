@@ -50,6 +50,11 @@ enum DesignConstants {
         static let subtle: CGFloat = 0.7
     }
 
+    enum Recovery {
+        static let maxContentWidth: CGFloat = 520
+        static let buttonHeight: CGFloat = 48
+    }
+
     enum Testing {
         static let exportDelay: UInt64 = 300_000_000
 
