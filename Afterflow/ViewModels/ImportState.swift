@@ -25,7 +25,7 @@ final class ImportState {
             }
 
             do {
-                try await self.downloadIfNeeded(url: url)
+                try await ScopedFileAccess.downloadIfNeeded(url: url)
                 let sessions = try CSVImportService().import(from: url)
                 self.pendingImportedSessions = sessions
                 self.showingImportConfirmation = !sessions.isEmpty
@@ -45,22 +45,5 @@ final class ImportState {
             }
         }
         self.pendingImportedSessions = []
-    }
-
-    private func downloadIfNeeded(url: URL) async throws {
-        let values = try url.resourceValues(forKeys: [.isUbiquitousItemKey])
-        guard values.isUbiquitousItem == true else { return }
-
-        try FileManager.default.startDownloadingUbiquitousItem(at: url)
-
-        while true {
-            let status = try url.resourceValues(forKeys: [.ubiquitousItemDownloadingStatusKey])
-            if let downloadingStatus = status.ubiquitousItemDownloadingStatus,
-               downloadingStatus == URLUbiquitousItemDownloadingStatus.current ||
-               downloadingStatus == URLUbiquitousItemDownloadingStatus.downloaded {
-                break
-            }
-            try await Task.sleep(nanoseconds: DesignConstants.Testing.downloadPollingInterval)
-        }
     }
 }

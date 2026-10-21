@@ -42,6 +42,43 @@ final class SessionStore {
         try self.modelContext.save()
     }
 
+    /// Merges a backup into the store: inserts unknown ids, overwrites a session only
+    /// when the backup's `updatedAt` is newer, and never deletes. All changes land in
+    /// one save, so a failure leaves the store untouched. Reminders are not rescheduled.
+    func restore(from backup: AfterflowBackup) throws -> RestoreSummary {
+        let existing = try self.modelContext.fetch(FetchDescriptor<TherapeuticSession>())
+        var sessionsByID: [UUID: TherapeuticSession] = Dictionary(
+            existing.map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        var summary = RestoreSummary()
+
+        for record in backup.sessions {
+            if let session = sessionsByID[record.id] {
+                if record.updatedAt > session.updatedAt {
+                    record.apply(to: session)
+                    summary.updated += 1
+                } else {
+                    summary.skipped += 1
+                }
+            } else {
+                let session = record.makeSession()
+                self.modelContext.insert(session)
+                sessionsByID[record.id] = session
+                summary.inserted += 1
+            }
+        }
+
+        guard summary.inserted + summary.updated > 0 else { return summary }
+        do {
+            try self.modelContext.save()
+        } catch {
+            self.modelContext.rollback()
+            throw error
+        }
+        return summary
+    }
+
     func setReminder(for session: TherapeuticSession, option: ReminderOption) async throws {
         try await self.reminderScheduler.setReminder(for: session, option: option)
         if self.modelContext.hasChanges {

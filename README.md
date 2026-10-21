@@ -415,6 +415,7 @@ Afterflow collects **zero** personal data. All information stays on your device.
 ### Data Storage
 - **Local Only**: SwiftData with SQLite backing
 - **No Cloud Sync**: Afterflow never sends your data anywhere. Like any app's data, it is included in your own iOS device backups (iCloud Backup or Finder), which Apple encrypts
+- **Backup Files**: Save a complete backup file from the menu at any time and restore it later, even on a new device. Restoring never duplicates or deletes sessions. The file isn't encrypted, so keep it somewhere private
 - **No Analytics**: No usage tracking or crash reporting
 
 ### Data Export

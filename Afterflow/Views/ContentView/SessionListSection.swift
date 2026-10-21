@@ -13,6 +13,9 @@ struct SessionListSection: View {
     let onReflect: (UUID) -> Void
     let onExport: () -> Void
     let onImport: () -> Void
+    let lastBackupDate: Date?
+    let onBackup: () -> Void
+    let onRestore: () -> Void
     let onOpenSettings: () -> Void
     let onExampleImport: () -> Void
     let onDebugNotification: () -> Void
@@ -81,6 +84,9 @@ struct SessionListSection: View {
             onReflect: self.onReflect,
             onExport: self.onExport,
             onImport: self.onImport,
+            lastBackupDate: self.lastBackupDate,
+            onBackup: self.onBackup,
+            onRestore: self.onRestore,
             onOpenSettings: self.onOpenSettings,
             onExampleImport: self.onExampleImport,
             onDebugNotification: self.onDebugNotification

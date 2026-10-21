@@ -90,11 +90,11 @@ enum ExportFormat: String, CaseIterable, Identifiable {
 
 struct BinaryFileDocument: FileDocument {
     static var readableContentTypes: [UTType] {
-        [.commaSeparatedText, .pdf]
+        [.commaSeparatedText, .pdf, .json]
     }
 
     static var writableContentTypes: [UTType] {
-        [.commaSeparatedText, .pdf]
+        [.commaSeparatedText, .pdf, .json]
     }
 
     let data: Data

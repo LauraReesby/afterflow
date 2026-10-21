@@ -28,6 +28,7 @@ struct ContentView: View {
 
     @State private var exportState = ExportState()
     @State private var importState: ImportState?
+    @State private var backupState = BackupState()
 
     @State private var settingsError: String?
     @State private var deleteError: String?
@@ -67,6 +68,7 @@ struct ContentView: View {
             .applyImportFlows(
                 self.importFlowConfig
             )
+            .applyBackupFlows(self.backupState)
             .applySettingsAlert(settingsError: self.$settingsError)
             .errorAlert(title: "Delete Failed", error: self.$deleteError)
             .overlay(alignment: .top) { self.bannerOverlay }
@@ -182,6 +184,9 @@ private extension ContentView {
                 },
                 onExport: { self.exportState.showingExportSheet = true },
                 onImport: { self.importState?.showingImportPicker = true },
+                lastBackupDate: self.backupState.lastBackupDate,
+                onBackup: { self.backupState.startBackup(sessions: self.allSessions) },
+                onRestore: { self.backupState.showingRestorePicker = true },
                 onOpenSettings: { self.openAppSettings() },
                 onExampleImport: { self.exportExampleImport() },
                 onDebugNotification: { Task { await self.scheduleDebugNotification() } }

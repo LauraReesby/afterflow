@@ -15,6 +15,9 @@ struct SessionListHeader: View {
     let onReflect: (UUID) -> Void
     let onExport: () -> Void
     let onImport: () -> Void
+    let lastBackupDate: Date?
+    let onBackup: () -> Void
+    let onRestore: () -> Void
     let onOpenSettings: () -> Void
     let onExampleImport: () -> Void
     let onDebugNotification: () -> Void
@@ -106,6 +109,9 @@ struct SessionListHeader: View {
                 Label("Import", systemImage: "square.and.arrow.down")
             }
             .accessibilityHint("Imports session data from a file")
+            Divider()
+            self.backupMenuItems
+            Divider()
             Menu {
                 Button {
                     self.onExampleImport()
@@ -137,6 +143,28 @@ struct SessionListHeader: View {
         .buttonStyle(.plain)
         .accessibilityIdentifier("overflowMenuButton")
         .accessibilityLabel("More options")
+    }
+
+    @ViewBuilder private var backupMenuItems: some View {
+        Button {
+            self.onBackup()
+        } label: {
+            Label("Back Up All Sessions…", systemImage: "externaldrive.badge.checkmark")
+        }
+        .accessibilityIdentifier("backUpAllSessionsButton")
+        .accessibilityHint("Saves a complete copy of your sessions to a file. The file is not encrypted.")
+        Button {
+            self.onRestore()
+        } label: {
+            Label("Restore from Backup…", systemImage: "arrow.counterclockwise")
+        }
+        .accessibilityIdentifier("restoreFromBackupButton")
+        .accessibilityHint("Merges sessions from a backup file into this device")
+        Button {} label: {
+            Label(BackupState.lastBackupText(for: self.lastBackupDate), systemImage: "clock")
+        }
+        .disabled(true)
+        .accessibilityIdentifier("lastBackupStatus")
     }
 
     private var trendsPill: some View {
